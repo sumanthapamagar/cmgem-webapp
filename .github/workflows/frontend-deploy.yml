@@ -1,58 +1,61 @@
-name: Frontend Deploy to Azure Static Web App
+name: Azure Static Web Apps CI/CD
 
 on:
-  push:
-    branches: [ main, develop ]
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/frontend-deploy.yml'
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/frontend-deploy.yml'
+    push:
+        branches:
+        - main
+        paths:
+          - 'frontend/**'
+          - '.github/workflows/frontend-deploy.yml'
+    pull_request:
+        branches:
+        - main
+        paths:
+          - 'frontend/**'
+          - '.github/workflows/frontend-deploy.yml'
+    workflow_dispatch:
 
 jobs:
-  build_and_deploy:
-    runs-on: ubuntu-latest
-    name: Build and Deploy Frontend
-    environment: production
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        submodules: true
-        
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-        cache-dependency-path: frontend/package-lock.json
-        
-    - name: Install dependencies
-      run: |
-        cd frontend
-        npm ci
-        
-    - name: Build frontend
-      run: |
-        cd frontend
-        npm run build
-      env:
-        VITE_CLIENT_ID: ${{ secrets.VITE_CLIENT_ID }}
-        VITE_AUTHORITY: ${{ secrets.VITE_AUTHORITY }}
-        VITE_REDIRECT_URI: ${{ secrets.VITE_REDIRECT_URI }}
-        VITE_SERVER_URL: ${{ secrets.VITE_SERVER_URL }}
-        VITE_ENVIRONMENT: ${{ secrets.VITE_ENVIRONMENT }}
-        
-    - name: Deploy to Azure Static Web Apps
-      uses: Azure/static-web-apps-deploy@v1
-      with:
-        azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        action: "upload"
-        app_location: "/frontend"
-        output_location: "dist"
-        skip_app_build: true
+    build_and_deploy_job:
+        if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+        runs-on: ubuntu-latest
+        name: Build and Deploy Job
+        environment: production
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                    submodules: true
+                    lfs: false
+            - name: Build And Deploy
+              id: builddeploy
+              uses: Azure/static-web-apps-deploy@v1
+              with:
+                azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+                repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
+                action: 'upload'
+                ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
+                # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
+                app_location: '/frontend' # App source code path
+                app_build_command: 'npm run build'
+                output_location: 'dist' # Built app content directory - optional
+                skip_api_build: true
+                ###### End of Repository/Build Configurations ######
+              env:
+                VITE_SERVER_URL: ${{ vars.VITE_SERVER_URL }}
+                VITE_CLIENT_ID: ${{ vars.VITE_CLIENT_ID }}
+                VITE_AUTHORITY: ${{ vars.VITE_AUTHORITY }}
+                VITE_REDIRECT_URI: ${{ vars.VITE_REDIRECT_URI }}
+                VITE_ENVIRONMENT: ${{ vars.VITE_ENVIRONMENT }}
+
+    close_pull_request_job:
+        if: github.event_name == 'pull_request' && github.event.action == 'closed'
+        runs-on: ubuntu-latest
+        name: Close Pull Request Job
+        environment: production
+        steps:
+            - name: Close Pull Request
+              id: closepullrequest
+              uses: Azure/static-web-apps-deploy@v1
+              with:
+                azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+                action: 'close'
