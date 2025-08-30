@@ -46,6 +46,7 @@ jobs:
         cp backend/package.json deploy-package/
         cp backend/package-lock.json deploy-package/
         cp -r backend/templates deploy-package/
+        cp -r backend/node_modules deploy-package/
         # Create a startup script for Azure Web App
         echo '#!/bin/bash' > deploy-package/start.sh
         echo 'cd dist' >> deploy-package/start.sh
