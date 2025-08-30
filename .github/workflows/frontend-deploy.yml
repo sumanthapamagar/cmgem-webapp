@@ -39,6 +39,12 @@ jobs:
       run: |
         cd frontend
         npm run build
+      env:
+        VITE_CLIENT_ID: ${{ secrets.VITE_CLIENT_ID }}
+        VITE_AUTHORITY: ${{ secrets.VITE_AUTHORITY }}
+        VITE_REDIRECT_URI: ${{ secrets.VITE_REDIRECT_URI }}
+        VITE_SERVER_URL: ${{ secrets.VITE_SERVER_URL }}
+        VITE_ENVIRONMENT: ${{ secrets.VITE_ENVIRONMENT }}
         
     - name: Deploy to Azure Static Web Apps
       uses: Azure/static-web-apps-deploy@v1
