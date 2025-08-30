@@ -38,9 +38,20 @@ jobs:
         cd backend
         npm run build
         
+    - name: Prepare deployment package
+      run: |
+        cd backend
+        # Create a deployment package with all necessary files
+        mkdir -p ../deploy-package
+        cp -r dist ../deploy-package/
+        cp package.json ../deploy-package/
+        cp package-lock.json ../deploy-package/
+        cp -r templates ../deploy-package/
+        cp -r node_modules ../deploy-package/
+        
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        package: backend/dist
+        package: deploy-package
