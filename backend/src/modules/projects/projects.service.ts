@@ -167,17 +167,23 @@ export class ProjectsService {
       {
         $addFields: {
           equipments: {
-            $map: {
-              input: "$equipments",
-              as: "eq",
-              in: {
-                $mergeObjects: [
-                  "$$eq",
-                  {
-                    equipmentIdStr: { $toString: "$$eq._id" }
+            $cond: {
+              if: { $gt: [{ $size: "$equipments" }, 0] },
+              then: {
+                $map: {
+                  input: "$equipments",
+                  as: "eq",
+                  in: {
+                    $mergeObjects: [
+                      "$$eq",
+                      {
+                        equipmentIdStr: { $toString: "$$eq._id" }
+                      }
+                    ]
                   }
-                ]
-              }
+                }
+              },
+              else: []
             }
           }
         }
@@ -220,7 +226,18 @@ export class ProjectsService {
           created_at: { $first: "$created_at" },
           updated_at: { $first: "$updated_at" },
           deleted_at: { $first: "$deleted_at" },
-          equipments: { $push: "$equipments" }
+          equipments: { 
+            $push: {
+              $cond: {
+                if: { $and: [
+                  { $ne: ["$equipments", null] },
+                  { $ne: ["$equipments", {}] }
+                ]},
+                then: "$equipments",
+                else: "$$REMOVE"
+              }
+            }
+          }
         }
       }
     ]).exec();
@@ -234,11 +251,13 @@ export class ProjectsService {
 
     projectData.checklists = await this.checklistsService.findAll();
 
-
-    if (projectData.equipments) {
+    // Ensure equipments is always an array and filter out deleted equipments
+    if (!projectData.equipments) {
+      projectData.equipments = [];
+    } else {
       projectData.equipments = projectData.equipments.filter(equipment => {
-        // Keep equipment only if deleted_at is undefined, null, or doesn't exist
-        return !equipment.deleted_at;
+        // Keep equipment only if it has valid properties and deleted_at is undefined, null, or doesn't exist
+        return equipment && equipment._id && !equipment.deleted_at;
       });
 
       // Filter out deleted attachments for each equipment

@@ -1,6 +1,6 @@
 import { useContext, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Stack } from "../../../../../../components";
 import {
     ImageGallery,
@@ -12,6 +12,7 @@ import {
 } from "./components";
 import { ProjectContext } from "../../../../projectContext";
 import { useSasToken } from "../../../../../../hooks/useSASToken";
+import { useEquipmentAttachments } from "../../../../../../hooks/useEquipmentAttachments";
 import { processImageUrls } from "./utils/imageUtils";
 import { useImageUpload } from "../../../../../../hooks/useImageUpload";
 import { deleteAttachment, patchEquipment } from "../../../../../../lib/api";
@@ -19,8 +20,11 @@ import { deleteAttachment, patchEquipment } from "../../../../../../lib/api";
 export function InspectionImages({ inspectionItem }) {
     const { equipmentId } = useParams();
     const { offlineProject: project } = useContext(ProjectContext);
+    const queryClient = useQueryClient();
 
     const sasTokenQuery = useSasToken(equipmentId);
+    const equipmentAttachmentsQuery = useEquipmentAttachments(equipmentId);
+    
     const equipment = useMemo(() =>
         project?.equipments?.find((eq) => eq._id == equipmentId),
         [project?.equipments, equipmentId]
@@ -28,8 +32,8 @@ export function InspectionImages({ inspectionItem }) {
 
     const token = sasTokenQuery.data?.sas_token;
     const uploadedImages = useMemo(() =>
-        processImageUrls(equipment?.attachments, token, inspectionItem._id),
-        [equipment?.attachments, token, inspectionItem._id]
+        processImageUrls(equipmentAttachmentsQuery.data?.attachments || [], token, inspectionItem._id),
+        [equipmentAttachmentsQuery.data?.attachments, token, inspectionItem._id]
     );
 
     const { images, setImages, isUploading, uploadAllImages, removeImage, onSelectImages } =
@@ -56,11 +60,8 @@ export function InspectionImages({ inspectionItem }) {
     const { mutate: deleteImage } = useMutation({
         mutationFn: async (id) => {
             const res = await deleteAttachment(id);
-            // Update local equipment state after successful deletion
-            const updatedAttachments = equipment.attachments.filter((a) => a._id != id);
-            await patchEquipment(project._id, equipmentId, {
-                attachments: updatedAttachments
-            });
+            // Invalidate and refetch equipment attachments
+            await queryClient.invalidateQueries(['equipment-attachments', equipmentId]);
             setImageToDelete(null);
             return res;
         }

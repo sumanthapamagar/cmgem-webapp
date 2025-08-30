@@ -8,6 +8,7 @@ export * from './useNetworkStatus';
 export * from './useEquipment';
 export * from './useEquipmentForm';
 export * from './useEquipmentAutosave';
+export * from './useEquipmentAttachments';
 
 // Mutation Hooks (Consolidated)
 export * from './useCommonMutation';

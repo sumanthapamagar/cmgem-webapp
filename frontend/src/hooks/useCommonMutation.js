@@ -117,7 +117,10 @@ export const useImageMutation = ({ projectId, equipmentId }) => {
             
             return postImage(projectId, equipmentId, formData);
         },
-        invalidateQueries: [['equipments', projectId]],
+        invalidateQueries: [
+            ['equipments', projectId],
+            ['equipment-attachments', equipmentId]
+        ],
         showSuccessMessage: true
     });
 };

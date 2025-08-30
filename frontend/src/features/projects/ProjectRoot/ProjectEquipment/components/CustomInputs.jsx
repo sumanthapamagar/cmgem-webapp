@@ -260,19 +260,21 @@ export function CustomCheckbox({
     const handleChange = useCallback(async (e) => {
         const newValue = checked ? "" : value;
         try {
-            console.log(`💾 Auto-saving ${fieldPath}:`, newValue);
+            console.log(`💾 Auto-saving checkbox ${fieldPath}:`, newValue);
+            console.log(`💾 Current checked state:`, checked);
+            console.log(`💾 Checkbox value:`, value);
 
             const success = await saveField(fieldPath, newValue);
 
             if (success) {
-                console.log(`✅ Successfully saved ${fieldPath}`);
+                console.log(`✅ Successfully saved checkbox ${fieldPath}`);
             } else {
-                console.error(`❌ Failed to save ${fieldPath}`);
+                console.error(`❌ Failed to save checkbox ${fieldPath}`);
             }
         } catch (error) {
-            console.error(`❌ Error saving ${fieldPath}:`, error);
+            console.error(`❌ Error saving checkbox ${fieldPath}:`, error);
         }
-    }, [fieldPath, saveField]);
+    }, [fieldPath, saveField, checked, value]);
 
     return (
         <Checkbox
@@ -463,7 +465,51 @@ export function useFieldAutosave() {
                 }
             }
 
-            // For non-floor fields, use the original path parsing logic
+            // Special handling for checklist fields to preserve existing data
+            if (fieldPath.startsWith('checklists.')) {
+                const pathParts = fieldPath.split('.');
+                if (pathParts.length === 3) {
+                    const [, checklistId, fieldName] = pathParts;
+                    
+                    console.log(`📋 Updating checklist ${checklistId}, field ${fieldName}:`, value);
+                    console.log(`📋 Existing checklists:`, equipment.checklists);
+                    console.log(`📋 Existing checklist data for ${checklistId}:`, equipment.checklists?.[checklistId]);
+                    
+                    // Get existing checklists object
+                    const existingChecklists = equipment.checklists || {};
+                    
+                    // Preserve existing checklist data and update only the specific field
+                    const updates = {
+                        checklists: {
+                            ...existingChecklists,
+                            [checklistId]: {
+                                ...existingChecklists[checklistId],
+                                [fieldName]: value
+                            }
+                        }
+                    };
+                    
+                    console.log(`🔧 Updating checklist field ${fieldPath}:`, updates);
+                    console.log(`🔧 Final checklist data for ${checklistId}:`, updates.checklists[checklistId]);
+                    
+                    const success = await updateEquipment({
+                        projectId,
+                        equipmentId,
+                        updates,
+                        delay: 100 // Quick save for checklist updates
+                    });
+                    
+                    if (success) {
+                        console.log(`✅ Successfully saved checklist field ${fieldPath}`);
+                    } else {
+                        console.error(`❌ Failed to save checklist field ${fieldPath}`);
+                    }
+                    
+                    return success;
+                }
+            }
+
+            // For other non-floor fields, use the original path parsing logic
             const pathParts = fieldPath.split('.');
             const updates = {};
             let current = updates;
@@ -474,14 +520,18 @@ export function useFieldAutosave() {
             // Build the nested structure while preserving existing data
             for (let i = 0; i < pathParts.length - 1; i++) {
                 const pathPart = pathParts[i];
-                // Get the existing value from equipment to preserve other fields
-                const existingValue = equipment[pathPart];
+                
+                // Navigate to the existing value in equipment
+                let existingValue = equipment;
+                for (let j = 0; j <= i; j++) {
+                    existingValue = existingValue?.[pathParts[j]];
+                }
 
                 console.log(`🔍 Processing path part ${i}: ${pathPart}`);
                 console.log(`🔍 Existing value:`, existingValue);
 
                 // Create a new object that preserves existing data
-                current[pathPart] = existingValue && typeof existingValue === 'object'
+                current[pathPart] = existingValue && typeof existingValue === 'object' && !Array.isArray(existingValue)
                     ? { ...existingValue }
                     : {};
                 current = current[pathPart];

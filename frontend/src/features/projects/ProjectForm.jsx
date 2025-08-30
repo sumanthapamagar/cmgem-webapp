@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { Input, Picker, Stack, Fieldset, Field, Label, Legend, Button, Checkbox, CheckboxField } from '../../components';
 import { getAccounts } from '../../lib/api';
@@ -31,7 +31,7 @@ const ProjectForm = ({
         text: acc.name
     }));
 
-    const { register, handleSubmit, formState: { errors }, setValue, watch, setError } = useForm({
+    const { register, handleSubmit, formState: { errors }, setValue, watch, setError, clearErrors } = useForm({
         defaultValues: {
             name: '',
             category: '',
@@ -49,6 +49,21 @@ const ProjectForm = ({
             ...defaultValues
         }
     });
+
+    const handleAccountSelect = (account) => {
+        setSelectedAccount(account);
+        // Clear the account_id error when an account is selected
+        if (account && account._id) {
+            clearErrors('account_id');
+        }
+    };
+
+    // Clear account_id error if there's a default account (for edit mode)
+    useEffect(() => {
+        if (selectedAccount && selectedAccount._id) {
+            clearErrors('account_id');
+        }
+    }, [selectedAccount, clearErrors]);
 
     const handleFormSubmit = (data) => {
         // Prevent resubmission if already processing
@@ -248,7 +263,7 @@ const ProjectForm = ({
                                     disabled={!isOnline || hasLocalChanges}
                                     onChange={findAccount}
                                     selected={selectedAccount}
-                                    onSelect={setSelectedAccount}
+                                    onSelect={handleAccountSelect}
                                 />
                                 {errors.account_id && (
                                     <span className="text-red-500 text-sm mt-1">{errors.account_id.message}</span>

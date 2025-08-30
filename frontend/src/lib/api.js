@@ -471,6 +471,18 @@ const postImage = async ( projectId, equipmentId, data) => {
 }
 
 /**
+ * Get equipment attachments by equipment ID
+ * @param {string} equipmentId - Equipment ID
+ * @returns {Promise<Object>} Equipment attachments data
+ */
+const getEquipmentAttachments = async (equipmentId) => {
+	validateRequiredString(equipmentId, 'Equipment ID');
+	
+	const response = await server.get(`attachments/equipment/${equipmentId}`);
+	return response.data;
+}
+
+/**
  * Delete an attachment
  * @param {string} attachmentId - Attachment ID
  * @returns {Promise<Object>} Deletion confirmation
@@ -588,6 +600,7 @@ export const api = {
 
 	// Attachments API
 	attachments: {
+		getEquipmentAttachments: getEquipmentAttachments,
 		delete: deleteAttachment
 	},
 
@@ -635,6 +648,7 @@ export {
 	updateFloor as patchFloor, // Alias for backward compatibility
 	deleteFloor,
 	postImage, // Alias for backward compatibility
+	getEquipmentAttachments,
 	deleteAttachment,
 	getStorageSasToken,
 	sendPatchRequest,
