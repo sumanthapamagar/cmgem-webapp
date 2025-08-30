@@ -17,38 +17,36 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Backend
     environment: production
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '22'
         cache: 'npm'
         cache-dependency-path: backend/package-lock.json
-        
+
     - name: Install dependencies
       run: |
         cd backend
         npm ci
-        
+
     - name: Build backend
       run: |
         cd backend
         npm run build
-        
+
     - name: Prepare deployment package
       run: |
-        cd backend
-        # Create a deployment package with all necessary files
-        mkdir -p ../deploy-package
-        cp -r dist ../deploy-package/
-        cp package.json ../deploy-package/
-        cp package-lock.json ../deploy-package/
-        cp -r templates ../deploy-package/
-        cp -r node_modules ../deploy-package/
-        
+        mkdir -p deploy-package
+        cp -r backend/dist deploy-package/
+        cp backend/package.json deploy-package/
+        cp backend/package-lock.json deploy-package/
+        cp -r backend/templates deploy-package/
+
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
