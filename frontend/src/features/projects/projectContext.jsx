@@ -25,7 +25,7 @@ const ProjectProvder = ({ children, projectId }) => {
     });
 
     const isLoadingOfflineProject = offlineProjectQuery.isPending;
-    const hasLocalChanges = offlineProject?.has_local_changes;
+    const hasLocalChanges = offlineProject?.has_local_changes || false;
 
     const canFetchOnlineProject = isOnline && !isLoadingOfflineProject && (!offlineProject || !hasLocalChanges);
     // Online project query (fallback and sync) - only when online and no local changes
@@ -63,14 +63,15 @@ const ProjectProvder = ({ children, projectId }) => {
     });
 
 
+    console.log('offlineProject', offlineProject);
+    console.log('project online', projectQuery.data);
 
-
-    if (projectQuery.isError) return <div>Error loading project</div>;
-    if (projectQuery.isLoading || offlineProjectQuery.isLoading  && !projectQuery.data) {
+    if (projectQuery.isLoading || offlineProjectQuery.isLoading && !projectQuery.data) {
         return <ProjectLoadingState />;
     }
     if (!offlineProject && !projectQuery.data) return <div>Project not found</div>;
 
+    if (!offlineProject && projectQuery.isError) return <div>Error loading project</div>;
 
     return (
         <ProjectContext.Provider
@@ -78,7 +79,7 @@ const ProjectProvder = ({ children, projectId }) => {
                 checklists: offlineProject?.checklists ?? [],
                 offlineProjectQuery,
                 projectQuery,
-                offlineProject: hasLocalChanges ? offlineProject : projectQuery.data,
+                offlineProject: hasLocalChanges ? offlineProject : (projectQuery.data || offlineProject),
                 onlineProject: projectQuery.data,
                 projectMutation,
                 submitStatus,
@@ -89,8 +90,8 @@ const ProjectProvder = ({ children, projectId }) => {
             {(projectEquipmentsMutation.isPending || projectEquipmentsMutation.isSuccess) && (
                 <Dialog open={true} onClose={() => { }}>
                     <DialogTitle>
-                        {projectEquipmentsMutation.isPending 
-                            ? 'Saving Offline Changes to server...' 
+                        {projectEquipmentsMutation.isPending
+                            ? 'Saving Offline Changes to server...'
                             : 'All changes saved to server'
                         }
                     </DialogTitle>

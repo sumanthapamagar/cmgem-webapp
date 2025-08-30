@@ -11,7 +11,8 @@ export const ProjectSyncIndicator = () => {
 
     const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
     
-    if (!project.has_local_changes) {
+    // Add null check to prevent TypeError
+    if (!project || !project.has_local_changes) {
         return null;
     }
 

@@ -156,7 +156,12 @@ class OfflineStorage {
             const projectData = localStorage.getItem(key);
             if (projectData) {
                 console.log(`Project ${projectId} retrieved from localStorage`);
-                return JSON.parse(projectData);
+                const parsed = JSON.parse(projectData);
+                // Ensure has_local_changes property exists
+                if (parsed && typeof parsed.has_local_changes === 'undefined') {
+                    parsed.has_local_changes = false;
+                }
+                return parsed;
             }
             return null;
         } catch (error) {
@@ -174,7 +179,12 @@ class OfflineStorage {
             request.onsuccess = () => {
                 if (request.result) {
                     console.log(`Project ${projectId} retrieved from IndexedDB`);
-                    resolve(request.result);
+                    const result = request.result;
+                    // Ensure has_local_changes property exists
+                    if (result && typeof result.has_local_changes === 'undefined') {
+                        result.has_local_changes = false;
+                    }
+                    resolve(result);
                 } else {
                     resolve(null);
                 }

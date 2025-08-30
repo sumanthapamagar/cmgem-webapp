@@ -46,11 +46,36 @@ jobs:
         cp backend/package.json deploy-package/
         cp backend/package-lock.json deploy-package/
         cp -r backend/templates deploy-package/
-        cp -r backend/node_modules deploy-package/
+        
+        # Copy node_modules with proper error handling
+        if [ -d "backend/node_modules" ]; then
+          echo "Copying existing node_modules..."
+          cp -r backend/node_modules deploy-package/
+        else
+          echo "node_modules not found, installing dependencies..."
+          cd deploy-package
+          npm ci --production
+          cd ..
+        fi
+        
         # Create a startup script for Azure Web App
         echo '#!/bin/bash' > deploy-package/start.sh
         echo 'node dist/main.js' >> deploy-package/start.sh
         chmod +x deploy-package/start.sh
+        
+        # Debug: List contents of deployment package
+        echo "=== Deployment package contents ==="
+        ls -la deploy-package/
+        echo "=== Node modules check ==="
+        ls -la deploy-package/node_modules/ | head -10
+        echo "=== NestJS core module check ==="
+        ls -la deploy-package/node_modules/@nestjs/ || echo "NestJS not found in node_modules"
+        echo "=== Dist contents ==="
+        ls -la deploy-package/dist/
+        echo "=== Package.json ==="
+        cat deploy-package/package.json | head -20
+        echo "=== Testing if main.js can find modules ==="
+        cd deploy-package && node -e "console.log('Testing module resolution...'); try { require('@nestjs/core'); console.log('✅ @nestjs/core found'); } catch(e) { console.log('❌ @nestjs/core not found:', e.message); }"
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2

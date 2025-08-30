@@ -50,7 +50,7 @@ const EquipmentRoot = () => {
 			<Online>
 				<Stack horizontal className='justify-between items-center bg-white py-6 px-8 '>
 					<h2 className='text-2xl text-blue-700'>Equipment: {equipment.name}</h2>
-					<Button variant='outline' onClick={showDeleteDialog} color='red' disabled={project.has_local_changes}>
+					<Button variant='outline' onClick={showDeleteDialog} color='red' disabled={project?.has_local_changes}>
 						<i className='fa-solid fa-trash mr-2'></i>
 						Delete Equipment
 					</Button>

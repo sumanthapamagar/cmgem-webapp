@@ -54,7 +54,7 @@ export function ProjectUpdate() {
                 />
             )}
 
-            {project.has_local_changes && (
+            {project?.has_local_changes && (
                 <NotificationBanner
                     type="warning"
                     message="You have local changes that are not saved. Please save them before updating the project."
@@ -67,7 +67,7 @@ export function ProjectUpdate() {
                 onSubmit={handleSubmit}
                 isPending={projectMutation.isPending}
                 isOnline={isOnline}
-                hasLocalChanges={project.has_local_changes}
+                hasLocalChanges={project?.has_local_changes}
                 defaultValues={defaultValues}
                 submitButtonText="Save"
                 submitButtonDisabled={false}
@@ -78,7 +78,7 @@ export function ProjectUpdate() {
                         type="submit"
                         color='blue'
                         className='w-32'
-                        disabled={!isOnline || projectMutation.isPending || project.has_local_changes}
+                        disabled={!isOnline || projectMutation.isPending || project?.has_local_changes}
                     >
                         {!isOnline ? 'Offline - Save Disabled' : (projectMutation.isPending ? (
                             <div className="flex items-center gap-2">
