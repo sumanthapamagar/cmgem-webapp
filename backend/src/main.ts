@@ -14,8 +14,8 @@ async function bootstrap() {
         })
     )
     const configService = app.get(ConfigService)
-    const port = configService.get<number>("APP_PORT") || 7080
-    await app.listen(port)
+    const port = process.env.PORT || configService.get<number>("APP_PORT") || 7080
+    await app.listen(port, '0.0.0.0')
     if (module.hot) {
         module.hot.accept()
         module.hot.dispose(() => app.close())
