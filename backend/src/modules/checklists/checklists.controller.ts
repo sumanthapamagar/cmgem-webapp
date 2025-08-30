@@ -1,8 +1,7 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, Req, Query, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, Req, UseInterceptors } from '@nestjs/common';
 import { ChecklistsService } from './checklists.service';
 import { CreateChecklistDto } from './dto/create-checklist.dto';
 import { ChecklistResponseDto } from './dto/checklist-response.dto';
-import { ChecklistQueryDto } from './dto/checklist-query.dto';
 import { UserInterceptor } from 'src/interceptors';
 import { GetUserInfo } from 'src/decorators';
 import type { UserInfo } from 'src/types/user.types';
@@ -13,15 +12,8 @@ export class ChecklistsController {
   constructor(private readonly checklistsService: ChecklistsService) {}
 
   @Get()
-  async findAll(@Query() query: ChecklistQueryDto): Promise<ChecklistResponseDto[]> {
-    return this.checklistsService.findAll(
-      query.equipment_type, 
-      query.location, 
-      query.category, 
-      query.title,
-      query.sortBy,
-      query.sortOrder
-    );
+  async findAll(): Promise<ChecklistResponseDto[]> {
+    return this.checklistsService.findAll();
   }
 
   @Get(':id')
