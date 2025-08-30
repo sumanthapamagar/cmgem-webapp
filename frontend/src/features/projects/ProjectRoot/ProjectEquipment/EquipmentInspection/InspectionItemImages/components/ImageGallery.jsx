@@ -29,8 +29,8 @@ export const ImageGallery = ({
             
             {/* Show loading state when token is being fetched */}
             {sasTokenQuery.isLoading && (
-                <div className="h-12 w-16 bg-gray-100 flex border border-gray-200">
-                    <LoadingState />
+                <div className="h-4 w-20 bg-gray-100 border border-gray-200 text-base/8">
+                    ...
                 </div>
             )}
             

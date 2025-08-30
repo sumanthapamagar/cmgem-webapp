@@ -25,12 +25,14 @@ export const OfflineModeToggle = () => {
     };
 
     return (
-        <div className="flex items-center gap-3">
-            <div className="text-xs text-gray-500">
-                Network Status
-            </div>
-            <div className={`text-sm font-medium ${getStatusColor()}`}>
-                {getStatusText()}
+        <div className="flex items-center gap-x-4 divide-x divide-black/40">
+            <div className="flex items-center gap-2 pr-4">
+                <div className="text-xs text-gray-500">
+                    Network Status
+                </div>
+                <div className={`text-sm font-medium ${getStatusColor()}`}>
+                    {getStatusText()}
+                </div>
             </div>
 
             <SwitchField>
