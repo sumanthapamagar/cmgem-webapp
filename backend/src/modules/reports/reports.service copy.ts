@@ -27,6 +27,7 @@ export class ReportsService {
       const buffer = await Packer.toBuffer(doc);
       return buffer;
     } catch (error) {
+      console.log("error", error);
       throw new Error(`Failed to generate Word document: ${error.message}`);
     }
   }

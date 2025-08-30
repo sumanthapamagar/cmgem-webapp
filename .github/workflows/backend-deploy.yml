@@ -49,8 +49,7 @@ jobs:
         cp -r backend/node_modules deploy-package/
         # Create a startup script for Azure Web App
         echo '#!/bin/bash' > deploy-package/start.sh
-        echo 'cd dist' >> deploy-package/start.sh
-        echo 'node main.js' >> deploy-package/start.sh
+        echo 'node dist/main.js' >> deploy-package/start.sh
         chmod +x deploy-package/start.sh
 
     - name: Deploy to Azure Web App
