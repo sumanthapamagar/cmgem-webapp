@@ -1,0 +1,183 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-family-sans: "Roboto", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-family-mono: "Roboto", ui-monospace, SFMono-Regular, "Cascadia Code", "Roboto Mono", "Ubuntu Monospace", "Source Code Pro", "Fira Code", "Droid Sans Mono", "Courier New", monospace;
+}
+
+/* Force light theme - prevent dark mode */
+:root {
+  color-scheme: light;
+  --text-xs: 10px;
+  --text-sm: 11px;
+  --text-base: 13px;
+  --text-lg: 14px;
+  --text-xl: 16px;
+  --text-2xl: 16px;
+  --text-3xl: 20px;
+  --text-4xl: 24px;
+  --text-5xl: 26px;
+}
+
+@theme {
+  --color-true-navy: #26374D;
+  --color-blue-door: #536D82;
+  --color-harper-blue: #9DB2BF;
+  --color-alice-blue: #DDE6ED;
+  --color-platinum: #FEFEFE;
+  --color-black: #141414
+}
+
+/* Override any dark mode preferences */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    color-scheme: light;
+    height: 100vh;
+  }
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  /* Set Inter as default font for the entire app */
+  html {
+    font-family: var(--font-family-sans);
+    color-scheme: light;
+  }
+
+  body {
+    font-family: var(--font-family-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-variation-settings: normal;
+    color-scheme: light;
+    background-color: var(--color-neutral-100);
+    color: var(--color-black);
+  }
+
+  /* Force light colors for common elements */
+  input,
+  textarea,
+  select {
+    background-color: #ffffff;
+    color: #111827;
+    border-color: #d1d5db;
+  }
+
+  /* Ensure buttons and interactive elements use light theme */
+  button,
+  [role="button"] {
+    background-color: #f3f4f6;
+    color: #111827;
+    border-color: #d1d5db;
+  }
+
+  button:hover,
+  [role="button"]:hover {
+    background-color: #e5e7eb;
+  }
+}
+
+@keyframes moving {
+  50% {
+    width: 100%;
+  }
+
+  100% {
+    width: 0;
+    right: 0;
+    left: unset;
+  }
+}
+
+.animate-moving {
+  animation: moving 1s ease-in-out infinite;
+}
+
+/* change the bacground color of scrollbar frame */
+::-webkit-scrollbar-track {
+  background: transparent;
+  padding: 4px; /* Increase padding to make track thicker */
+  width: 6px; /* Track width */
+}
+::-webkit-scrollbar-track:horizontal {
+  background: transparent;
+  padding: 4px; /* Increase padding to make horizontal track thicker */
+  height: 6px; /* Track height */
+}
+scrollbar-track {
+  background: transparent;
+  padding: 4px; /* Increase padding to make track thicker */
+  width: 6px;
+}
+scrollbar-track:horizontal {
+  background: transparent;
+  padding: 4px; /* Increase padding to make horizontal track thicker */
+  height: 6px;
+}
+
+/* change the bacground color of scrollbar thumb */
+::-webkit-scrollbar-thumb {
+  background: var(--color-blue-door);
+  border-radius: 10px;
+  margin: 4px; /* Increase margin to make thumb thinner */
+  width: 4px; /* Make thumb very thin */
+}
+::-webkit-scrollbar-thumb:horizontal {
+  background: var(--color-blue-door);
+  border-radius: 10px;
+  margin: 4px; /* Increase margin to make horizontal thumb thinner */
+  height: 4px; /* Make horizontal thumb very thin */
+}
+scrollbar-thumb {
+  background: var(--color-blue-door);
+  border-radius: 10px;
+  margin: 4px;
+  width: 4px;
+}
+scrollbar-thumb:horizontal {
+  background: var(--color-blue-door);
+  border-radius: 10px;
+  margin: 4px;
+  height: 4px;
+}
+
+/* Horizontal scrollbar thumb styling is now handled above */
+
+/* make the scrollbar thinnner*/
+::-webkit-scrollbar {
+  width: 6px; /* Track width */
+  height: 6px; /* Track height */
+}
+::-webkit-scrollbar:vertical {
+  width: 6px; /* Track width for vertical scrollbars */
+}
+::-webkit-scrollbar:horizontal {
+  height: 6px; /* Track height for horizontal scrollbars */
+}
+scrollbar {
+  width: 6px; /* Track width */
+  height: 6px; /* Track height */
+}
