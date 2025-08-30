@@ -2,7 +2,7 @@ import { useState,  useCallback } from 'react';
 import dayjs from 'dayjs';
 import { useQuery } from '@tanstack/react-query';
 
-import { getProjects, getProjectCategories } from '../../lib/api';
+import { getProjects } from '../../lib/api';
 import { Input,  ProjectsLoadingState, Stack, Modal, Button, Online, Table, TableHead, TableBody, TableRow, TableHeader, TableCell } from '../../components';
 import { Pagination, PaginationPrevious, PaginationNext, PaginationList, PaginationPage, PaginationGap } from '../../components/ui/pagination';
 import NewProjectForm from './NewProject';

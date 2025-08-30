@@ -15,6 +15,7 @@ export * from './common/LoadingState';
 export * from './common/ProjectSyncIndicator';
 export * from './common/NotificationBanner';
 export * from './common/OfflineModeToggle';
+export * from './common/MsalError';
 
 // UI Components (keep as is)
 export * from './ui';

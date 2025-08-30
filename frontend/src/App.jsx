@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import Root from './features/projects/Root';
 import ProjectRoot from './features/projects/ProjectRoot';
 import OfflineProjects from './features/projects/OfflineProjects';
-import { Header } from './components';
+import { Header, ErrorComponent } from './components';
 import Accounts from './features/accounts/Accounts';
 import NewAccount from './features/accounts/NewAccount';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -14,7 +14,6 @@ import { InteractionType } from '@azure/msal-browser';
 import { loginRequest } from './lib/authConfig';
 import ChecklistHome from './features/checklists/Checklists';
 import { NetworkStatusProvider, useNetworkStatus } from './contexts/NetworkStatusContext';
-
 
 // Create a new instance of QueryClient
 const queryClient = new QueryClient({
@@ -31,8 +30,7 @@ const queryClient = new QueryClient({
     // Configure global cache callbacks to show toast notifications
 });
 
-// Define ErrorComponent and Loading components
-const ErrorComponent = () => 'An error occured';
+// Define Loading component
 const Loading = () => 'Loading profile data';
 
 // Define the AppContent component that uses the network status
