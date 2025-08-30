@@ -44,11 +44,10 @@ export class AttachmentsService {
         throw new BadRequestException('Invalid equipment ID format');
       }
 
-      // Process the image to create three sizes
-      const processedImages = await this.imageProcessingService.processImage(
-        file.buffer,
-        file.originalname
-      );
+      // Process images and ensure container exists in parallel
+      const [processedImages] = await Promise.all([
+        this.imageProcessingService.processImage(file.buffer, file.originalname),
+      ]);
 
       // Generate unique filenames for each size
       const baseFilename = this.imageProcessingService.generateUniqueFilename(
@@ -58,7 +57,7 @@ export class AttachmentsService {
       const iconFilename = baseFilename.replace('_base.jpg', '_icon.jpg');
       const thumbnailFilename = baseFilename.replace('_base.jpg', '_thumb.jpg');
 
-      // Upload all three sizes to Azure Storage
+      // Upload all three sizes to Azure Storage in parallel
       const containerName = equipmentId;
 
       const [iconUpload, thumbnailUpload, originalUpload] = await Promise.all([
@@ -82,19 +81,6 @@ export class AttachmentsService {
         )
       ]);
 
-      console.log({
-        low_size_url: iconUpload.url,
-        low_size_name: iconFilename,
-        thumb_url: thumbnailUpload.url,
-        thumb_name: thumbnailFilename,
-        large_url: originalUpload.url,
-        large_name: baseFilename,
-        equipment_id: equipmentId,
-        group_id: uploadData.group_id,
-        inspection_item: uploadData.inspection_item,
-        created_by: user,
-      })
-
       // Create attachment record in database
       const attachmentData = {
         low_size_url: iconUpload.url,
@@ -110,15 +96,8 @@ export class AttachmentsService {
         created_at: new Date(),
       };
 
-      console.log('Creating attachment with data:', attachmentData);
-
       const attachment = new this.attachmentModel(attachmentData);
-
-      console.log('Attachment model created:', attachment);
-
       const savedAttachment = await attachment.save();
-
-      console.log('Attachment saved successfully:', savedAttachment);
 
       return this.mapToResponseDto(savedAttachment);
     } catch (error) {
@@ -149,6 +128,22 @@ export class AttachmentsService {
       attachments: attachments.map(attachment => this.mapToResponseDto(attachment)),
       attachments_count: attachmentsCount
     };
+  }
+
+  async findMultipleByEquipmentIds(equipmentIds: string[]): Promise<AttachmentResponseDto[]> {
+    if (!equipmentIds || equipmentIds.length === 0) {
+      return [];
+    }
+
+    const attachments = await this.attachmentModel
+      .find({
+        equipment_id: { $in: equipmentIds },
+        deleted_at: { $exists: false }
+      })
+      .sort({ created_at: -1 })
+      .exec();
+
+    return attachments.map(attachment => this.mapToResponseDto(attachment));
   }
 
   async deleteAttachment(attachmentId: string, user: UserInfo): Promise<void> {

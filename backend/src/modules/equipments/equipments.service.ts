@@ -47,6 +47,29 @@ export class EquipmentsService {
     return this.mapToResponseDto(equipment);
   }
 
+  async findByProjectId(projectId: string): Promise<EquipmentResponseDto[]> {
+    const equipments = await this.equipmentModel.find({
+      project_id: projectId,
+      deleted_at: { $exists: false }
+    }).exec();
+
+    return equipments.map(equipment => this.mapToResponseDto(equipment));
+  }
+
+  async findMultipleByIds(equipmentIds: string[]): Promise<EquipmentResponseDto[]> {
+    if (!equipmentIds || equipmentIds.length === 0) {
+      return [];
+    }
+
+    const objectIds = equipmentIds.map(id => new Types.ObjectId(id));
+    const equipments = await this.equipmentModel.find({
+      _id: { $in: objectIds },
+      deleted_at: { $exists: false }
+    }).exec();
+
+    return equipments.map(equipment => this.mapToResponseDto(equipment));
+  }
+
   async delete(id: string, user: UserInfo): Promise<void> {
     console.log('deleting equipment', id);
     const equipment = await this.equipmentModel.findOne({
@@ -65,15 +88,6 @@ export class EquipmentsService {
         deleted_at: new Date(),
       }
     ).exec();
-  }
-
-  async findByProjectId(projectId: string): Promise<EquipmentResponseDto[]> {
-    const equipments = await this.equipmentModel.find({
-      project_id: projectId,
-      deleted_at: { $exists: false }
-    }).exec();
-
-    return equipments.map(equipment => this.mapToResponseDto(equipment));
   }
 
     async createOrUpdate(equipment: CreateEquipmentWithFloorsDto, user: UserInfo): Promise<Equipment> {
@@ -145,19 +159,25 @@ export class EquipmentsService {
     user: UserInfo
   ): Promise<any> {
 
-    for (const equipment of equipments) {
-      await this.createOrUpdate(equipment, user);
-    }
-    const floors = equipments.reduce((floors: CreateFloorDto[], equipment) => (floors.concat(equipment.floors.map(
-      (floor: CreateFloorDto) => ({
+    // Process equipment updates in parallel
+    const equipmentPromises = equipments.map(equipment => 
+      this.createOrUpdate(equipment, user)
+    );
+    
+    const updatedEquipments = await Promise.all(equipmentPromises);
+    
+    // Process floors in parallel
+    const floors = equipments.flatMap(equipment => 
+      equipment.floors.map(floor => ({
         ...floor,
         equipment_id: equipment._id.toString(),
-      })
-    ))), []);
+      }))
+    );
 
     await this.floorsService.bulkSave(floors, user);
+    
     return {
-      equipments: equipments,
+      equipments: updatedEquipments,
       floors: floors,
     };
   }

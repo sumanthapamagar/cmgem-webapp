@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 
 import { Button, NotificationBanner } from '../../../components';
-import { useNetworkStatus } from '../../../hooks/useNetworkStatus';
+import { useNetworkStatus } from '../../../contexts/NetworkStatusContext';
 import dayjs from 'dayjs';
 import { ProjectContext } from '../projectContext';
 import { useParams } from 'react-router-dom';

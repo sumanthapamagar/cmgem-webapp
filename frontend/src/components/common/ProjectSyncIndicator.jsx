@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react';
 import { ProjectContext } from '../../features/projects/projectContext';
-import { useNetworkStatus } from '../../hooks';
+import { useNetworkStatus } from '../../contexts/NetworkStatusContext';
 import { Online } from './Online';
 import { Offline } from './Offline';
 import { Button } from '../ui/button';

@@ -136,7 +136,7 @@ export const useEquipmentAutosave = ({
     const triggerAutosave = useCallback(async (values) => {
         if (!values || Object.keys(values).length === 0) return;
         
-        console.log('💾 Triggering autosave with values:', values);
+
         setIsAutoSaving(true);
         
         try {
@@ -152,20 +152,20 @@ export const useEquipmentAutosave = ({
     // Main effect for watching form changes
     useEffect(() => {
         if (!isDirty) {
-            console.log('🚫 Form not dirty, skipping autosave setup');
+
             return;
         }
         
         const formValues = watch();
         if (!formValues || Object.keys(formValues).length === 0) {
-            console.log('🚫 No form values, skipping autosave setup');
+
             return;
         }
         
         // Check if values actually changed using hash
         const currentHash = simpleHash(formValues);
         if (currentHash === lastValuesHashRef.current) {
-            console.log('🚫 Values unchanged, skipping autosave setup');
+
             return;
         }
         
@@ -173,21 +173,21 @@ export const useEquipmentAutosave = ({
         let hasChanges = true;
         if (customChangeDetector) {
             hasChanges = customChangeDetector(formValues);
-            console.log('🔍 Custom change detector result:', hasChanges, 'for values:', formValues);
+
         } else {
             // Default change detection logic
             hasChanges = Object.values(formValues).some(
                 section => section && Object.keys(section).length > 0
             );
-            console.log('🔍 Default change detector result:', hasChanges, 'for values:', formValues);
+
         }
         
         if (!hasChanges) {
-            console.log('🚫 No meaningful changes detected, skipping autosave setup');
+
             return;
         }
         
-        console.log('📝 Form values changed, setting up autosave');
+
         lastValuesHashRef.current = currentHash;
         
         // Clear existing timeouts
@@ -195,10 +195,10 @@ export const useEquipmentAutosave = ({
         
         // Set debounce timeout
         debounceTimeoutRef.current = setTimeout(() => {
-            console.log('⏱️ Debounce timeout completed, setting idle timeout');
+
             // After debounce, set idle timeout
             idleTimeoutRef.current = setTimeout(() => {
-                console.log('⏰ Autosave timer expired, saving now');
+
                 triggerAutosave(formValues);
             }, idleDelay);
         }, debounceDelay);

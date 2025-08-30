@@ -258,6 +258,11 @@ EquipmentSchema.index({ created_at: -1 });
 // Add index for project_id field
 EquipmentSchema.index({ project_id: 1 });
 
+// Compound indexes for better performance
+EquipmentSchema.index({ project_id: 1, deleted_at: 1 });
+EquipmentSchema.index({ _id: 1, deleted_at: 1 });
+EquipmentSchema.index({ category: 1, deleted_at: 1 });
+
 // Pre-save hook to set updated_at
 EquipmentSchema.pre('save', function(next) {
   if (this.isModified()) {

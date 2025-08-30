@@ -189,6 +189,19 @@ export class FloorsService {
     return floors.map(floor => this.mapToResponseDto(floor));
   }
 
+  async findMultipleByEquipmentIds(equipmentIds: string[]): Promise<FloorResponseDto[]> {
+    if (!equipmentIds || equipmentIds.length === 0) {
+      return [];
+    }
+
+    const floors = await this.floorModel.find({
+      equipment_id: { $in: equipmentIds },
+      deleted_at: { $exists: false }
+    }).exec();
+
+    return floors.map(floor => this.mapToResponseDto(floor));
+  }
+
   async findByLevel(level: number): Promise<FloorResponseDto[]> {
     const floors = await this.floorModel.find({
       level: level,

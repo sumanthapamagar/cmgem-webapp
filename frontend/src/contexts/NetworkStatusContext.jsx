@@ -1,6 +1,16 @@
-import { useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+
+const NetworkStatusContext = createContext();
 
 export const useNetworkStatus = () => {
+    const context = useContext(NetworkStatusContext);
+    if (!context) {
+        throw new Error('useNetworkStatus must be used within a NetworkStatusProvider');
+    }
+    return context;
+};
+
+export const NetworkStatusProvider = ({ children }) => {
     const [isOnline, setIsOnline] = useState(navigator.onLine);
     const [isManualOffline, setIsManualOffline] = useState(() => {
         // Initialize from localStorage
@@ -16,12 +26,20 @@ export const useNetworkStatus = () => {
             setIsOnline(false);
         };
 
+        const handleStorageChange = (e) => {
+            if (e.key === 'manual_offline_mode') {
+                setIsManualOffline(e.newValue === 'true');
+            }
+        };
+
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
+        window.addEventListener('storage', handleStorageChange);
 
         return () => {
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
+            window.removeEventListener('storage', handleStorageChange);
         };
     }, []);
 
@@ -50,9 +68,13 @@ export const useNetworkStatus = () => {
         setManualOffline // Function to set manual offline state
     };
 
-    return networkStatus;
+    return (
+        <NetworkStatusContext.Provider value={networkStatus}>
+            {children}
+        </NetworkStatusContext.Provider>
+    );
 };
 
+// Legacy exports for backward compatibility
 export const useOnline = () => useNetworkStatus();
-
 export const useOfflineMode = () => useNetworkStatus();

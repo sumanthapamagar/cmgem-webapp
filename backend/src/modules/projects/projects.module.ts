@@ -8,6 +8,9 @@ import { Floor, FloorSchema } from '../floors/floors.schema';
 import { Attachment, AttachmentSchema } from '../attachments/attachments.schema';
 import { ReportsModule } from '../reports/reports.module';
 import { ChecklistsModule } from '../checklists/checklists.module';
+import { EquipmentsModule } from '../equipments/equipments.module';
+import { AttachmentsModule } from '../attachments/attachments.module';
+import { FloorsModule } from '../floors/floors.module';
 
 @Module({
   imports: [
@@ -19,6 +22,9 @@ import { ChecklistsModule } from '../checklists/checklists.module';
     ], 'default'),
     ReportsModule,
     ChecklistsModule,
+    EquipmentsModule,
+    AttachmentsModule,
+    FloorsModule,
   ],
   controllers: [ProjectsController],
   providers: [ProjectsService],

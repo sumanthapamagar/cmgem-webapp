@@ -262,8 +262,7 @@ const createAccount = async (data) => {
  * @returns {Promise<Object>} Updated account data
  */
 const updateAccount = async ({accountId, data}) => {
-	console.log("accountId", accountId);
-	console.log("data", data);
+
 	validateRequiredString(accountId, 'Account ID');
 	validateRequiredObject(data, 'Account data');
 	
@@ -485,7 +484,7 @@ const deleteFloor = async (projectId, equipmentId, floorId) => {
  * @returns {Promise<Object>} Upload confirmation
  */
 const postImage = async ( projectId, equipmentId, data) => {
-	console.log("data", data);
+
 	validateRequiredString(projectId, 'Project ID');
 	validateRequiredString(equipmentId, 'Equipment ID');
 	// if (!(data instanceof FormData)) {

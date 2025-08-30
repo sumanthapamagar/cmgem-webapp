@@ -6,7 +6,7 @@ export default function InspectionItemCondition({ inspectionItem, equipment }) {
 
     const handleStatusChange = (newStatus) => {
         // The CustomRadioGroup will handle saving internally
-        console.log(`Status changed to: ${newStatus}`);
+
     };
 
     return (

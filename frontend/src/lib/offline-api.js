@@ -16,7 +16,7 @@ class OfflineStorage {
             if (window.indexedDB) {
                 this.db = await this.initIndexedDB();
                 this.isInitialized = true;
-                console.log('IndexedDB initialized successfully for offline storage');
+
                 return this.db;
             }
         } catch (error) {
@@ -26,7 +26,7 @@ class OfflineStorage {
         // Fallback to localStorage
         this.db = 'localStorage';
         this.isInitialized = true;
-        console.log('Using localStorage for offline storage');
+
         return this.db;
     }
 
@@ -108,7 +108,7 @@ class OfflineStorage {
                 last_local_change: isFromServer ? null : currentTime,
                 offline_timestamp: currentTime // Always update offline timestamp when saving
             };
-            console.log('projectWithMetadata, localstorage', projectWithMetadata);
+
             
             const key = `project_${projectId}`;
             localStorage.setItem(key, JSON.stringify(projectWithMetadata));
@@ -120,7 +120,7 @@ class OfflineStorage {
                 localStorage.setItem('project_list', JSON.stringify(projectList));
             }
             
-            console.log(`Project ${projectId} saved to localStorage for offline use (server: ${isFromServer})`);
+
             return true;
         } catch (error) {
             console.error('Error saving project to localStorage:', error);
@@ -146,7 +146,7 @@ class OfflineStorage {
             const request = store.put(projectWithMetadata);
             
             request.onsuccess = () => {
-                console.log(`Project ${projectData._id} saved to IndexedDB for offline use (server: ${isFromServer})`);
+
                 resolve(true);
             };
             
@@ -169,7 +169,7 @@ class OfflineStorage {
             const key = `project_${projectId}`;
             const projectData = localStorage.getItem(key);
             if (projectData) {
-                console.log(`Project ${projectId} retrieved from localStorage`);
+    
                 const parsed = JSON.parse(projectData);
                 // Ensure has_local_changes property exists
                 if (parsed && typeof parsed.has_local_changes === 'undefined') {
@@ -192,7 +192,7 @@ class OfflineStorage {
             
             request.onsuccess = () => {
                 if (request.result) {
-                    console.log(`Project ${projectId} retrieved from IndexedDB`);
+
                     const result = request.result;
                     // Ensure has_local_changes property exists
                     if (result && typeof result.has_local_changes === 'undefined') {
@@ -419,15 +419,15 @@ class OfflineStorage {
             const projectsToKeep = sortedProjects.slice(0, maxProjects);
             const projectsToRemove = sortedProjects.slice(maxProjects);
             
-            console.log(`Project limit exceeded (${projects.length}/${maxProjects}). Removing ${projectsToRemove.length} oldest projects.`);
+
             
             // Remove excess projects
             for (const project of projectsToRemove) {
                 await this.deleteProject(project._id);
-                console.log(`Removed project: ${project.name} (${project._id})`);
+
             }
             
-            console.log(`Project limit enforced. Kept ${projectsToKeep.length} most recent projects.`);
+
         }
     }
 
@@ -448,7 +448,7 @@ class OfflineStorage {
                 await this.deleteProject(project._id);
             }
             
-            console.log(`Limited offline storage to ${maxProjects} projects`);
+
         }
     }
 
@@ -654,7 +654,7 @@ export const testPouchDBConnection = async () => {
 export const manualPouchDBInit = async () => {
     try {
         await offlineStorage.initialize();
-        console.log('Offline storage manually initialized successfully');
+
         return true;
     } catch (error) {
         console.error('Manual offline storage initialization failed:', error);
@@ -667,7 +667,7 @@ export const syncProject = async (projectId) => {
     try {
         const success = await offlineStorage.updateSyncTimestamp(projectId);
         if (success) {
-            console.log(`Project ${projectId} synced successfully`);
+
         }
         return success;
     } catch (error) {

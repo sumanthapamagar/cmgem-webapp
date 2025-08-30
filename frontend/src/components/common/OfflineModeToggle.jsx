@@ -1,4 +1,4 @@
-import { useNetworkStatus } from '../../hooks';
+import { useNetworkStatus } from '../../contexts/NetworkStatusContext';
 import { Switch, SwitchField } from '../ui/switch';
 
 export const OfflineModeToggle = () => {
@@ -39,9 +39,9 @@ export const OfflineModeToggle = () => {
                 <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-700">Offline</span>
                     <Switch
-                        checked={isOnline}
+                        checked={!isManualOffline}
                         onChange={toggleManualOffline}
-                        color={isOnline ? 'green' : 'red'}
+                        color={!isManualOffline ? 'green' : 'red'}
                     />
                     <span className="text-sm text-gray-700">Online</span>
                 </div>

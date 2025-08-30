@@ -5,73 +5,35 @@ import { Checklist, ChecklistDocument } from './checklists.schema';
 import { CreateChecklistDto } from './dto/create-checklist.dto';
 import { ChecklistResponseDto } from './dto/checklist-response.dto';
 import type { UserInfo } from 'src/types/user.types';
+import { CacheService } from '../../common/cache.service';
 
 @Injectable()
 export class ChecklistsService {
   constructor(
     @InjectModel(Checklist.name, 'default') private checklistModel: Model<ChecklistDocument>,
+    private cacheService: CacheService,
   ) {}
 
-  async findAll(
-    equipmentType?: string, 
-    location?: string, 
-    category?: string, 
-    title?: string,
-    sortBy: string = 'order',
-    sortOrder: string = 'asc'
-  ): Promise<ChecklistResponseDto[]> {
-    const filter: any = { deleted_at: { $exists: false } };
-    
-    if (equipmentType) {
-      filter.equipment_type = { $regex: equipmentType, $options: 'i' };
-    }
-    
-    if (location) {
-      filter.location = { $regex: location, $options: 'i' };
+  async findAll(): Promise<ChecklistResponseDto[]> {
+    // Try to get from cache first
+    const cached = await this.cacheService.getChecklists();
+    if (cached) {
+      return cached;
     }
 
-    if (category) {
-      filter.category = { $regex: category, $options: 'i' };
-    }
-
-    if (title) {
-      filter.title = { $regex: title, $options: 'i' };
-    }
+    // If not in cache, fetch from database
+    const checklists = await this.checklistModel
+      .find({ deleted_at: { $exists: false } })
+      .sort({ order: 1 }) // Always sort by order ascending
+      .exec();
     
-    // Remove MongoDB sorting and execute query without sort
-    const checklists = await this.checklistModel.find(filter).exec();
+    // Map to response DTOs
+    const mappedChecklists = checklists.map(checklist => this.mapToResponseDto(checklist));
     
-    // Apply sorting in the service function after the query response
-    const sortedChecklists = checklists.sort((a, b) => {
-      let aValue = a[sortBy];
-      let bValue = b[sortBy];
-      
-      // Handle numeric sorting for fields like 'order'
-      if (typeof aValue === 'number' && typeof bValue === 'number') {
-        return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
-      }
-      
-      // Handle string sorting
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        aValue = aValue.toLowerCase();
-        bValue = bValue.toLowerCase();
-        if (sortOrder === 'asc') {
-          return aValue.localeCompare(bValue);
-        } else {
-          return bValue.localeCompare(aValue);
-        }
-      }
-      
-      // Handle date sorting
-      if (aValue instanceof Date && bValue instanceof Date) {
-        return sortOrder === 'asc' ? aValue.getTime() - bValue.getTime() : bValue.getTime() - aValue.getTime();
-      }
-      
-      // Default case - no sorting
-      return 0;
-    });
+    // Cache the result for 30 minutes (1800 seconds)
+    await this.cacheService.setChecklists(mappedChecklists, 1800);
     
-    return sortedChecklists.map(checklist => this.mapToResponseDto(checklist));
+    return mappedChecklists;
   }
 
   async findById(id: string): Promise<ChecklistResponseDto> {
@@ -95,6 +57,10 @@ export class ChecklistsService {
     });
     
     const savedChecklist = await newChecklist.save();
+    
+    // Invalidate cache when new checklist is created
+    await this.cacheService.invalidateChecklists();
+    
     return this.mapToResponseDto(savedChecklist);
   }
 
@@ -122,6 +88,9 @@ export class ChecklistsService {
       throw new NotFoundException(`Failed to update checklist with ID ${id}`);
     }
 
+    // Invalidate cache when checklist is updated
+    await this.cacheService.invalidateChecklists();
+
     return this.mapToResponseDto(updatedChecklist);
   }
 
@@ -139,24 +108,25 @@ export class ChecklistsService {
       deleted_by: user,
       deleted_at: new Date(),
     }).exec();
+
+    // Invalidate cache when checklist is deleted
+    await this.cacheService.invalidateChecklists();
   }
 
   async findByEquipmentType(equipmentType: string): Promise<ChecklistResponseDto[]> {
-    const checklists = await this.checklistModel.find({ 
-      equipment_type: equipmentType, 
-      deleted_at: { $exists: false } 
-    }).exec();
-    
-    return checklists.map(checklist => this.mapToResponseDto(checklist));
+    // Get all checklists from cache and filter by equipment type
+    const allChecklists = await this.findAll();
+    return allChecklists.filter(checklist => 
+      checklist.equipment_type.toLowerCase().includes(equipmentType.toLowerCase())
+    );
   }
 
   async findByLocation(location: string): Promise<ChecklistResponseDto[]> {
-    const checklists = await this.checklistModel.find({ 
-      location: location, 
-      deleted_at: { $exists: false } 
-    }).exec();
-    
-    return checklists.map(checklist => this.mapToResponseDto(checklist));
+    // Get all checklists from cache and filter by location
+    const allChecklists = await this.findAll();
+    return allChecklists.filter(checklist => 
+      checklist.location.toLowerCase().includes(location.toLowerCase())
+    );
   }
 
   private mapToResponseDto(checklist: ChecklistDocument): ChecklistResponseDto {

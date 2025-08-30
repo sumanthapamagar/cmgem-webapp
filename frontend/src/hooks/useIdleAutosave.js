@@ -48,7 +48,7 @@ export const useIdleAutosave = (
     const triggerAutosave = useCallback(async (values) => {
         if (!values || Object.keys(values).length === 0) return;
 
-        console.log('💾 Triggering autosave with values:', values);
+
         setIsAutoSaving(true);
 
         try {
@@ -81,7 +81,7 @@ export const useIdleAutosave = (
             return; // No change, don't do anything
         }
 
-        console.log('📝 Form values changed, setting up autosave timer');
+
         lastValuesHashRef.current = currentHash;
         lastValuesRef.current = formValues;
 
@@ -90,7 +90,7 @@ export const useIdleAutosave = (
 
         // Set new timeout to save after delay
         saveTimeoutRef.current = setTimeout(() => {
-            console.log('⏰ Autosave timer expired, saving now');
+
             triggerAutosave(formValues);
         }, idleDelay);
 

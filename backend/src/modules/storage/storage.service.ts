@@ -23,7 +23,7 @@ export class StorageService {
   ) {
     const accountName = this.configService.get<string>('AZURE_STORAGE_ACCOUNT_NAME');
     const accountKey = this.configService.get<string>('AZURE_STORAGE_ACCOUNT_KEY');
-    
+
     if (!accountName || !accountKey) {
       throw new Error('Azure Storage credentials not configured');
     }
@@ -49,18 +49,12 @@ export class StorageService {
     expiryHours: number = 24
   ): Promise<string> {
     try {
-      // Get container client
-      const containerClient = this.blobServiceClient.getContainerClient(containerName);
-      
-      // Ensure container exists
-      await this.ensureContainerExists(containerClient, containerName);
-      
       // Generate read-only SAS token for the entire container
       const sasToken = await this.generateReadOnlyContainerSasToken(
         containerName,
         expiryHours
       );
-      
+
       return sasToken;
     } catch (error) {
       throw new InternalServerErrorException(`Failed to generate container SAS token: ${error.message}`);
@@ -80,13 +74,10 @@ export class StorageService {
 
       // Get container client
       const containerClient = this.blobServiceClient.getContainerClient(containerName);
-      
-      // Ensure container exists
-      await this.ensureContainerExists(containerClient, containerName);
-      
+
       // Get blob client
       const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-      
+
       // Upload the file
       await blockBlobClient.uploadData(fileBuffer, {
         blobHTTPHeaders: {
@@ -111,13 +102,6 @@ export class StorageService {
     }
   }
 
-  private async ensureContainerExists(containerClient: any, containerName: string): Promise<void> {
-    try {
-      await containerClient.createIfNotExists();
-    } catch (error) {
-      throw new InternalServerErrorException(`Failed to create container ${containerName}: ${error.message}`);
-    }
-  }
 
   private async generateReadOnlyContainerSasToken(
     containerName: string,

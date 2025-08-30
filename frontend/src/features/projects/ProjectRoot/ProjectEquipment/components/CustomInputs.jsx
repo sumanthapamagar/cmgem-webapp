@@ -56,14 +56,11 @@ function BaseCustomInput({
                 idleTimeoutRef.current = setTimeout(async () => {
                     if (newValue !== lastSavedValue.current) {
                         try {
-                            console.log(`💾 Auto-saving ${fieldPath} (idle timeout):`, newValue);
-
                             const success = await saveField(fieldPath, newValue);
 
                             if (success) {
                                 lastSavedValue.current = newValue;
                                 setIsDirty(false);
-                                console.log(`✅ Successfully saved ${fieldPath} (idle timeout)`);
                             } else {
                                 console.error(`❌ Failed to save ${fieldPath} (idle timeout)`);
                             }
@@ -79,21 +76,18 @@ function BaseCustomInput({
     // Handle immediate save on blur (for immediate feedback)
     const handleBlur = useCallback(async (newValue) => {
         if (newValue !== lastSavedValue.current) {
-            try {
-                console.log(`💾 Auto-saving ${fieldPath} (blur):`, newValue);
+                            try {
+                    const success = await saveField(fieldPath, newValue);
 
-                const success = await saveField(fieldPath, newValue);
-
-                if (success) {
-                    lastSavedValue.current = newValue;
-                    setIsDirty(false);
-                    console.log(`✅ Successfully saved ${fieldPath} (blur)`);
-                } else {
-                    console.error(`❌ Failed to save ${fieldPath} (blur)`);
+                    if (success) {
+                        lastSavedValue.current = newValue;
+                        setIsDirty(false);
+                    } else {
+                        console.error(`❌ Failed to save ${fieldPath} (blur)`);
+                    }
+                } catch (error) {
+                    console.error(`❌ Error saving ${fieldPath} (blur):`, error);
                 }
-            } catch (error) {
-                console.error(`❌ Error saving ${fieldPath} (blur):`, error);
-            }
         }
     }, [fieldPath, saveField]);
 
@@ -260,14 +254,10 @@ export function CustomCheckbox({
     const handleChange = useCallback(async (e) => {
         const newValue = checked ? "" : value;
         try {
-            console.log(`💾 Auto-saving checkbox ${fieldPath}:`, newValue);
-            console.log(`💾 Current checked state:`, checked);
-            console.log(`💾 Checkbox value:`, value);
-
             const success = await saveField(fieldPath, newValue);
 
             if (success) {
-                console.log(`✅ Successfully saved checkbox ${fieldPath}`);
+                lastSavedValue.current = newValue;
             } else {
                 console.error(`❌ Failed to save checkbox ${fieldPath}`);
             }
@@ -353,21 +343,18 @@ export function CustomRadioGroup({
         setIsDirty(newValue !== lastSavedValue.current);
 
         if (newValue !== lastSavedValue.current) {
-            try {
-                console.log(`💾 Auto-saving ${fieldPath}:`, newValue);
+                    try {
+            const success = await saveField(fieldPath, newValue);
 
-                const success = await saveField(fieldPath, newValue);
-
-                if (success) {
-                    lastSavedValue.current = newValue;
-                    setIsDirty(false);
-                    console.log(`✅ Successfully saved ${fieldPath}`);
-                } else {
-                    console.error(`❌ Failed to save ${fieldPath}`);
-                }
-            } catch (error) {
-                console.error(`❌ Error saving ${fieldPath}:`, error);
+            if (success) {
+                lastSavedValue.current = newValue;
+                setIsDirty(false);
+            } else {
+                console.error(`❌ Failed to save ${fieldPath}`);
             }
+        } catch (error) {
+            console.error(`❌ Error saving ${fieldPath}:`, error);
+        }
         }
     }, [fieldPath, saveField]);
 
@@ -414,7 +401,7 @@ export function useFieldAutosave() {
         }
 
         try {
-            console.log(`🚀 Saving field ${fieldPath}:`, value);
+
 
             // Special handling for floors array updates
             if (fieldPath.startsWith('floors.')) {
@@ -423,7 +410,7 @@ export function useFieldAutosave() {
                 if (pathParts.length === 3) {
                     const [, floorId, fieldName] = pathParts;
 
-                    console.log(`🏢 Updating floor ${floorId}, field ${fieldName}:`, value);
+
 
                     // Find the floor in the equipment's floors array
                     if (!equipment.floors || !Array.isArray(equipment.floors)) {
@@ -446,7 +433,7 @@ export function useFieldAutosave() {
                         )
                     };
 
-                    console.log(`🔧 Updating floor field ${fieldPath}:`, updates);
+
 
                     const success = await updateEquipment({
                         projectId,
@@ -456,7 +443,7 @@ export function useFieldAutosave() {
                     });
 
                     if (success) {
-                        console.log(`✅ Successfully saved floor field ${fieldPath}`);
+
                     } else {
                         console.error(`❌ Failed to save floor field ${fieldPath}`);
                     }
@@ -471,9 +458,7 @@ export function useFieldAutosave() {
                 if (pathParts.length === 3) {
                     const [, checklistId, fieldName] = pathParts;
                     
-                    console.log(`📋 Updating checklist ${checklistId}, field ${fieldName}:`, value);
-                    console.log(`📋 Existing checklists:`, equipment.checklists);
-                    console.log(`📋 Existing checklist data for ${checklistId}:`, equipment.checklists?.[checklistId]);
+
                     
                     // Get existing checklists object
                     const existingChecklists = equipment.checklists || {};
@@ -489,8 +474,7 @@ export function useFieldAutosave() {
                         }
                     };
                     
-                    console.log(`🔧 Updating checklist field ${fieldPath}:`, updates);
-                    console.log(`🔧 Final checklist data for ${checklistId}:`, updates.checklists[checklistId]);
+
                     
                     const success = await updateEquipment({
                         projectId,
@@ -500,7 +484,7 @@ export function useFieldAutosave() {
                     });
                     
                     if (success) {
-                        console.log(`✅ Successfully saved checklist field ${fieldPath}`);
+
                     } else {
                         console.error(`❌ Failed to save checklist field ${fieldPath}`);
                     }
@@ -514,8 +498,7 @@ export function useFieldAutosave() {
             const updates = {};
             let current = updates;
 
-            console.log(`🔍 Building updates for path: ${fieldPath}`);
-            console.log(`🔍 Path parts:`, pathParts);
+            
 
             // Build the nested structure while preserving existing data
             for (let i = 0; i < pathParts.length - 1; i++) {
@@ -527,8 +510,7 @@ export function useFieldAutosave() {
                     existingValue = existingValue?.[pathParts[j]];
                 }
 
-                console.log(`🔍 Processing path part ${i}: ${pathPart}`);
-                console.log(`🔍 Existing value:`, existingValue);
+
 
                 // Create a new object that preserves existing data
                 current[pathPart] = existingValue && typeof existingValue === 'object' && !Array.isArray(existingValue)
@@ -536,11 +518,11 @@ export function useFieldAutosave() {
                     : {};
                 current = current[pathPart];
 
-                console.log(`🔍 Created/updated object for ${pathPart}:`, current[pathPart]);
+
             }
             current[pathParts[pathParts.length - 1]] = value;
 
-            console.log(`🔍 Final updates object:`, updates);
+
 
             // Safety check: ensure we're not accidentally overwriting the entire equipment
             if (Object.keys(updates).length === 0) {
@@ -549,7 +531,7 @@ export function useFieldAutosave() {
             }
 
             // Validate that we're only updating the specific field path
-            console.log(`🔍 Validating update structure...`);
+
             let validationPath = updates;
             for (let i = 0; i < pathParts.length - 1; i++) {
                 if (!validationPath[pathParts[i]]) {
@@ -563,7 +545,7 @@ export function useFieldAutosave() {
                 return false;
             }
 
-            console.log(`✅ Update structure validation passed`);
+
 
 
 
@@ -575,7 +557,7 @@ export function useFieldAutosave() {
             });
 
             if (success) {
-                console.log(`✅ Successfully saved equipment field ${fieldPath}`);
+
             } else {
                 console.error(`❌ Failed to save equipment field ${fieldPath}`);
             }

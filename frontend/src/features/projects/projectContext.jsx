@@ -9,7 +9,7 @@ import {
 import { offlineStorage, updateLastVisitedTimestamp } from '../../lib/offline-api';
 import { Button, Dialog, DialogBody, DialogActions, DialogTitle, ProjectLoadingState } from '../../components';
 import { projectKeys } from './projects';
-import { useNetworkStatus } from '../../hooks';
+import { useNetworkStatus } from '../../contexts/NetworkStatusContext';
 
 const ProjectContext = createContext();
 
@@ -65,8 +65,7 @@ const ProjectProvder = ({ children, projectId }) => {
     });
 
 
-    console.log('offlineProject', offlineProject);
-    console.log('project online', projectQuery.data);
+
 
     if (projectQuery.isLoading || offlineProjectQuery.isLoading && !projectQuery.data) {
         return <ProjectLoadingState />;

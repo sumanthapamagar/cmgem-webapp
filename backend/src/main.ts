@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import compression from 'compression';
 
 declare const module: any
 
@@ -9,6 +10,18 @@ async function bootstrap() {
     console.log('Starting NestJS application...')
     
     const app = await NestFactory.create(AppModule, { cors: true })
+    
+    // Add compression middleware
+    app.use(compression());
+    
+    // Add response caching headers
+    app.use((req, res, next) => {
+        if (req.path.includes('/projects') && req.method === 'GET') {
+            res.set('Cache-Control', 'public, max-age=300'); // 5 minutes
+        }
+        next();
+    });
+    
     app.useGlobalPipes(
         new ValidationPipe({
             whitelist: true,

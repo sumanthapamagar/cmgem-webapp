@@ -11,6 +11,10 @@ import { ChecklistsService } from '../checklists/checklists.service';
 import { ExcelService } from '../reports/excel.service';
 import type { UserInfo } from 'src/types/user.types';
 import { ReportsServiceFactory } from '../reports/reports.service';
+import { CacheService } from '../../common/cache.service';
+import { EquipmentsService } from '../equipments/equipments.service';
+import { AttachmentsService } from '../attachments/attachments.service';
+import { FloorsService } from '../floors/floors.service';
 
 export interface PaginationOptions {
   page?: number;
@@ -38,12 +42,13 @@ export interface PaginatedResult<T> {
 export class ProjectsService {
   constructor(
     @InjectModel(Project.name, 'default') private projectModel: Model<ProjectDocument>,
-    @InjectModel(Equipment.name, 'default') private equipmentModel: Model<EquipmentDocument>,
-    @InjectModel(Floor.name, 'default') private floorModel: Model<FloorDocument>,
-    @InjectModel(Attachment.name, 'default') private attachmentModel: Model<AttachmentDocument>,
     private checklistsService: ChecklistsService,
     private excelService: ExcelService,
-    private reportServiceFactory: ReportsServiceFactory
+    private reportServiceFactory: ReportsServiceFactory,
+    private cacheService: CacheService,
+    private equipmentsService: EquipmentsService,
+    private attachmentsService: AttachmentsService,
+    private floorsService: FloorsService
   ) { }
 
   async findAll(options: PaginationOptions = {}): Promise<PaginatedResult<Project>> {
@@ -88,17 +93,50 @@ export class ProjectsService {
       filter.account_id = new Types.ObjectId(accountId);
     }
 
-    // Get total count for pagination
-    const total = await this.projectModel.countDocuments(filter);
+    // Use aggregation with $facet for better performance and include account details
+    const pipeline = [
+      { $match: filter },
+      {
+        $addFields: {
+          accountIdObjectId: { $toObjectId: "$account_id" }
+        }
+      },
+      {
+        $lookup: {
+          from: "accounts",
+          localField: "accountIdObjectId",
+          foreignField: "_id",
+          as: "account"
+        }
+      },
+      {
+        $addFields: {
+          account: { 
+            $cond: {
+              if: { $gt: [{ $size: "$account" }, 0] },
+              then: { $arrayElemAt: ["$account", 0] },
+              else: null
+            }
+          }
+        }
+      },
+      {
+        $facet: {
+          data: [
+            { $sort: sort },
+            { $skip: skip },
+            { $limit: limit }
+          ],
+          count: [
+            { $count: "total" }
+          ]
+        }
+      }
+    ];
 
-    // Get paginated data
-    const data = await this.projectModel
-      .find(filter)
-      .sort(sort)
-      .skip(skip)
-      .limit(limit)
-      .exec();
-
+    const result = await this.projectModel.aggregate(pipeline).exec();
+    const data = result[0].data;
+    const total = result[0].count[0]?.total || 0;
     const totalPages = Math.ceil(total / limit);
 
     return {
@@ -122,20 +160,38 @@ export class ProjectsService {
   }
 
   async getAvailableCategories(): Promise<string[]> {
+    // Try to get from cache first
+    const cached = await this.cacheService.getCategories();
+    if (cached) {
+      return cached;
+    }
+
+    // If not in cache, fetch from database
     const categories = await this.projectModel
       .distinct('category', { deleted_at: { $exists: false } })
       .exec();
-    return categories.sort();
+    
+    const sortedCategories = categories.sort();
+    
+    // Cache the result for 1 hour
+    await this.cacheService.setCategories(sortedCategories, 3600);
+    
+    return sortedCategories;
   }
 
   async findById(id: string): Promise<ProjectDetailResponseDto> {
-    const result = await this.projectModel.aggregate([
+    // Try to get from cache first
+    const cached = await this.cacheService.getProject(id);
+    if (cached) {
+      return cached;
+    }
+
+    // Step 1: Find the project with account information
+    const project = await this.projectModel.aggregate([
       {
-        $match: { _id: new Types.ObjectId(id) }
-      },
-      {
-        $addFields: {
-          projectIdStr: { $toString: "$_id" }
+        $match: { 
+          _id: new Types.ObjectId(id),
+          deleted_at: { $exists: false }
         }
       },
       {
@@ -155,123 +211,56 @@ export class ProjectsService {
         $addFields: {
           account: { $arrayElemAt: ["$account", 0] }
         }
-      },
-      {
-        $lookup: {
-          from: "equipments",
-          localField: "projectIdStr",
-          foreignField: "project_id",
-          as: "equipments"
-        }
-      },
-      {
-        $addFields: {
-          equipments: {
-            $cond: {
-              if: { $gt: [{ $size: "$equipments" }, 0] },
-              then: {
-                $map: {
-                  input: "$equipments",
-                  as: "eq",
-                  in: {
-                    $mergeObjects: [
-                      "$$eq",
-                      {
-                        equipmentIdStr: { $toString: "$$eq._id" }
-                      }
-                    ]
-                  }
-                }
-              },
-              else: []
-            }
-          }
-        }
-      },
-      {
-        $unwind: {
-          path: "$equipments",
-          preserveNullAndEmptyArrays: true
-        }
-      },
-      {
-        $lookup: {
-          from: "floors",
-          localField: "equipments.equipmentIdStr",
-          foreignField: "equipment_id",
-          as: "equipments.floors"
-        }
-      },
-      {
-        $lookup: {
-          from: "attachments",
-          localField: "equipments.equipmentIdStr",
-          foreignField: "equipment_id",
-          as: "equipments.attachments"
-        }
-      },
-      {
-        $group: {
-          _id: "$_id",
-          name: { $first: "$name" },
-          category: { $first: "$category" },
-          account_id: { $first: "$account_id" },
-          account: { $first: "$account" },
-          address: { $first: "$address" },
-          inspection_date: { $first: "$inspection_date" },
-          is_test: { $first: "$is_test" },
-          created_by: { $first: "$created_by" },
-          updated_by: { $first: "$updated_by" },
-          deleted_by: { $first: "$deleted_by" },
-          created_at: { $first: "$created_at" },
-          updated_at: { $first: "$updated_at" },
-          deleted_at: { $first: "$deleted_at" },
-          equipments: { 
-            $push: {
-              $cond: {
-                if: { $and: [
-                  { $ne: ["$equipments", null] },
-                  { $ne: ["$equipments", {}] }
-                ]},
-                then: "$equipments",
-                else: "$$REMOVE"
-              }
-            }
-          }
-        }
       }
     ]).exec();
 
-    if (!result || result.length === 0) {
+    if (!project || project.length === 0) {
       throw new NotFoundException(`Project with ID ${id} not found`);
     }
 
-    // Filter out equipments that have deleted_at field with a value after the MongoDB query
-    const projectData = result[0];
+    const projectData = project[0];
 
-    projectData.checklists = await this.checklistsService.findAll();
+    // Step 2: Get equipments for this project
+    const equipments = await this.equipmentsService.findByProjectId(id);
 
-    // Ensure equipments is always an array and filter out deleted equipments
-    if (!projectData.equipments) {
-      projectData.equipments = [];
-    } else {
-      projectData.equipments = projectData.equipments.filter(equipment => {
-        // Keep equipment only if it has valid properties and deleted_at is undefined, null, or doesn't exist
-        return equipment && equipment._id && !equipment.deleted_at;
-      });
+    // Step 3: If equipments exist, get their IDs and fetch attachments and floors
+    let allAttachments: any[] = [];
+    let allFloors: any[] = [];
 
-      // Filter out deleted attachments for each equipment
-      projectData.equipments.forEach(equipment => {
-        if (equipment.attachments) {
-          equipment.attachments = equipment.attachments.filter(attachment => {
-            // Keep attachment only if deleted_at is undefined, null, or doesn't exist
-            return !attachment.deleted_at;
-          });
-        }
-      });
+    if (equipments && equipments.length > 0) {
+      const equipmentIds = equipments.map(eq => eq._id);
+
+      // Step 4: Fetch attachments and floors in parallel
+      const [attachments, floors] = await Promise.all([
+        this.attachmentsService.findMultipleByEquipmentIds(equipmentIds),
+        this.floorsService.findMultipleByEquipmentIds(equipmentIds)
+      ]);
+
+      allAttachments = attachments;
+      allFloors = floors;
     }
 
-    return this.mapToDetailResponseDto(projectData);
+    // Step 5: Get checklists
+    const checklists = await this.checklistsService.findAll();
+
+    // Step 6: Structure the data
+    const projectResult = {
+      ...projectData,
+      checklists,
+      equipments: equipments.map(equipment => ({
+        ...equipment,
+        floors: allFloors.filter(floor => floor.equipment_id === equipment._id),
+        attachments: allAttachments.filter(attachment => attachment.equipment_id === equipment._id)
+      })),
+      attachments: allAttachments // All project attachments
+    };
+
+    const mappedResult = this.mapToDetailResponseDto(projectResult);
+    
+    // Cache the result for 5 minutes
+    await this.cacheService.setProject(id, mappedResult, 300);
+    
+    return mappedResult;
   }
 
   async findByAccountId(accountId: string): Promise<Project[]> {
@@ -310,6 +299,10 @@ export class ProjectsService {
       throw new NotFoundException(`Project with ID ${id} not found`);
     }
 
+    // Invalidate cache
+    await this.cacheService.invalidateProject(id);
+    await this.cacheService.invalidateCategories();
+
     return updatedProject;
   }
 
@@ -322,6 +315,10 @@ export class ProjectsService {
     if (!result) {
       throw new NotFoundException(`Project with ID ${id} not found`);
     }
+
+    // Invalidate cache
+    await this.cacheService.invalidateProject(id);
+    await this.cacheService.invalidateCategories();
   }
 
   async hardDelete(id: string, user: UserInfo): Promise<void> {

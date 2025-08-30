@@ -1,8 +1,7 @@
 // Custom Hooks
 export * from './useMsalAccount';
 
-// Network Status Hooks
-export * from './useNetworkStatus';
+// Network Status Hooks - Now using NetworkStatusContext
 
 // Equipment Hooks (Consolidated)
 export * from './useEquipment';

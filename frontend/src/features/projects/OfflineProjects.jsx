@@ -30,6 +30,7 @@ export default function OfflineProjects() {
     const [showClearModal, setShowClearModal] = useState(false);
     const [syncingProjects, setSyncingProjects] = useState(new Set());
     const [isEnforcingLimit, setIsEnforcingLimit] = useState(false);
+    const [showOnlyPending, setShowOnlyPending] = useState(false);
     const navigate = useNavigate();
 
     // Load offline projects and storage info
@@ -37,21 +38,28 @@ export default function OfflineProjects() {
         loadOfflineData();
     }, []);
 
-    // Filter projects based on search term
+    // Filter projects based on search term and pending changes filter
     useEffect(() => {
-        if (!searchTerm.trim()) {
-            setFilteredProjects(offlineProjects);
-        } else {
-            const filtered = offlineProjects.filter(project =>
+        let filtered = offlineProjects;
+        
+        // Apply pending changes filter
+        if (showOnlyPending) {
+            filtered = filtered.filter(project => project.has_local_changes);
+        }
+        
+        // Apply search term filter
+        if (searchTerm.trim()) {
+            filtered = filtered.filter(project =>
                 project.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 project.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 project.account?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 project.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 project.state?.toLowerCase().includes(searchTerm.toLowerCase())
             );
-            setFilteredProjects(filtered);
         }
-    }, [searchTerm, offlineProjects]);
+        
+        setFilteredProjects(filtered);
+    }, [searchTerm, offlineProjects, showOnlyPending]);
 
     const loadOfflineData = async () => {
         try {
@@ -137,6 +145,11 @@ export default function OfflineProjects() {
                     <h1 className="text-4xl font-bold text-gray-900">Offline Projects</h1>
                     <p className="text-gray-600 mt-2">
                         Projects available for offline access
+                        {offlineProjects.filter(p => p.has_local_changes).length > 0 && (
+                            <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                {offlineProjects.filter(p => p.has_local_changes).length} with pending changes
+                            </span>
+                        )}
                     </p>
                 </div>
                 <Stack horizontal className="gap-3">
@@ -166,12 +179,6 @@ export default function OfflineProjects() {
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <Stack horizontal className="gap-6 items-center">
                         <div className="flex items-center gap-2">
-                            <i className="fa-solid fa-database text-blue-600"></i>
-                            <span className="font-medium text-blue-900">
-                                Storage Type: {storageInfo.storageType}
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-2">
                             <i className="fa-solid fa-folder text-blue-600"></i>
                             <span className="font-medium text-blue-900">
                                 Projects: {storageInfo.totalProjects}
@@ -186,17 +193,6 @@ export default function OfflineProjects() {
                     </Stack>
                 </div>
             )}
-
-            {/* Search */}
-            <div className="w-96">
-                <Input
-                    placeholder="Search offline projects..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-96"
-                />
-            </div>
-
             {/* Projects Table */}
             <div className="relative">
                 <Table className="border border-gray-300 rounded-xs" dense striped grid>
@@ -217,9 +213,6 @@ export default function OfflineProjects() {
                             <TableHeader className="font-semibold text-lg w-44">
                                 Last Visited
                             </TableHeader>
-                            <TableHeader className="font-semibold text-lg w-32">
-                                Actions
-                            </TableHeader>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -231,8 +224,16 @@ export default function OfflineProjects() {
                                     onClick={() => handleProjectClick(project._id)}
                                 >
                                     <TableCell>
-                                        <div className="font-semibold text-gray-900">
-                                            {project.name}
+                                        <div className="flex items-center gap-2">
+                                            <div className="font-semibold text-gray-900">
+                                                {project.name}
+                                            </div>
+                                            {project.has_local_changes && (
+                                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                                    <i className="fa-solid fa-circle text-orange-500 mr-1" style={{fontSize: '6px'}}></i>
+                                                    Pending Changes
+                                                </span>
+                                            )}
                                         </div>
                                         {project.city && project.state && (
                                             <div className="text-sm text-gray-600">
@@ -276,30 +277,6 @@ export default function OfflineProjects() {
                                             <span className="text-gray-400 text-sm">Never</span>
                                         )}
                                     </TableCell>
-                                    <TableCell>
-                                        <Button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleSyncProject(project._id);
-                                            }}
-                                            size="sm"
-                                            variant="outline"
-                                            disabled={syncingProjects.has(project._id)}
-                                            className="px-3"
-                                        >
-                                            {syncingProjects.has(project._id) ? (
-                                                <>
-                                                    <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full mr-2"></div>
-                                                    Syncing
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <i className="fa-solid fa-sync mr-2"></i>
-                                                    Sync
-                                                </>
-                                            )}
-                                        </Button>
-                                    </TableCell>
                                 </TableRow>
                             ))
                         ) : (
@@ -307,6 +284,16 @@ export default function OfflineProjects() {
                                 <TableCell colSpan={6} className="text-center py-12 text-gray-500">
                                     {searchTerm ? (
                                         'No offline projects found matching your search.'
+                                    ) : showOnlyPending ? (
+                                        <div className="text-center">
+                                            <i className="fa-solid fa-check-circle text-6xl text-green-300 mb-4"></i>
+                                            <div className="text-xl font-medium text-gray-400 mb-2">
+                                                No Pending Changes
+                                            </div>
+                                            <div className="text-gray-500">
+                                                All offline projects are up to date with the server.
+                                            </div>
+                                        </div>
                                     ) : (
                                         <div className="text-center">
                                             <i className="fa-solid fa-download text-6xl text-gray-300 mb-4"></i>
@@ -328,7 +315,11 @@ export default function OfflineProjects() {
             {/* Summary */}
             {filteredProjects.length > 0 && (
                 <div className="text-sm text-gray-600 text-center">
-                    Showing {filteredProjects.length} of {offlineProjects.length} offline projects
+                    {showOnlyPending ? (
+                        <>Showing {filteredProjects.length} projects with pending changes</>
+                    ) : (
+                        <>Showing {filteredProjects.length} of {offlineProjects.length} offline projects</>
+                    )}
                 </div>
             )}
 

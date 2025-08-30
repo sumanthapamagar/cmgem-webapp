@@ -68,11 +68,11 @@ export const useFormSubmission = (
                 return JSON.stringify(newVal) !== JSON.stringify(oldVal);
             });
             
-            console.log('📝 Form change detected:', { hasChanges, hasNewChanges, newValues });
+
             
             if (hasChanges && hasNewChanges) {
                 lastSavedValues.current = { ...newValues };
-                console.log('🚀 Calling updateEquipment with:', newValues);
+
                 updateEquipment({ projectId, equipmentId, updates: newValues });
             }
         }

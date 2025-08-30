@@ -74,3 +74,10 @@ ProjectSchema.index({ inspection_date: 1 });
 ProjectSchema.index({ created_at: 1 });
 ProjectSchema.index({ updated_at: 1 });
 ProjectSchema.index({ deleted_at: 1 });
+
+// Compound indexes for better performance
+ProjectSchema.index({ _id: 1, deleted_at: 1 });
+ProjectSchema.index({ account_id: 1, deleted_at: 1 });
+ProjectSchema.index({ category: 1, deleted_at: 1 });
+ProjectSchema.index({ created_at: -1, deleted_at: 1 });
+ProjectSchema.index({ name: 1, deleted_at: 1 });

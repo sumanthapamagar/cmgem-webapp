@@ -89,3 +89,7 @@ FloorSchema.index({ designation: 1 });
 FloorSchema.index({ created_at: 1 });
 FloorSchema.index({ updated_at: 1 });
 FloorSchema.index({ deleted_at: 1 });
+
+// Compound indexes for better performance
+FloorSchema.index({ equipment_id: 1, deleted_at: 1 });
+FloorSchema.index({ _id: 1, deleted_at: 1 });

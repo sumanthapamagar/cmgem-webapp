@@ -7,7 +7,7 @@ import {
 import {  useLocation, useParams } from 'react-router-dom'
 import clsx from 'clsx'
 import { useMsalAccount } from '../../hooks/useMsalAccount'
-import { useOnline } from '../../hooks'
+import { useNetworkStatus } from '../../contexts/NetworkStatusContext'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { sendPatchRequest } from '../../lib/api'
 import { Stack, Button } from '../../components'
@@ -16,7 +16,7 @@ import { LoadingState, Online, Offline, Link, OfflineModeToggle } from '../../co
 
 export function Header() {
     const queryClient = useQueryClient();
-	const { isOnline } = useOnline()
+	const { isOnline } = useNetworkStatus()
 	const location = useLocation()
 	const user = useMsalAccount()
 
@@ -111,7 +111,6 @@ export function Header() {
 					</div>
 				</div>
 				<div className='flex items-center gap-4'>
-					<OfflineModeToggle />
 					
 					<Online>
 						<div className='ml-4 block'>
@@ -132,6 +131,8 @@ export function Header() {
 							</div>
 						</div>
 					</Online>
+					<OfflineModeToggle />
+
 				</div>
 			</div>
 			<Offline>

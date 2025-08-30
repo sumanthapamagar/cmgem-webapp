@@ -68,6 +68,11 @@ AttachmentSchema.index({ equipment_id: 1 });
 AttachmentSchema.index({ created_at: -1 });
 AttachmentSchema.index({ group_id: 1 });
 
+// Compound indexes for better performance
+AttachmentSchema.index({ equipment_id: 1, deleted_at: 1 });
+AttachmentSchema.index({ _id: 1, deleted_at: 1 });
+AttachmentSchema.index({ group_id: 1, deleted_at: 1 });
+
 // Pre-save hook to set updated_at
 AttachmentSchema.pre('save', function(next) {
   if (this.isModified()) {

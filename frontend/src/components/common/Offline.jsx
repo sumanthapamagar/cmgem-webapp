@@ -1,7 +1,7 @@
-import { useOnline } from "../../hooks"
+import { useNetworkStatus } from "../../contexts/NetworkStatusContext"
 
 export function Offline({children}){
-    const {isOffline} = useOnline()
-    if (isOffline ) return children
+    const {isOffline} = useNetworkStatus()
+    if (isOffline) return children
     return null
 }

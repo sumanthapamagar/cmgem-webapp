@@ -30,7 +30,7 @@ class SyncService {
                 return { success: true, message: 'No local changes to sync' };
             }
 
-            console.log(`Starting sync for project ${projectId}`);
+
 
             // Sync project data first
             if (project.last_modified !== project.last_synced) {
@@ -40,7 +40,7 @@ class SyncService {
                         description: project.description,
                         // Add other project fields as needed
                     });
-                    console.log(`Project ${projectId} data synced`);
+
                 } catch (error) {
                     console.error(`Failed to sync project ${projectId} data:`, error);
                     return { success: false, error: `Failed to sync project data: ${error.message}` };
@@ -63,7 +63,7 @@ class SyncService {
 
             await offlineStorage.saveProject(syncedProject, true);
             
-            console.log(`Project ${projectId} synced successfully`);
+
             return { 
                 success: true, 
                 message: 'Project synced successfully',
@@ -102,7 +102,7 @@ class SyncService {
                             equipment._id = serverEquipment._id;
                             equipment.last_synced = new Date().toISOString();
                             
-                            console.log(`Equipment ${equipment._id} created on server`);
+
                         } catch (error) {
                             console.error(`Failed to create equipment ${equipment._id}:`, error);
                             return { success: false, error: `Failed to create equipment: ${error.message}` };
@@ -117,7 +117,7 @@ class SyncService {
                             });
                             
                             equipment.last_synced = new Date().toISOString();
-                            console.log(`Equipment ${equipment._id} updated on server`);
+
                         } catch (error) {
                             console.error(`Failed to update equipment ${equipment._id}:`, error);
                             return { success: false, error: `Failed to update equipment: ${error.message}` };
@@ -166,7 +166,7 @@ class SyncService {
                             floor._id = serverFloor._id;
                             floor.last_synced = new Date().toISOString();
                             
-                            console.log(`Floor ${floor._id} created on server`);
+
                         } catch (error) {
                             console.error(`Failed to create floor ${floor._id}:`, error);
                             return { success: false, error: `Failed to create floor: ${error.message}` };
@@ -181,7 +181,7 @@ class SyncService {
                             });
                             
                             floor.last_synced = new Date().toISOString();
-                            console.log(`Floor ${floor._id} updated on server`);
+
                         } catch (error) {
                             console.error(`Failed to update floor ${floor._id}:`, error);
                             return { success: false, error: `Failed to update floor: ${error.message}` };
@@ -209,7 +209,7 @@ class SyncService {
                 return { success: true, message: 'No projects with local changes to sync' };
             }
 
-            console.log(`Syncing ${projectsWithChanges.length} projects with local changes`);
+
 
             const results = [];
             let successCount = 0;

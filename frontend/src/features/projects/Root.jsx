@@ -31,12 +31,6 @@ export default function Root() {
         keepPreviousData: true, // Keep previous data while loading new page
     });
 
-    // Fetch available categories
-    const categoriesQuery = useQuery({
-        queryKey: projectKeys.categories(),
-        queryFn: getProjectCategories,
-    });
-
     // Update pagination when params change
     const updatePagination = useCallback((updates) => {
         setPaginationParams(prev => ({
@@ -49,15 +43,6 @@ export default function Root() {
     // Handle page change
     const handlePageChange = (page) => {
         setPaginationParams(prev => ({ ...prev, page }));
-    };
-
-    // Handle page size change
-    const handlePageSizeChange = (size) => {
-        setPaginationParams(prev => ({ 
-            ...prev, 
-            limit: Number(size),
-            page: 1 
-        }));
     };
 
     // Handle search input change
