@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, Req, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, UseInterceptors, Query } from '@nestjs/common';
 import { ChecklistsService } from './checklists.service';
 import { CreateChecklistDto } from './dto/create-checklist.dto';
 import { ChecklistResponseDto } from './dto/checklist-response.dto';
@@ -12,14 +12,35 @@ export class ChecklistsController {
   constructor(private readonly checklistsService: ChecklistsService) {}
 
   @Get()
-  async findAll(): Promise<ChecklistResponseDto[]> {
+  async findAll(
+    @Query('equipment_type') equipmentType?: string,
+    @Query('location') location?: string
+  ): Promise<ChecklistResponseDto[]> {
+    if (equipmentType && location) {
+      return this.checklistsService.findByEquipmentTypeAndLocation(equipmentType, location);
+    } else if (equipmentType) {
+      return this.checklistsService.findByEquipmentType(equipmentType);
+    } else if (location) {
+      return this.checklistsService.findByLocation(location);
+    }
     return this.checklistsService.findAll();
   }
 
+  @Get('with-version')
+  async findAllWithVersion(): Promise<{ checklists: ChecklistResponseDto[], version: string }> {
+    try {
+      return this.checklistsService.findAllWithVersion();
+    } catch (error) {
+      console.error('Error fetching checklists with version:', error);
+      throw error;
+    }
+  }
+
   @Get(':id')
-  async findById(@Param('id') id: string): Promise<ChecklistResponseDto> {
+  async findOne(@Param('id') id: string): Promise<ChecklistResponseDto> {
     return this.checklistsService.findById(id);
   }
+
 
   @Post()
   async create(
@@ -27,6 +48,14 @@ export class ChecklistsController {
     @GetUserInfo() user: UserInfo
   ): Promise<ChecklistResponseDto> {
     return this.checklistsService.create(createChecklistDto, user);
+  }
+
+  @Patch()
+  async updateMany(
+    @Body() updateChecklistsDto: Array<{ id: string; order: number }>,
+    @GetUserInfo() user: UserInfo
+  ): Promise<void> {
+    return this.checklistsService.updateMany(updateChecklistsDto, user);
   }
 
   @Patch(':id')
@@ -44,15 +73,5 @@ export class ChecklistsController {
     @GetUserInfo() user: UserInfo
   ): Promise<void> {
     return this.checklistsService.delete(id, user);
-  }
-
-  @Get('equipment-type/:equipmentType')
-  async findByEquipmentType(@Param('equipmentType') equipmentType: string): Promise<ChecklistResponseDto[]> {
-    return this.checklistsService.findByEquipmentType(equipmentType);
-  }
-
-  @Get('location/:location')
-  async findByLocation(@Param('location') location: string): Promise<ChecklistResponseDto[]> {
-    return this.checklistsService.findByLocation(location);
   }
 }

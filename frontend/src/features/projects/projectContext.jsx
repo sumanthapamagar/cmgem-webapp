@@ -10,6 +10,7 @@ import { offlineStorage, updateLastVisitedTimestamp } from '../../lib/offline-ap
 import { Button, Dialog, DialogBody, DialogActions, DialogTitle, ProjectLoadingState } from '../../components';
 import { projectKeys } from './projects';
 import { useNetworkStatus } from '../../contexts/NetworkStatusContext';
+import { useChecklists } from '../../hooks/useChecklists';
 
 const ProjectContext = createContext();
 
@@ -18,6 +19,9 @@ const ProjectProvder = ({ children, projectId }) => {
     const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' });
 
     const { isOnline } = useNetworkStatus();
+
+    // Get checklists using the new offline-first approach
+    const { data: checklistsData, isLoading: isLoadingChecklists } = useChecklists();
 
     const { data: offlineProject, ...offlineProjectQuery } = useQuery({
         queryKey: ['offline-project', projectId],
@@ -74,10 +78,14 @@ const ProjectProvder = ({ children, projectId }) => {
 
     if (!offlineProject && projectQuery.isError) return <div>Error loading project</div>;
 
+    // Get checklists from the new service
+    const checklists = checklistsData?.checklists || [];
+
     return (
         <ProjectContext.Provider
             value={{
-                checklists: offlineProject?.checklists ?? [],
+                checklists,
+                isLoadingChecklists,
                 offlineProjectQuery,
                 projectQuery,
                 offlineProject: hasLocalChanges ? offlineProject : (projectQuery.data || offlineProject),

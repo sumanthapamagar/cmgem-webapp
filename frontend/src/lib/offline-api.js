@@ -561,6 +561,120 @@ class OfflineStorage {
             request.onerror = () => reject(request.error);
         });
     }
+
+    // ===== CHECKLIST STORAGE METHODS =====
+    
+    async saveChecklists(checklists, version = null) {
+        const db = await this.initialize();
+        
+        if (db === 'localStorage') {
+            return this.saveChecklistsToLocalStorage(checklists, version);
+        } else {
+            return this.saveChecklistsToIndexedDB(db, checklists, version);
+        }
+    }
+
+    async saveChecklistsToLocalStorage(checklists, version) {
+        try {
+            const checklistData = {
+                checklists,
+                version: version || new Date().toISOString(),
+                last_updated: new Date().toISOString()
+            };
+            
+            localStorage.setItem('checklists_cache', JSON.stringify(checklistData));
+            return true;
+        } catch (error) {
+            console.error('Error saving checklists to localStorage:', error);
+            return false;
+        }
+    }
+
+    async saveChecklistsToIndexedDB(db, checklists, version) {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction([this.storeName], 'readwrite');
+            const store = transaction.objectStore(this.storeName);
+            
+            const checklistData = {
+                _id: 'checklists_cache',
+                checklists,
+                version: version || new Date().toISOString(),
+                last_updated: new Date().toISOString()
+            };
+            
+            const request = store.put(checklistData);
+            request.onsuccess = () => resolve(true);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async getChecklists() {
+        const db = await this.initialize();
+        
+        if (db === 'localStorage') {
+            return this.getChecklistsFromLocalStorage();
+        } else {
+            return this.getChecklistsFromIndexedDB(db);
+        }
+    }
+
+    async getChecklistsFromLocalStorage() {
+        try {
+            const checklistData = localStorage.getItem('checklists_cache');
+            if (checklistData) {
+                const parsed = JSON.parse(checklistData);
+                return {
+                    checklists: parsed.checklists || [],
+                    version: parsed.version,
+                    last_updated: parsed.last_updated
+                };
+            }
+            return { checklists: [], version: null, last_updated: null };
+        } catch (error) {
+            console.error('Error getting checklists from localStorage:', error);
+            return { checklists: [], version: null, last_updated: null };
+        }
+    }
+
+    async getChecklistsFromIndexedDB(db) {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction([this.storeName], 'readonly');
+            const store = transaction.objectStore(this.storeName);
+            const request = store.get('checklists_cache');
+            
+            request.onsuccess = () => {
+                if (request.result) {
+                    resolve({
+                        checklists: request.result.checklists || [],
+                        version: request.result.version,
+                        last_updated: request.result.last_updated
+                    });
+                } else {
+                    resolve({ checklists: [], version: null, last_updated: null });
+                }
+            };
+            
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async clearChecklists() {
+        const db = await this.initialize();
+        
+        if (db === 'localStorage') {
+            localStorage.removeItem('checklists_cache');
+            return true;
+        } else {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([this.storeName], 'readwrite');
+                const store = transaction.objectStore(this.storeName);
+                const request = store.delete('checklists_cache');
+                
+                request.onsuccess = () => resolve(true);
+                request.onerror = () => reject(request.error);
+            });
+        }
+    }
 }
 
 // Initialize offline storage instance
@@ -696,4 +810,21 @@ export const getProjectSyncStatus = async (projectId) => {
         console.error('Error getting project sync status:', error);
         return null;
     }
+};
+
+// ===== CHECKLIST HELPER FUNCTIONS =====
+
+// Helper function to save checklists to offline storage
+export const saveChecklistsToOfflineStorage = async (checklists, version = null) => {
+    return await offlineStorage.saveChecklists(checklists, version);
+};
+
+// Helper function to get checklists from offline storage
+export const getChecklistsFromOfflineStorage = async () => {
+    return await offlineStorage.getChecklists();
+};
+
+// Helper function to clear checklists from offline storage
+export const clearChecklistsFromOfflineStorage = async () => {
+    return await offlineStorage.clearChecklists();
 };

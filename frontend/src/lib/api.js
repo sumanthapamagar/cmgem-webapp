@@ -293,6 +293,15 @@ const getChecklists = async (params) => {
 }
 
 /**
+ * Get checklists with version information for offline sync
+ * @returns {Promise<Object>} Checklists data with version
+ */
+const getChecklistsWithVersion = async () => {
+	const response = await server.get("checklists/with-version");
+	return response.data;
+}
+
+/**
  * Get a single checklist by ID
  * @param {string} checklistId - Checklist ID
  * @returns {Promise<Object>} Checklist data
@@ -332,11 +341,13 @@ const updateChecklist = async (checklistId, data) => {
 
 /**
  * Update multiple checklists
- * @param {Object} data - Data for multiple checklists
+ * @param {Array} data - Data for multiple checklists
  * @returns {Promise<Object>} Update confirmation
  */
 const updateChecklists = async (data) => {
-	validateRequiredObject(data, 'Checklists data');
+	if (!data || !Array.isArray(data)) {
+		throw new Error('Checklists data is required and must be an array');
+	}
 	
 	const response = await server.patch('checklists', data);
 	return response.data;
@@ -658,6 +669,7 @@ export {
 	updateAccount as saveAccount, // Alias for backward compatibility
 	deleteAccount,
 	getChecklists,
+	getChecklistsWithVersion,
 	getChecklist,
 	saveProjectEquipments,
 	createChecklist,

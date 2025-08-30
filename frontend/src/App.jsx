@@ -14,6 +14,7 @@ import { InteractionType } from '@azure/msal-browser';
 import { loginRequest } from './lib/authConfig';
 import ChecklistHome from './features/checklists/Checklists';
 import { NetworkStatusProvider, useNetworkStatus } from './contexts/NetworkStatusContext';
+import { useInitializeChecklists } from './hooks/useChecklists';
 
 // Create a new instance of QueryClient
 const queryClient = new QueryClient({
@@ -40,6 +41,9 @@ function AppContent({ msalInstance }) {
     const authRequest = useMemo(() => ({
         ...loginRequest
     }), []);
+
+    // Initialize checklist sync service when online
+    useInitializeChecklists();
 
     return (
         <div key={`app-${isOffline ? 'offline' : 'online'}`}>

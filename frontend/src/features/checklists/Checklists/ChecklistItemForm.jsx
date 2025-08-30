@@ -1,118 +1,144 @@
-import { useEffect, useState } from 'react';
-import { Select, Textarea  , Field, Label, Stack, Button, Input, ChecklistLoadingState } from '../../../components';
+import { Select, Textarea, Stack, Button, Input, ChecklistLoadingState } from '../../../components';
 import locationCategories from '../../../constants/locationCategories';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { createChecklist, getChecklist, patchChecklist } from '../../../lib';
 import { useParams } from 'react-router-dom';
+import { useChecklistForm } from './useChecklistForm';
+import FormField from './FormField';
 
 function ChecklistItemForm({ id = null, onCancel, onSaveSuccess }) {
     const { equipmentType, location } = useParams();
-    const [category, setCategory] = useState([]);
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-
+    
     const {
-        data: checklistData,
-        isLoading
-    } = useQuery({
-        queryKey: ['checklist', id],
-        queryFn: () =>
-            getChecklist(id).then((data) => {
-                return data;
-            }),
-        enabled: !!id
-    });
+        control,
+        handleSubmit,
+        onSubmit,
+        errors,
+        isSubmitting,
+        isValid,
+        isLoading,
+        queryError,
+        mutationError
+    } = useChecklistForm(id, onSaveSuccess);
 
-    useEffect(() => {
-        if (checklistData?.checklist) {
-            setTitle(checklistData.checklist.title);
-            setDescription(checklistData.checklist.description);
-            setCategory((checklistData.checklist.category || '').split('; '));
-        }
-    }, [checklistData?.checklist]);
-
-    const { mutate: mutateCreateChecklist } = useMutation({
-        mutationFn: (data) =>
-            id ? patchChecklist(id, data) : createChecklist(data),
-        onSuccess: (res) => {
-            setCategory([]);
-            setTitle('');
-            setDescription('');
-            onSaveSuccess(res.checklist);
-        }
-    });
-
-    const onSaveChecklist = () => {
-        if (title) {
-            mutateCreateChecklist({
-                equipment_type: equipmentType,
-                location,
-                title,
-                description,
-                category: category.join('; ')
-            });
-        }
+    const handleFormSubmit = (data) => {
+        onSubmit({
+            ...data,
+            equipment_type: equipmentType,
+            location
+        });
     };
     if (isLoading)
         return (
             <ChecklistLoadingState />
         );
     return (
-        <Stack className='w-full m-4 md:w-[600px] gap-4'>
-            <div className="flex items-start">
-                <Field className='w-full flex gap-4'>
-                    <Label className="w-32 pt-2 text-sm font-medium">Title</Label>
-                    <Input
-                        value={title}
-                        onChange={(ev) => setTitle(ev.target.value)}
-                        placeholder="Enter checklist item title"
-                        className="w-full"
-                    />
-                </Field>
-            </div>
-
-            <div className="flex items-start">
-                <Field className='w-full flex gap-4'>
-                    <Label className="w-32 text-sm pt-2 font-medium">Description</Label>
-                    <Textarea
-                        rows={3}
-                        value={description}
-                        onChange={(ev) => setDescription(ev.target.value)}
-                        placeholder="Enter checklist item description"
-                        className="w-full"
-                    />
-                </Field>
-            </div>
-
-            <div className="flex items-start">
-                <Field className='w-full flex gap-4'>
-                    <Label className="w-32 text-sm font-medium pt-2">Item Category</Label>
-                    <Select
-                        placeholder="Category"
-                        value={category}
-                        onChange={(value) => setCategory(value)}
-                        multiple
-                    >
-                        {
-                            locationCategories.map((category) => (
-                                <option key={category.key} value={category.text}>
-                                    {category.text}
-                                </option>
-                            ))
+        <form onSubmit={handleSubmit(handleFormSubmit)}>
+            <Stack className='w-full m-4 gap-4'>
+                {/* Error Messages */}
+                {(queryError || mutationError) && (
+                    <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                        <p className="text-red-800 text-sm">
+                            {queryError?.message || mutationError?.message || 'An error occurred'}
+                        </p>
+                    </div>
+                )}
+                <FormField
+                    name="title"
+                    control={control}
+                    label="Title"
+                    required
+                    rules={{ 
+                        required: 'Title is required',
+                        minLength: {
+                            value: 3,
+                            message: 'Title must be at least 3 characters'
                         }
-                    </Select>
-                </Field>
-            </div>
+                    }}
+                    error={errors.title?.message}
+                >
+                    {(field) => (
+                        <Input
+                            {...field}
+                            placeholder="Enter checklist item title"
+                            className="w-full"
+                        />
+                    )}
+                </FormField>
 
-            <Stack horizontal className="justify-end gap-4 mt-8">
-                <Button onClick={onSaveChecklist}>
-                    {!id ? 'Create' : 'Save'}
-                </Button>
-                <Button onClick={onCancel} variant="outline">
-                    Cancel
-                </Button>
+                <FormField
+                    name="description"
+                    control={control}
+                    label="Description"
+                >
+                    {(field) => (
+                        <Textarea
+                            {...field}
+                            rows={3}
+                            placeholder="Enter checklist item description"
+                            className="w-full"
+                        />
+                    )}
+                </FormField>
+
+                <FormField
+                    name="category"
+                    control={control}
+                    label="Item Category"
+                    required
+                    rules={{
+                        required: 'At least one category is required',
+                        validate: (value) => 
+                            Array.isArray(value) && value.length > 0 
+                                ? true 
+                                : 'Please select at least one category'
+                    }}
+                    error={errors.category?.message}
+                >
+                    {(field) => (
+                        <div className="w-full">
+                            <select
+                                className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
+                                    errors.category 
+                                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' 
+                                        : 'border-zinc-950/10 focus:border-blue-500 focus:ring-blue-500/20'
+                                }`}
+                                value={field.value}
+                                onChange={(e) => {
+                                    const selectedValues = Array.from(e.target.selectedOptions, option => option.value);
+                                    field.onChange(selectedValues);
+                                }}
+                                multiple
+                                size={4}
+                            >
+                                {locationCategories.map((category) => (
+                                    <option key={category.key} value={category.text}>
+                                        {category.text}
+                                    </option>
+                                ))}
+                            </select>
+                            <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple options</p>
+                        </div>
+                    )}
+                </FormField>
+
+                <Stack horizontal className="justify-end gap-4 mt-8">
+                    <Button 
+                        type="submit" 
+                        disabled={isSubmitting || !isValid}
+                        loading={isSubmitting ? true : undefined}
+                    >
+                        {!id ? 'Create' : 'Save'}
+                    </Button>
+                    <Button 
+                        type="button" 
+                        onClick={onCancel} 
+                        variant="outline"
+                        disabled={isSubmitting}
+                    >
+                        Cancel
+                    </Button>
+                </Stack>
             </Stack>
-        </Stack>
+        </form>
     );
 }
 

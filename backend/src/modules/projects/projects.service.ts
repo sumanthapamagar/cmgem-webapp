@@ -240,13 +240,9 @@ export class ProjectsService {
       allFloors = floors;
     }
 
-    // Step 5: Get checklists
-    const checklists = await this.checklistsService.findAll();
-
-    // Step 6: Structure the data
+    // Step 5: Structure the data (checklists are now handled separately)
     const projectResult = {
       ...projectData,
-      checklists,
       equipments: equipments.map(equipment => ({
         ...equipment,
         floors: allFloors.filter(floor => floor.equipment_id === equipment._id),
@@ -332,21 +328,22 @@ export class ProjectsService {
   async generateInspectionDocument(projectId: string): Promise<Buffer> {
     // Get project details with all related data
     const project = await this.findById(projectId);
+    const checklists = await this.checklistsService.findAll();
 
     // Generate Excel document
-    return this.excelService.generateInspectionDocument(project);
+    return this.excelService.generateInspectionDocument(project, checklists);
   }
 
   async generateReport(projectId: string, user: UserInfo): Promise<Buffer> {
     const project = await this.findById(projectId);
-    const reportService = this.reportServiceFactory.create(project, user);
+    const checklists = await this.checklistsService.findAll();
+    const reportService = this.reportServiceFactory.create(project, checklists, user);
     return reportService.generateReport();
   }
 
   private mapToDetailResponseDto(projectData: any): ProjectDetailResponseDto {
     return {
       _id: projectData._id,
-      checklists: projectData.checklists,
       name: projectData.name,
       category: projectData.category,
       account_id: projectData.account_id,

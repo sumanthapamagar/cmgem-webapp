@@ -1,7 +1,5 @@
-import React from 'react';
 import { useNetworkStatus } from '../../contexts/NetworkStatusContext';
 import { Button } from '../ui/button';
-import { AlertTriangle, Wifi, WifiOff } from 'lucide-react';
 
 export function ErrorComponent({ error }) {
     const { setManualOffline, browserOnline } = useNetworkStatus();
@@ -74,9 +72,9 @@ export function ErrorComponent({ error }) {
             <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
                 <div className="mb-4">
                     {isNetworkError ? (
-                        <WifiOff className="h-16 w-16 text-red-500 mx-auto mb-4" />
+                        <i className="fas fa-wifi text-red-500 text-6xl mx-auto mb-4 block"></i>
                     ) : (
-                        <AlertTriangle className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
+                        <i className="fas fa-exclamation-triangle text-yellow-500 text-6xl mx-auto mb-4 block"></i>
                     )}
                 </div>
                 
@@ -112,7 +110,7 @@ export function ErrorComponent({ error }) {
                             onClick={handleUseOfflineMode}
                             className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                         >
-                            <WifiOff className="h-4 w-4 mr-2" />
+                            <i className="fas fa-wifi mr-2"></i>
                             Use App Offline
                         </Button>
                     )}
@@ -122,7 +120,7 @@ export function ErrorComponent({ error }) {
                         variant="outline"
                         className="w-full"
                     >
-                        <Wifi className="h-4 w-4 mr-2" />
+                        <i className="fas fa-sync-alt mr-2"></i>
                         Try Again
                     </Button>
                 </div>

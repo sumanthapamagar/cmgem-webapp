@@ -12,6 +12,9 @@ export * from './useEquipmentAttachments';
 // Mutation Hooks (Consolidated)
 export * from './useCommonMutation';
 
+// Checklist Hooks
+export * from './useChecklists';
+
 // Legacy Hooks (Deprecated - will be removed)
 export * from './useOfflineEquipmentUpdate';
 export * from './useFormSubmission';

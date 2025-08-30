@@ -70,7 +70,17 @@ export class CacheService {
     await this.set('checklists:all', checklists, ttl);
   }
 
+  async getChecklistsVersion(): Promise<string> {
+    const result = await this.get<string>('checklists:version');
+    return result || '';
+  }
+
+  async setChecklistsVersion(version: string, ttl: number = 1800): Promise<void> {
+    await this.set('checklists:version', version, ttl);
+  }
+
   async invalidateChecklists(): Promise<void> {
     await this.del('checklists:all');
+    await this.del('checklists:version');
   }
 }

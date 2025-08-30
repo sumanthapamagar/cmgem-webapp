@@ -1,6 +1,5 @@
 import { Types } from 'mongoose';
 import { AttachmentResponseDto } from 'src/modules/attachments/dto';
-import { ChecklistResponseDto } from 'src/modules/checklists/dto/checklist-response.dto';
 import { EquipmentResponseDto } from 'src/modules/equipments/dto';
 import { FloorResponseDto } from 'src/modules/floors/dto';
 import type { UserInfo } from 'src/types/user.types';
@@ -13,7 +12,6 @@ export interface EquipmentWithFloors extends EquipmentResponseDto {
 
 export interface ProjectDetailResponseDto {
   _id: Types.ObjectId;
-  checklists: Array<ChecklistResponseDto>;
   name: string;
   category: string;
   account_id: Types.ObjectId;

@@ -6,12 +6,14 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { StorageService } from '../storage/storage.service';
 import { AttachmentResponseDto } from '../attachments/dto';
+import { ChecklistResponseDto } from '../checklists/dto/checklist-response.dto';
 
 export class ReportsService {
   private readonly allFloorDesignations: Set<string>;
 
   constructor(
     private readonly project: ProjectDetailResponseDto,
+    private readonly checklists: ChecklistResponseDto[],
     private readonly currentUser: UserInfo,
     private readonly storageService: StorageService
   ) {
@@ -260,7 +262,7 @@ export class ReportsService {
       if (!equipment.category || !equipment.checklists) return;
       const equipmentItems: FileChild[] = [];
 
-      this.project.checklists.forEach(checklist => {
+      this.checklists.forEach(checklist => {
         if (!categoryArray.includes(checklist.category))
           return
 
@@ -480,7 +482,7 @@ export class ReportsService {
     ];
     for (const equipment of this.project.equipments) {
       if (!equipment.checklists || !equipment.category) continue;
-      for (const checklist of this.project.checklists) {
+      for (const checklist of this.checklists) {
         if (!equipment.checklists[checklist._id]) continue;
         const status = equipment.checklists[checklist._id].status;
         if (status !== 'priority1' && status !== 'priority2') continue;
@@ -853,7 +855,7 @@ export class ReportsServiceFactory {
 
   constructor(private readonly storageService: StorageService) { }
 
-  create(project: ProjectDetailResponseDto, user: UserInfo): ReportsService {
-    return new ReportsService(project, user, this.storageService);
+  create(project: ProjectDetailResponseDto, checklists: ChecklistResponseDto[], user: UserInfo): ReportsService {
+    return new ReportsService(project, checklists, user, this.storageService);
   }
 }

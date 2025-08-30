@@ -61,11 +61,6 @@ export default function Root() {
         updatePagination({ search: '' });
     };
 
-    // Handle category filter
-    const handleCategoryChange = (category) => {
-        updatePagination({ category });
-    };
-
     // Handle sorting
     const handleSort = (field) => {
         setPaginationParams(prev => ({

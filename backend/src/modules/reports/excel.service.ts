@@ -7,7 +7,7 @@ import { ChecklistResponseDto } from '../checklists/dto/checklist-response.dto';
 export class ExcelService {
   constructor() {}
 
-  generateInspectionDocument(project: ProjectDetailResponseDto): Buffer {
+  generateInspectionDocument(project: ProjectDetailResponseDto, checklists: ChecklistResponseDto[]): Buffer {
     const workbook = XLSX.utils.book_new();
 
     if (!project.equipments || project.equipments.length === 0) {
@@ -28,7 +28,7 @@ export class ExcelService {
         this.addEquipmentInfo(worksheet, equipment);
         
         // Inspection items table
-        this.addInspectionTable(worksheet, equipment, project.checklists);
+        this.addInspectionTable(worksheet, equipment, checklists);
 
         // Set column widths
         this.setColumnWidths(worksheet);

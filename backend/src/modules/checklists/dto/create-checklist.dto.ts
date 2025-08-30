@@ -8,6 +8,10 @@ export class CreateChecklistDto {
   title: string;
 
   @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
   @IsNumber()
   order?: number;
 

@@ -12,6 +12,10 @@ export class ChecklistResponseDto {
   @IsString()
   title: string;
 
+  @IsOptional()
+  @IsString()
+  description?: string;
+
   @IsNumber()
   order: number;
 
