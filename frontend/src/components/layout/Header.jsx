@@ -12,7 +12,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { sendPatchRequest } from '../../lib/api'
 import { Stack, Button } from '../../components'
 import { projectKeys } from '../../features/projects/projects'
-import { LoadingState, Online, Offline, Link } from '../../components'
+import { LoadingState, Online, Offline, Link, OfflineModeToggle } from '../../components'
 
 export function Header() {
     const queryClient = useQueryClient();
@@ -111,7 +111,7 @@ export function Header() {
 					</div>
 				</div>
 				<div className='flex items-center gap-4'>
-					
+					<OfflineModeToggle />
 					
 					<Online>
 						<div className='ml-4 block'>

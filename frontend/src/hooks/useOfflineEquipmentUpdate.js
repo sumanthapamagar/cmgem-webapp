@@ -193,7 +193,7 @@ export const useOfflineEquipmentUpdate = () => {
             equipments: updatedEquipments,
         };
 
-        const success = await offlineStorage.saveProject(updatedProject);
+        const success = await offlineStorage.saveProject(updatedProject, false, true); // Skip limit enforcement for equipment updates
 
         // Invalidate offline project query to trigger UI update
         if (success && queryClient) {
@@ -243,7 +243,7 @@ export const useOfflineEquipmentUpdate = () => {
                         last_updated: new Date().toISOString(), // Add timestamp for tracking
                     };
 
-                    const success = await offlineStorage.saveProject(updatedProject);
+                    const success = await offlineStorage.saveProject(updatedProject, false, true); // Skip limit enforcement for equipment updates
 
                     // Invalidate offline project query to trigger UI update
                     if (success && queryClient) {

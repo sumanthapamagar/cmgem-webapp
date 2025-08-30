@@ -14,6 +14,7 @@ export * from './common/Offline';
 export * from './common/LoadingState';
 export * from './common/ProjectSyncIndicator';
 export * from './common/NotificationBanner';
+export * from './common/OfflineModeToggle';
 
 // UI Components (keep as is)
 export * from './ui';

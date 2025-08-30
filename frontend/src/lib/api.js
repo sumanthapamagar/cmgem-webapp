@@ -2,6 +2,29 @@ import axios from 'axios'
 import { getIdToken } from './authConfig'
 
 // ============================================================================
+// OFFLINE MODE CHECK
+// ============================================================================
+
+/**
+ * Check if the app is in manual offline mode
+ * @returns {boolean} True if in manual offline mode
+ */
+const isManualOfflineMode = () => {
+	// Check localStorage for manual offline mode flag
+	return localStorage.getItem('manual_offline_mode') === 'true';
+};
+
+/**
+ * Throw error if in manual offline mode
+ * @throws {Error} If in manual offline mode
+ */
+const checkOfflineMode = () => {
+	if (isManualOfflineMode()) {
+		throw new Error('App is in manual offline mode. Network requests are disabled.');
+	}
+};
+
+// ============================================================================
 // CONFIGURATION & SETUP
 // ============================================================================
 
@@ -12,8 +35,11 @@ const server = axios.create({
 	timeout: 30000, // 30 second timeout
 })
 
-// Request interceptor for authentication
+// Request interceptor for authentication and offline mode check
 server.interceptors.request.use(async function (config) {
+	// Check if in manual offline mode first
+	checkOfflineMode();
+	
 	try {
 		const id_token = await getIdToken()
 		config.headers = {

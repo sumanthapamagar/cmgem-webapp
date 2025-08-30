@@ -119,7 +119,7 @@ export const useEquipmentAutosave = ({
                 last_updated: new Date().toISOString(),
             };
             
-            const success = await offlineStorage.saveProject(updatedProject);
+            const success = await offlineStorage.saveProject(updatedProject, false, true); // Skip limit enforcement for equipment autosave
             
             if (success && queryClient) {
                 queryClient.invalidateQueries({ queryKey: ['offline-project', projectId] });

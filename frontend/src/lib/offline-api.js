@@ -45,6 +45,7 @@ class OfflineStorage {
                     store.createIndex('last_synced', 'last_synced', { unique: false });
                     store.createIndex('has_local_changes', 'has_local_changes', { unique: false });
                     store.createIndex('last_local_change', 'last_local_change', { unique: false });
+                    store.createIndex('last_visited_timestamp', 'last_visited_timestamp', { unique: false });
                 }
             };
         });
@@ -75,26 +76,37 @@ class OfflineStorage {
         }
     }
 
-    async saveProject(projectData, isFromServer = false) {
+    async saveProject(projectData, isFromServer = false, skipLimitEnforcement = false) {
         const db = await this.initialize();
         
+        let result;
         if (db === 'localStorage') {
-            return this.saveToLocalStorage(projectData, isFromServer);
+            result = await this.saveToLocalStorage(projectData, isFromServer);
         } else {
-            return this.saveToIndexedDB(db, projectData, isFromServer);
+            result = await this.saveToIndexedDB(db, projectData, isFromServer);
         }
+        
+        // Enforce project limit after saving (unless skipped)
+        // Note: skipLimitEnforcement is used for equipment operations to improve performance
+        if (!skipLimitEnforcement) {
+            await this.enforceProjectLimit();
+        }
+        
+        return result;
     }
 
     async saveToLocalStorage(projectData, isFromServer = false) {
         try {
             const projectId = projectData._id;
+            const currentTime = new Date().toISOString();
             
             // If this is from server, mark as synced and clear local changes
             // If this is local update, preserve existing local changes or mark as having local changes
             const projectWithMetadata = {
                 ...projectData,
-                has_local_changes: isFromServer ? false :   true,
-                last_local_change: isFromServer ? null : new Date().toISOString()
+                has_local_changes: isFromServer ? false : true,
+                last_local_change: isFromServer ? null : currentTime,
+                offline_timestamp: currentTime // Always update offline timestamp when saving
             };
             console.log('projectWithMetadata, localstorage', projectWithMetadata);
             
@@ -120,13 +132,15 @@ class OfflineStorage {
         return new Promise((resolve, reject) => {
             const transaction = db.transaction([this.storeName], 'readwrite');
             const store = transaction.objectStore(this.storeName);
+            const currentTime = new Date().toISOString();
             
             // If this is from server, mark as synced and clear local changes
             // If this is local update, preserve existing local changes or mark as having local changes
             const projectWithMetadata = {
                 ...projectData,
                 has_local_changes: isFromServer ? false : true,
-                last_local_change: isFromServer ? null : new Date().toISOString()
+                last_local_change: isFromServer ? null : currentTime,
+                offline_timestamp: currentTime // Always update offline timestamp when saving
             };
             
             const request = store.put(projectWithMetadata);
@@ -216,9 +230,11 @@ class OfflineStorage {
                 }
             }
             
-            return projects.sort((a, b) => 
-                new Date(b.offline_timestamp) - new Date(a.offline_timestamp)
-            );
+            return projects.sort((a, b) => {
+                const aTime = new Date(a.last_visited_timestamp || a.offline_timestamp || 0);
+                const bTime = new Date(b.last_visited_timestamp || b.offline_timestamp || 0);
+                return bTime - aTime; // Most recent first
+            });
         } catch (error) {
             console.error('Error getting all projects from localStorage:', error);
             return [];
@@ -232,9 +248,11 @@ class OfflineStorage {
             const request = store.getAll();
             
             request.onsuccess = () => {
-                const projects = request.result.sort((a, b) => 
-                    new Date(b.offline_timestamp) - new Date(a.offline_timestamp)
-                );
+                const projects = request.result.sort((a, b) => {
+                    const aTime = new Date(a.last_visited_timestamp || a.offline_timestamp || 0);
+                    const bTime = new Date(b.last_visited_timestamp || b.offline_timestamp || 0);
+                    return bTime - aTime; // Most recent first
+                });
                 resolve(projects);
             };
             
@@ -337,24 +355,97 @@ class OfflineStorage {
         }
     }
 
+    async updateLastVisitedTimestamp(projectId) {
+        const db = await this.initialize();
+        
+        if (db === 'localStorage') {
+            return this.updateLastVisitedTimestampLocalStorage(projectId);
+        } else {
+            return this.updateLastVisitedTimestampIndexedDB(db, projectId);
+        }
+    }
+
+    async updateLastVisitedTimestampLocalStorage(projectId) {
+        try {
+            const projectData = await this.getFromLocalStorage(projectId);
+            if (projectData) {
+                projectData.last_visited_timestamp = new Date().toISOString();
+                await this.saveProject(projectData, true, true); // Save without triggering limit enforcement
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error updating last visited timestamp in localStorage:', error);
+            return false;
+        }
+    }
+
+    async updateLastVisitedTimestampIndexedDB(db, projectId) {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction([this.storeName], 'readwrite');
+            const store = transaction.objectStore(this.storeName);
+            
+            const getRequest = store.get(projectId);
+            getRequest.onsuccess = () => {
+                if (getRequest.result) {
+                    const projectData = getRequest.result;
+                    projectData.last_visited_timestamp = new Date().toISOString();
+                    
+                    const putRequest = store.put(projectData);
+                    putRequest.onsuccess = () => resolve(true);
+                    putRequest.onerror = () => reject(putRequest.error);
+                } else {
+                    resolve(false);
+                }
+            };
+            
+            getRequest.onerror = () => reject(getRequest.error);
+        });
+    }
+
+    async enforceProjectLimit() {
+        const maxProjects = 20; // Project limit
+        const projects = await this.getAllProjects();
+        
+        if (projects.length > maxProjects) {
+            // Sort by last_visited_timestamp (most recent first) to keep the latest visited projects
+            const sortedProjects = projects.sort((a, b) => {
+                const aTime = new Date(a.last_visited_timestamp || a.offline_timestamp || 0);
+                const bTime = new Date(b.last_visited_timestamp || b.offline_timestamp || 0);
+                return bTime - aTime; // Most recent first
+            });
+            
+            // Keep only the most recent projects
+            const projectsToKeep = sortedProjects.slice(0, maxProjects);
+            const projectsToRemove = sortedProjects.slice(maxProjects);
+            
+            console.log(`Project limit exceeded (${projects.length}/${maxProjects}). Removing ${projectsToRemove.length} oldest projects.`);
+            
+            // Remove excess projects
+            for (const project of projectsToRemove) {
+                await this.deleteProject(project._id);
+                console.log(`Removed project: ${project.name} (${project._id})`);
+            }
+            
+            console.log(`Project limit enforced. Kept ${projectsToKeep.length} most recent projects.`);
+        }
+    }
+
     async limitProjects(maxProjects) {
         const projects = await this.getAllProjects();
         
         if (projects.length > maxProjects) {
-            const projectsToRemove = projects.slice(maxProjects);
+            // Sort by offline_timestamp (most recent first)
+            const sortedProjects = projects.sort((a, b) => {
+                const aTime = new Date(a.offline_timestamp || 0);
+                const bTime = new Date(b.offline_timestamp || 0);
+                return bTime - aTime; // Most recent first
+            });
+            
+            const projectsToRemove = sortedProjects.slice(maxProjects);
             
             for (const project of projectsToRemove) {
-                if (this.db === 'localStorage') {
-                    localStorage.removeItem(`project_${project._id}`);
-                } else {
-                    await this.removeFromIndexedDB(project._id);
-                }
-            }
-            
-            // Update project list for localStorage
-            if (this.db === 'localStorage') {
-                const remainingProjects = projects.slice(0, maxProjects).map(p => p._id);
-                localStorage.setItem('project_list', JSON.stringify(remainingProjects));
+                await this.deleteProject(project._id);
             }
             
             console.log(`Limited offline storage to ${maxProjects} projects`);
@@ -506,8 +597,8 @@ export const getOfflineStorageInfo = async () => {
     const info = await offlineStorage.getStorageInfo();
     return {
         ...info,
-        storageLimit: 10,
-        availableSpace: Math.max(0, 10 - info.totalProjects)
+        storageLimit: 20,
+        availableSpace: Math.max(0, 20 - info.totalProjects)
     };
 };
 
@@ -519,6 +610,16 @@ export const markProjectAsChanged = async (projectId) => {
 // Helper function to get projects with local changes
 export const getProjectsWithLocalChanges = async () => {
     return await offlineStorage.getProjectsWithLocalChanges();
+};
+
+// Helper function to manually enforce project limit
+export const enforceProjectLimit = async () => {
+    return await offlineStorage.enforceProjectLimit();
+};
+
+// Helper function to update last visited timestamp
+export const updateLastVisitedTimestamp = async (projectId) => {
+    return await offlineStorage.updateLastVisitedTimestamp(projectId);
 };
 
 // Helper function to check if project has local changes

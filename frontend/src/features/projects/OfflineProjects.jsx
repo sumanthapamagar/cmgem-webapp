@@ -5,7 +5,8 @@ import {
     getOfflineProjects, 
     getOfflineStorageInfo, 
     clearOfflineProjects,
-    syncProject 
+    syncProject,
+    enforceProjectLimit
 } from '../../lib';
 import { 
     Stack, 
@@ -28,6 +29,7 @@ export default function OfflineProjects() {
     const [filteredProjects, setFilteredProjects] = useState([]);
     const [showClearModal, setShowClearModal] = useState(false);
     const [syncingProjects, setSyncingProjects] = useState(new Set());
+    const [isEnforcingLimit, setIsEnforcingLimit] = useState(false);
     const navigate = useNavigate();
 
     // Load offline projects and storage info
@@ -101,6 +103,19 @@ export default function OfflineProjects() {
 
     const handleRefresh = () => {
         loadOfflineData();
+    };
+
+    const handleEnforceLimit = async () => {
+        try {
+            setIsEnforcingLimit(true);
+            await enforceProjectLimit();
+            // Reload data to show updated project list
+            await loadOfflineData();
+        } catch (error) {
+            console.error('Error enforcing project limit:', error);
+        } finally {
+            setIsEnforcingLimit(false);
+        }
     };
 
     if (isLoading) {
@@ -200,7 +215,7 @@ export default function OfflineProjects() {
                                 Last Synced
                             </TableHeader>
                             <TableHeader className="font-semibold text-lg w-44">
-                                Offline Since
+                                Last Visited
                             </TableHeader>
                             <TableHeader className="font-semibold text-lg w-32">
                                 Actions
@@ -250,15 +265,15 @@ export default function OfflineProjects() {
                                         )}
                                     </TableCell>
                                     <TableCell>
-                                        {project.offline_timestamp ? (
+                                        {project.last_visited_timestamp ? (
                                             <time
                                                 className="text-slate-600"
-                                                dateTime={project.offline_timestamp}
+                                                dateTime={project.last_visited_timestamp}
                                             >
-                                                {dayjs(project.offline_timestamp).format('DD MMM YYYY HH:mm')}
+                                                {dayjs(project.last_visited_timestamp).format('DD MMM YYYY HH:mm')}
                                             </time>
                                         ) : (
-                                            <span className="text-gray-400 text-sm">-</span>
+                                            <span className="text-gray-400 text-sm">Never</span>
                                         )}
                                     </TableCell>
                                     <TableCell>

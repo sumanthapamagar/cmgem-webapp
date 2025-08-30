@@ -6,7 +6,7 @@ import {
     saveProject,
     saveProjectEquipments,
 } from '../../lib/api';
-import { offlineStorage } from '../../lib/offline-api';
+import { offlineStorage, updateLastVisitedTimestamp } from '../../lib/offline-api';
 import { Button, Dialog, DialogBody, DialogActions, DialogTitle, ProjectLoadingState } from '../../components';
 import { projectKeys } from './projects';
 import { useNetworkStatus } from '../../hooks';
@@ -33,6 +33,8 @@ const ProjectProvder = ({ children, projectId }) => {
         queryKey: projectKeys.detail(projectId),
         queryFn: () => getProject(projectId).then(async (project) => {
             await offlineStorage.saveProject(project, true);
+            // Update last visited timestamp when project is successfully fetched from server
+            await updateLastVisitedTimestamp(projectId);
             offlineProjectQuery.refetch();
             return project;
         }),
