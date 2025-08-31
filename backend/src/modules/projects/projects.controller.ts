@@ -114,11 +114,14 @@ export class ProjectsController {
       // Sanitize project name for filename (remove special characters)
       const sanitizedProjectName = projectName.replace(/[^a-zA-Z0-9\s-_]/g, '').replace(/\s+/g, '_');
       
-      // Set response headers for file download
+      // Set response headers for file download with cache control
       res.set({
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'Content-Disposition': `attachment; filename="Inspection Report ${sanitizedProjectName}.xlsx"`,
         'Content-Length': excelBuffer.length,
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       });
       
       // Send the file
@@ -141,11 +144,14 @@ export class ProjectsController {
       // Sanitize project name for filename (remove special characters)
       const sanitizedProjectName = projectName.replace(/[^a-zA-Z0-9\s-_]/g, '').replace(/\s+/g, '_');
       
-      // Set response headers for file download
+      // Set response headers for file download with cache control
       res.set({
         'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'Content-Disposition': `attachment; filename="Audit Report ${sanitizedProjectName}.docx"`,
         'Content-Length': wordBuffer.length,
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       });
       
       // Send the file

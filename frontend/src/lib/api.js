@@ -565,7 +565,9 @@ const sendPatchRequest = async (uri, data) => {
 const downloadInspectionReport = async (projectId) => {
 	validateRequiredString(projectId, 'Project ID');
 	
-	const response = await server.get(`projects/${projectId}/inspection-report`, {
+	// Add timestamp to bypass cache
+	const timestamp = new Date().getTime();
+	const response = await server.get(`projects/${projectId}/inspection-report?t=${timestamp}`, {
 		responseType: 'blob'
 	});
 	return response.data;
@@ -573,7 +575,10 @@ const downloadInspectionReport = async (projectId) => {
 
 const downloadInspectionReportWord = async (projectId) => {
 	validateRequiredString(projectId, 'Project ID');
-	const response = await server.get(`projects/${projectId}/report`, {
+	
+	// Add timestamp to bypass cache
+	const timestamp = new Date().getTime();
+	const response = await server.get(`projects/${projectId}/report?t=${timestamp}`, {
 		responseType: 'blob'
 	});
 	return response.data;
