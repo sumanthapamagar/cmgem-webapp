@@ -44,6 +44,8 @@ const ProjectProvder = ({ children, projectId }) => {
         }),
         enabled: canFetchOnlineProject,
         refetchOnWindowFocus: false,
+        staleTime: 0,
+        gcTime: 0, // Previously cacheTime in older versions
     });
 
     const projectEquipmentsMutation = useMutation({
