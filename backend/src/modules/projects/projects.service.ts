@@ -2,16 +2,12 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Project, ProjectDocument } from './projects.schema';
-import { Equipment, EquipmentDocument } from '../equipments/equipments.schema';
-import { Floor, FloorDocument } from '../floors/floors.schema';
-import { Attachment, AttachmentDocument } from '../attachments/attachments.schema';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { ProjectDetailResponseDto } from './dto/project-detail-response.dto';
 import { ChecklistsService } from '../checklists/checklists.service';
 import { ExcelService } from '../reports/excel.service';
 import type { UserInfo } from 'src/types/user.types';
 import { ReportsServiceFactory } from '../reports/reports.service';
-import { CacheService } from '../../common/cache.service';
 import { EquipmentsService } from '../equipments/equipments.service';
 import { AttachmentsService } from '../attachments/attachments.service';
 import { FloorsService } from '../floors/floors.service';
@@ -45,7 +41,6 @@ export class ProjectsService {
     private checklistsService: ChecklistsService,
     private excelService: ExcelService,
     private reportServiceFactory: ReportsServiceFactory,
-    private cacheService: CacheService,
     private equipmentsService: EquipmentsService,
     private attachmentsService: AttachmentsService,
     private floorsService: FloorsService
@@ -160,31 +155,16 @@ export class ProjectsService {
   }
 
   async getAvailableCategories(): Promise<string[]> {
-    // Try to get from cache first
-    const cached = await this.cacheService.getCategories();
-    if (cached) {
-      return cached;
-    }
-
-    // If not in cache, fetch from database
+    // Fetch from database
     const categories = await this.projectModel
       .distinct('category', { deleted_at: { $exists: false } })
       .exec();
     
     const sortedCategories = categories.sort();
-    
-    // Cache the result for 1 hour
-    await this.cacheService.setCategories(sortedCategories, 3600);
-    
     return sortedCategories;
   }
 
   async findById(id: string): Promise<ProjectDetailResponseDto> {
-    // Try to get from cache first
-    const cached = await this.cacheService.getProject(id);
-    if (cached) {
-      return cached;
-    }
 
     // Step 1: Find the project with account information
     const project = await this.projectModel.aggregate([
@@ -252,10 +232,6 @@ export class ProjectsService {
     };
 
     const mappedResult = this.mapToDetailResponseDto(projectResult);
-    
-    // Cache the result for 5 minutes
-    await this.cacheService.setProject(id, mappedResult, 300);
-    
     return mappedResult;
   }
 
@@ -295,10 +271,6 @@ export class ProjectsService {
       throw new NotFoundException(`Project with ID ${id} not found`);
     }
 
-    // Invalidate cache
-    await this.cacheService.invalidateProject(id);
-    await this.cacheService.invalidateCategories();
-
     return updatedProject;
   }
 
@@ -311,10 +283,6 @@ export class ProjectsService {
     if (!result) {
       throw new NotFoundException(`Project with ID ${id} not found`);
     }
-
-    // Invalidate cache
-    await this.cacheService.invalidateProject(id);
-    await this.cacheService.invalidateCategories();
   }
 
   async hardDelete(id: string, user: UserInfo): Promise<void> {

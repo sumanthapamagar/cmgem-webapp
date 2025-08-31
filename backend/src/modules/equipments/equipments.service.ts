@@ -52,7 +52,8 @@ export class EquipmentsService {
       project_id: projectId,
       deleted_at: { $exists: false }
     }).exec();
-
+    console.log('Found equipments for project', projectId, ':', equipments.length, 'items');
+    console.log('Equipment IDs:', equipments.map(e => e._id));
     return equipments.map(equipment => this.mapToResponseDto(equipment));
   }
 
@@ -70,6 +71,21 @@ export class EquipmentsService {
     return equipments.map(equipment => this.mapToResponseDto(equipment));
   }
 
+  // Debug method to check all equipments including deleted ones
+  async findAllIncludingDeleted(projectId: string): Promise<any[]> {
+    const allEquipments = await this.equipmentModel.find({
+      project_id: projectId
+    }).exec();
+    
+    console.log('All equipments (including deleted) for project', projectId, ':', allEquipments.length);
+    return allEquipments.map(equipment => ({
+      _id: equipment._id,
+      name: equipment.name,
+      deleted_at: equipment.deleted_at,
+      deleted_by: equipment.deleted_by
+    }));
+  }
+
   async delete(id: string, user: UserInfo): Promise<void> {
     console.log('deleting equipment', id);
     const equipment = await this.equipmentModel.findOne({
@@ -81,13 +97,21 @@ export class EquipmentsService {
       throw new NotFoundException(`Equipment with ID ${id} not found`);
     }
 
-    await this.equipmentModel.findOneAndUpdate(
+    console.log('Equipment found, performing soft delete:', equipment._id);
+    const result = await this.equipmentModel.findOneAndUpdate(
       { _id: new Types.ObjectId(id) },
       {
         deleted_by: user,
         deleted_at: new Date(),
-      }
+      },
+      { new: true }
     ).exec();
+
+    console.log('Soft delete result:', result);
+    
+    if (!result) {
+      throw new NotFoundException(`Failed to delete equipment with ID ${id}`);
+    }
   }
 
     async createOrUpdate(equipment: CreateEquipmentWithFloorsDto, user: UserInfo): Promise<Equipment> {
@@ -150,7 +174,6 @@ export class EquipmentsService {
       throw new NotFoundException(`Failed to create equipment with ID ${equipment._id}`);
     }
     console.log('createdEquipment', equipmentId);
-
     return newEquipment;
   }
 

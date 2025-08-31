@@ -1,4 +1,5 @@
-import { Controller,  Post, Param, Body, Delete, UseInterceptors, UploadedFile, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Delete, UseInterceptors, UploadedFile, UploadedFiles, Query, Res, Header } from '@nestjs/common';
+import { Response } from 'express';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { EquipmentsService } from './equipments.service';
 import { 
@@ -26,6 +27,32 @@ type MulterFile = {
 @UseInterceptors(UserInterceptor)
 export class EquipmentsController {
   constructor(private readonly equipmentsService: EquipmentsService) {}
+
+  @Get()
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
+  async findAll(@Query('project_id') projectId?: string, @Res() res?: Response): Promise<any> {
+    if (projectId) {
+      const result = await this.equipmentsService.findByProjectId(projectId);
+      return res ? res.json(result) : result;
+    }
+    // Add a general findAll method if needed
+    return res ? res.json([]) : [];
+  }
+
+  @Get(':id')
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
+  async findOne(@Param('id') id: string): Promise<any> {
+    return this.equipmentsService.findById(id);
+  }
+
+  @Get('debug/all/:projectId')
+  async findAllIncludingDeleted(@Param('projectId') projectId: string): Promise<any> {
+    return this.equipmentsService.findAllIncludingDeleted(projectId);
+  }
 
   @Post('bulk-save')
   async bulkSave(

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Patch, Delete, Param, Body, Query, UseInterceptors, Res } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Param, Body, Query, UseInterceptors, Res, Header } from '@nestjs/common';
 import type { Response } from 'express';
 import { ProjectsService } from './projects.service';
 import type { PaginationOptions, PaginatedResult } from './projects.service';
@@ -15,6 +15,9 @@ export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) { }
 
   @Get()
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   async findAll(@Query() query: any): Promise<PaginatedResult<Project>> {
     // Parse and validate query parameters
     const options: PaginationOptions = {
@@ -31,21 +34,33 @@ export class ProjectsController {
   }
 
   @Get('all')
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   async findAllWithoutPagination(): Promise<Project[]> {
     return this.projectsService.findAllWithoutPagination();
   }
 
   @Get('categories')
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   async getAvailableCategories(): Promise<string[]> {
     return this.projectsService.getAvailableCategories();
   }
 
   @Get('account/:accountId')
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   async findByAccountId(@Param('accountId') accountId: string): Promise<Project[]> {
     return this.projectsService.findByAccountId(accountId);
   }
 
   @Get(':id')
+  @Header('Cache-Control', 'no-cache, no-store, must-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   async findById(@Param('id') id: string): Promise<ProjectDetailResponseDto> {
     return this.projectsService.findById(id);
   }

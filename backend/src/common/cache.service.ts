@@ -34,31 +34,7 @@ export class CacheService {
     this.cache.clear();
   }
 
-  // Specific cache methods for common use cases
-  async getProject(id: string): Promise<any> {
-    return this.get(`project:${id}`);
-  }
-
-  async setProject(id: string, project: any, ttl: number = 300): Promise<void> {
-    await this.set(`project:${id}`, project, ttl);
-  }
-
-  async getCategories(): Promise<string[]> {
-    const result = await this.get<string[]>('project:categories');
-    return result || [];
-  }
-
-  async setCategories(categories: string[], ttl: number = 3600): Promise<void> {
-    await this.set('project:categories', categories, ttl);
-  }
-
-  async invalidateProject(id: string): Promise<void> {
-    await this.del(`project:${id}`);
-  }
-
-  async invalidateCategories(): Promise<void> {
-    await this.del('project:categories');
-  }
+  // Project and equipment caching removed - only checklists use cache
 
   // Checklist cache methods
   async getChecklists(): Promise<any[]> {
