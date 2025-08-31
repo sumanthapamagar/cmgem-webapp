@@ -803,8 +803,8 @@ export class ReportsService {
         data: imageData,
         type: "jpg",
         transformation: {
-          width: 400,
-          height: 300
+          width: 200,
+          height: 150
         }
       });
     } catch (error) {

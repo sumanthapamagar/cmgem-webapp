@@ -26,7 +26,7 @@ export class ImageProcessingService {
   private readonly logger = new Logger(ImageProcessingService.name);
   private readonly imageSizes: ImageSizes = {
     icon: { width: 64, height: 64 },
-    thumbnail: { width: 300, height: 300 },
+    thumbnail: { width: 600, height: 600 },
     original: { width: 1920, height: 1080 } // Max dimensions for original
   };
 
