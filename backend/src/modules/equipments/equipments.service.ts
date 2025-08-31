@@ -52,8 +52,6 @@ export class EquipmentsService {
       project_id: projectId,
       deleted_at: { $exists: false }
     }).exec();
-    console.log('Found equipments for project', projectId, ':', equipments.length, 'items');
-    console.log('Equipment IDs:', equipments.map(e => e._id));
     return equipments.map(equipment => this.mapToResponseDto(equipment));
   }
 
@@ -77,7 +75,6 @@ export class EquipmentsService {
       project_id: projectId
     }).exec();
     
-    console.log('All equipments (including deleted) for project', projectId, ':', allEquipments.length);
     return allEquipments.map(equipment => ({
       _id: equipment._id,
       name: equipment.name,
