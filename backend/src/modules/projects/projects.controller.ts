@@ -109,12 +109,15 @@ export class ProjectsController {
     @Res() res: Response,
   ): Promise<void> {
     try {
-      const excelBuffer = await this.projectsService.generateInspectionDocument(id);
+      const { buffer: excelBuffer, projectName } = await this.projectsService.generateInspectionDocument(id);
+      
+      // Sanitize project name for filename (remove special characters)
+      const sanitizedProjectName = projectName.replace(/[^a-zA-Z0-9\s-_]/g, '').replace(/\s+/g, '_');
       
       // Set response headers for file download
       res.set({
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition': `attachment; filename="inspection_report_${id}.xlsx"`,
+        'Content-Disposition': `attachment; filename="Inspection Report ${sanitizedProjectName}.xlsx"`,
         'Content-Length': excelBuffer.length,
       });
       
@@ -133,12 +136,15 @@ export class ProjectsController {
   ): Promise<void> {
     
     try {
-      const wordBuffer = await this.projectsService.generateReport(id, user);
+      const { buffer: wordBuffer, projectName } = await this.projectsService.generateReport(id, user);
+      
+      // Sanitize project name for filename (remove special characters)
+      const sanitizedProjectName = projectName.replace(/[^a-zA-Z0-9\s-_]/g, '').replace(/\s+/g, '_');
       
       // Set response headers for file download
       res.set({
         'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'Content-Disposition': `attachment; filename="report_${id}.docx"`,
+        'Content-Disposition': `attachment; filename="Audit Report ${sanitizedProjectName}.docx"`,
         'Content-Length': wordBuffer.length,
       });
       

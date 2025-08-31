@@ -293,20 +293,22 @@ export class ProjectsService {
     }
   }
 
-  async generateInspectionDocument(projectId: string): Promise<Buffer> {
+  async generateInspectionDocument(projectId: string): Promise<{ buffer: Buffer; projectName: string }> {
     // Get project details with all related data
     const project = await this.findById(projectId);
     const checklists = await this.checklistsService.findAll();
 
     // Generate Excel document
-    return this.excelService.generateInspectionDocument(project, checklists);
+    const buffer = await this.excelService.generateInspectionDocument(project, checklists);
+    return { buffer, projectName: project.name };
   }
 
-  async generateReport(projectId: string, user: UserInfo): Promise<Buffer> {
+  async generateReport(projectId: string, user: UserInfo): Promise<{ buffer: Buffer; projectName: string }> {
     const project = await this.findById(projectId);
     const checklists = await this.checklistsService.findAll();
     const reportService = this.reportServiceFactory.create(project, checklists, user);
-    return reportService.generateReport();
+    const buffer = await reportService.generateReport();
+    return { buffer, projectName: project.name };
   }
 
   private mapToDetailResponseDto(projectData: any): ProjectDetailResponseDto {
