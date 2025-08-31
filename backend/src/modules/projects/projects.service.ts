@@ -249,6 +249,9 @@ export class ProjectsService {
       account_id: createProjectDto.account_id,
       inspection_date: new Date(createProjectDto.inspection_date),
       created_by: user,
+      updated_by: user,
+      created_at: new Date(),
+      updated_at: new Date(),
     });
     return createdProject.save();
   }
