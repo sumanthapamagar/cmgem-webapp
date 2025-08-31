@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BlobServiceClient, StorageSharedKeyCredential, generateBlobSASQueryParameters, BlobSASPermissions } from '@azure/storage-blob';
+import { BlobServiceClient, StorageSharedKeyCredential, generateBlobSASQueryParameters, BlobSASPermissions, ContainerClient } from '@azure/storage-blob';
 
 export interface FileUploadResult {
   success: boolean;
@@ -75,6 +75,9 @@ export class StorageService {
       // Get container client
       const containerClient = this.blobServiceClient.getContainerClient(containerName);
 
+      // Ensure container exists, create if it doesn't
+      await this.ensureContainerExists(containerClient, containerName);
+
       // Get blob client
       const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
@@ -87,7 +90,6 @@ export class StorageService {
 
       // Build the URL
       const url = `https://${this.accountName}.blob.core.windows.net/${containerName}/${blobName}`;
-      console.log(url);
       return {
         success: true,
         blob_name: blobName,
@@ -102,6 +104,24 @@ export class StorageService {
     }
   }
 
+  private async ensureContainerExists(
+    containerClient: ContainerClient,
+    containerName: string
+  ): Promise<void> {
+    try {
+      // Check if container exists
+      const exists = await containerClient.exists();
+      
+      if (!exists) {
+        // Create container with private access (no public access)
+        await containerClient.create();
+      }
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Failed to ensure container '${containerName}' exists: ${error.message}`
+      );
+    }
+  }
 
   private async generateReadOnlyContainerSasToken(
     containerName: string,

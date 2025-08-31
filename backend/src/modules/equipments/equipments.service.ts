@@ -208,8 +208,6 @@ export class EquipmentsService {
     uploadData: UploadImageDto, 
     user: UserInfo
   ): Promise<any> {
-    console.log('uploading images', id, file, uploadData, user);
-    
     // Use the attachments service to handle the image upload
     const attachment = await this.attachmentsService.uploadImage(
       id,

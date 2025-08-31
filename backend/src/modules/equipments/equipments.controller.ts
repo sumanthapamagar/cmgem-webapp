@@ -70,8 +70,6 @@ export class EquipmentsController {
     @UploadedFile() file: MulterFile,
     @GetUserInfo() user: UserInfo
   ): Promise<any> {
-    console.log('File received:', file);
-    console.log('Uploading images for equipment:', id, 'Data:', uploadData, 'User:', user);
     return this.equipmentsService.uploadImages(id, file, uploadData, user);
   }
 
