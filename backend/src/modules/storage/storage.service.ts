@@ -113,8 +113,18 @@ export class StorageService {
       const exists = await containerClient.exists();
       
       if (!exists) {
-        // Create container with private access (no public access)
-        await containerClient.create();
+        try {
+          // Create container with private access (no public access)
+          await containerClient.create();
+        } catch (createError) {
+          // If container already exists (race condition), that's fine
+          if (createError.statusCode === 409 && createError.code === 'ContainerAlreadyExists') {
+            // Container was created by another process, which is fine
+            return;
+          }
+          // Re-throw other creation errors
+          throw createError;
+        }
       }
     } catch (error) {
       throw new InternalServerErrorException(
