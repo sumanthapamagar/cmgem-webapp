@@ -1,5 +1,5 @@
 import { Injectable, Scope } from '@nestjs/common';
-import { Document, Packer, Paragraph, TextRun, AlignmentType, patchDocument, PatchType, PatchDocumentOptions, IPatch, Table, TableRow, TableCell, VerticalAlignTable, TextDirection, HeadingLevel, WidthType, ShadingType, ParagraphChild, FileChild, ImageRun, LevelFormat, Numbering } from 'docx';
+import { Document, Packer, Paragraph, TextRun, AlignmentType, patchDocument, PatchType, PatchDocumentOptions, IPatch, Table, TableRow, TableCell, VerticalAlignTable, TextDirection, HeadingLevel, WidthType, ShadingType, ParagraphChild, FileChild, ImageRun, LevelFormat, Numbering, TableOfContents } from 'docx';
 import type { EquipmentWithFloors, ProjectDetailResponseDto } from '../projects/dto';
 import type { UserInfo } from 'src/types/user.types';
 import * as fs from 'fs';
@@ -175,6 +175,10 @@ export class ReportsService {
           await this.generateDefectiveItemsData()
         ]
       },
+      TABLE_SITE_DETAILS: {
+        type: PatchType.DOCUMENT,
+        children: this.generateSiteDetailsData()
+      },
       OWNER_BULLET_LIST: {
         type: PatchType.DOCUMENT,
         children: this.generateChecklistBulletList("owner")
@@ -275,11 +279,11 @@ export class ReportsService {
 
         equipmentItems.push(new Paragraph({
           text: comment,
-          spacing:{
+          spacing: {
             before: 200,
             after: 200
           },
-          bullet:{
+          bullet: {
             level: 0,
           }
         }));
@@ -333,8 +337,8 @@ export class ReportsService {
       ...this.project.equipments.map(equipment => equipment.name || `Equipment ${equipment._id}`)
     ];
     const rows = [
-      'Housekeeping', 'Safety Risk', 'Reliability Risk',
-      'Maintenance and Failure Rate', 'Extended Outage Risk', 'Passenger Comfort', 'Sustainability'
+      'Housekeeping', 'Safety Risk', 'Reliability and Outage Risk',
+      'Maintenance and Failure Rate', 'Passenger Comfort', 'Sustainability and Technology'
     ];
     return this.createTable([
       headers,
@@ -385,6 +389,7 @@ export class ReportsService {
       ['Fullly open to fully closed', 'sec', '2.4 - 2.8'],
       ['Fully closed to fully open', 'sec', '1.8 - 2.2'],
       ['Levelling time', 'sec', '1.0 - 1.2'],
+      ['Closing Force:', 'N', '<=150'],
       new TableRow({
         height: {
           value: "20pt",
@@ -396,13 +401,12 @@ export class ReportsService {
             verticalAlign: VerticalAlignTable.CENTER,
             children: [new Paragraph({
               children: [
-                new TextRun({ text: 'Closing Force:', bold: true })
+                new TextRun({ text: 'Door dwell time in response to:', bold: true })
               ]
             })]
           }),
         ]
       }),
-      ['Door dwell time in response to:', '', ''],
       ['Car cell', 'sec', '3.0 - 5.0'],
       ['Landing call', 'sec', '5.0 - 7.0']
     ];
@@ -504,16 +508,16 @@ export class ReportsService {
               return this.createImageFallback(attachment);
             }
           });
-          
+
           const imageResults = await Promise.all(imagePromises);
           // All images should now be valid (either actual images or fallbacks)
           const images = imageResults;
-          
+
           // Log summary of image processing
           const totalImages = attachments.length;
           const successfulImages = imageResults.filter(img => img instanceof ImageRun).length;
           const failedImages = totalImages - successfulImages;
-          
+
           if (failedImages > 0) {
             console.warn(`Image processing summary for equipment ${equipment.name || equipment._id}: ${successfulImages}/${totalImages} images loaded successfully, ${failedImages} failed (using fallbacks)`);
           } else if (totalImages > 0) {
@@ -525,13 +529,14 @@ export class ReportsService {
             new TableCell({
               children: [
                 new Paragraph({
-                  spacing:{
+                  spacing: {
                     before: 200,
                     after: 200
                   },
                   children: [
                     new TextRun({
-                      text: comment || '' }),
+                      text: comment || ''
+                    }),
                     ...images
                   ]
                 }),
@@ -637,6 +642,141 @@ export class ReportsService {
     ]);
   }
 
+
+  private generateSiteDetailsData(): Array<FileChild> {
+
+    const carInterriorRows: Array<{ label: string, typeKeys?: string[] }> = [
+      {
+        label: 'Car interior Details (Walls, Floor, Ceiling, Lighting)',
+        typeKeys: ['car_interior.wall_type', 'car_interior.flooring_type', 'car_interior.ceiling_and_lights_type'],
+      }, {
+        label: 'Car mirror',
+        typeKeys: ['car_interior.mirror_location'],
+      }, {
+        label: 'Car door finishes',
+        typeKeys: ['car_interior.car_door_finishes'],
+      }, {
+        label: 'Car door type',
+        typeKeys: ['car_interior.car_door_type'],
+      }]
+
+    const landingRows: Array<{ label: string, typeKeys?: string[] }> = [{
+      label: 'Landings',
+    }, {
+      label: 'Fire rated landing doors (Label attached)',
+      typeKeys: ['landings.fire_rated_landing_doors'],
+    }, {
+      label: 'Landing Signalisation type',
+      typeKeys: ['landings.landing_signalisation_type'],
+    }, {
+      label: 'Nº of landing button risers',
+      typeKeys: ['landings.no_of_landing_button_risers'],
+    }, {
+      label: 'Landing doors frame finishes',
+      typeKeys: ['landings.landing_doors_frame_finishes'],
+    }]
+
+    const machineRoomRows: Array<{ label: string, typeKeys?: string[] }> = [{
+      label: 'Lift Shaft / Machine Room',
+    }, {
+      label: 'Liftwell construction',
+      typeKeys: ['machine_room.liftwell_construiction'],
+    }, {
+      label: 'Vents in liftwell',
+      typeKeys: ['machine_room.vents_in_liftwell'],
+    }, {
+      label: 'Smoke detectors at top of liftwell',
+      typeKeys: ['machine_room.smoke_detectors_at_top_of_liftwell'],
+    }, {
+      label: 'Ledges in liftwell',
+      typeKeys: ['machine_room.ledges_in_liftwell'],
+    }, {
+      label: 'Sprinklers in pit',
+      typeKeys: ['machine_room.sprinklers_in_pit'],
+    }, {
+      label: 'Machine Room location',
+      typeKeys: ['machine_room.machine_room_location'],
+    }, {
+      label: 'Lifting beams with rated load (SWL visible)',
+      typeKeys: ['machine_room.lifting_beams_with_rated_load_visible'],
+    }]
+    const siteDetailsChildren: Array<ParagraphChild | FileChild> = []
+    this.project.equipments.forEach(equipment => {
+      const rows = [
+        {
+          label: equipment.name,
+        },
+        ...carInterriorRows,
+        ...landingRows
+      ]
+      if (equipment.category == "machineRoom") {
+        rows.push(...machineRoomRows)
+      }
+      siteDetailsChildren.push(
+        this.createTable(rows.map(row => {
+          return row.typeKeys ? [
+            new TableCell({
+              verticalAlign: VerticalAlignTable.CENTER,
+              width: { size: 50, type: WidthType.PERCENTAGE },
+              children: [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: row.label,
+                      bold: true,
+                      size: `9pt`,
+                      color: '#141414',
+                    })
+                  ]
+                })
+              ]
+            }),
+            new TableCell({
+              verticalAlign: VerticalAlignTable.CENTER,
+              width: { size: 50, type: WidthType.PERCENTAGE },
+              children: row.typeKeys.map(typeKey =>
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: this.getNestedValue(equipment, typeKey) || "",
+                      size: `9pt`,
+                      color: '#141414',
+                    })
+                  ]
+                })
+              )
+            }),
+          ] : [
+            new TableCell({
+              columnSpan: 2,
+              verticalAlign: VerticalAlignTable.CENTER,
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              shading: {
+                fill: '#e2e2e2',
+                type: ShadingType.CLEAR
+              },
+              children: [
+                new Paragraph({
+                  alignment: AlignmentType.CENTER,
+                  children: [
+                    new TextRun({
+                      text: row.label,
+                      bold: true,
+                      size: `9pt`,
+                      color: '#141414',
+                    })
+                  ]
+                })
+              ]
+            })
+          ]
+        }))
+      )
+    })
+
+    return siteDetailsChildren as Array<FileChild>
+  }
+
   // Helper method to generate car interior data
   private generateCarInteriorData(): Array<FileChild> {
 
@@ -688,7 +828,7 @@ export class ReportsService {
     this.project.equipments.forEach(equipment => {
       carInterriorChildren.push(
         new Paragraph({
-          spacing:{
+          spacing: {
             before: 200,
             after: 200
           },
@@ -794,7 +934,7 @@ export class ReportsService {
   private async getImage(attachment: AttachmentResponseDto): Promise<ImageRun> {
     try {
       const imageData = await this.storageService.getFile(attachment.equipment_id, attachment.low_size_name);
-      
+
       if (!imageData) {
         throw new Error(`No image data returned for attachment ${attachment._id}`);
       }
