@@ -4,16 +4,18 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import compression from 'compression';
 
+import * as bodyParser from 'body-parser';
+
 declare const module: any
 
 async function bootstrap() {
     console.log('Starting NestJS application...')
-    
+
     const app = await NestFactory.create(AppModule, { cors: true })
-    
+
     // Add compression middleware
     app.use(compression());
-    
+
     // Add response caching headers
     app.use((req, res, next) => {
         if (req.path.includes('/projects') && req.method === 'GET') {
@@ -21,24 +23,27 @@ async function bootstrap() {
         }
         next();
     });
-    
+
     app.useGlobalPipes(
         new ValidationPipe({
             whitelist: true,
             transform: true
         })
     )
-    
+
     const configService = app.get(ConfigService)
     const port = process.env.PORT || configService.get<number>("APP_PORT") || 7080
+
+    app.use(bodyParser.json({ limit: '8mb' }));  // increase limit
+    app.use(bodyParser.urlencoded({ limit: '8mb', extended: true }));
     
     console.log(`Environment PORT: ${process.env.PORT}`)
     console.log(`Config APP_PORT: ${configService.get<number>("APP_PORT")}`)
     console.log(`Final port: ${port}`)
-    
+
     await app.listen(port, '0.0.0.0')
     console.log(`Application is running on: http://0.0.0.0:${port}`)
-    
+
     if (module.hot) {
         module.hot.accept()
         module.hot.dispose(() => app.close())
