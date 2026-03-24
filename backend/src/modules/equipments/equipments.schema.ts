@@ -70,6 +70,58 @@ export class LiftInformation {
 }
 
 @Schema({ _id: false })
+export class EscalatorInformation {
+  @Prop({ type: String, default: '' })
+  current_maintenance_provider?: string;
+
+  @Prop({ type: String, default: '' })
+  equipment_type?: string;
+
+  @Prop({ type: String, default: '' })
+  unit_type?: string;
+
+  @Prop({ type: String, default: '' })
+  arrangement?: string;
+
+  @Prop({ type: String, default: '' })
+  unit_number_location?: string;
+
+  @Prop({ type: String, default: '' })
+  installation_modernised_date?: string;
+
+  @Prop({ type: String, default: '' })
+  original_equipment_manufacturer?: string;
+
+  @Prop({ type: String, default: '' })
+  equipment_model?: string;
+
+  @Prop({ type: String, default: '' })
+  control_drive_system?: string;
+
+  @Prop({ type: String, default: '' })
+  speed?: string;
+
+  @Prop({ type: String, default: '' })
+  rise?: string;
+
+  @Prop({ type: String, default: '' })
+  balustrade_type?: string;
+
+  @Prop({ type: String, default: '' })
+  balustrade_lighting?: string;
+
+  @Prop({ type: String, default: '' })
+  balustrade_height?: string;
+
+  @Prop({ type: String, default: '' })
+  skirt_type?: string;
+
+  @Prop({ type: String, default: '' })
+  skirt_lighting?: string;
+
+}
+
+@Schema({ _id: false })
 export class LiftCar {
   @Prop({ type: String, default: '' })
   car_interior?: string;
@@ -211,6 +263,9 @@ export class Equipment {
 
   @Prop({ type: LiftInformation, default: {} })
   lift?: LiftInformation;
+
+  @Prop({ type: EscalatorInformation, default: {} })
+  escalator_information?: EscalatorInformation;
 
   @Prop({ type: LiftCar, default: {} })
   lift_car?: LiftCar;

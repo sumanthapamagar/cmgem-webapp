@@ -71,6 +71,25 @@ export class CarInteriorResponseDto {
   car_door_type?: string;
 }
 
+export class EscalatorInformationResponseDto {
+  current_maintenance_provider?: string;
+  equipment_type?: string;
+  unit_type?: string;
+  arrangement?: string;
+  unit_number_location?: string;
+  installation_modernised_date?: string;
+  original_equipment_manufacturer?: string;
+  equipment_model?: string;
+  control_drive_system?: string;
+  speed?: string;
+  rise?: string;
+  balustrade_type?: string;
+  balustrade_lighting?: string;
+  balustrade_height?: string
+  skirt_type?: string;
+  skirt_lighting?: string;
+}
+
 export class EquipmentResponseDto {
   _id: string;
   category: string;
@@ -80,6 +99,7 @@ export class EquipmentResponseDto {
   project_id: string;
   maintenance?: MaintenanceResponseDto;
   lift?: LiftInformationResponseDto;
+  escalator_information?: EscalatorInformationResponseDto;
   lift_car?: LiftCarResponseDto;
   landings?: LandingResponseDto;
   lift_shaft?: LiftShaftResponseDto;

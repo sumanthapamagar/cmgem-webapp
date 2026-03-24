@@ -9,7 +9,7 @@ export function Navigation({ navigation, className }) {
                     <li key={section.key}>
                         <Link
                             className={clsx(
-                                ' font-normal leading-8 hover:text-blue-800',
+                                ' font-normal leading-6 hover:text-blue-800',
                                 (location.pathname === section.href ||
                                     location.pathname.includes(section.key))
                                     ? 'text-blue-600'
@@ -32,7 +32,7 @@ export function Navigation({ navigation, className }) {
                                         <Link
                                             to={link.href}
                                             className={clsx(
-                                                'block rounded-sm w-full ml-6 leading-8 px-3 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full hover:bg-neutral-200 hover:text-gray-800 ',
+                                                'block rounded-sm w-full ml-6 leading-4 px-3 py-2 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full hover:bg-neutral-200 hover:text-gray-800 ',
                                                 link.href == location.pathname
                                                     ? 'bg-sky-200 text-gray-800 before:bg-sky-500'
                                                     : 'text-slate-800 before:hidden before:bg-slate-600 hover:text-slate-600 hover:before:block'

@@ -20,7 +20,7 @@ export function SiteDetails() {
             <Landings equipment={equipment} />
             <LiftShaft equipment={equipment} />
             <MachineRoom equipment={equipment} />
-            <LiftCars equipment={equipment} />
+            {/* <LiftCars equipment={equipment} /> */}
         </div>
     );
 }

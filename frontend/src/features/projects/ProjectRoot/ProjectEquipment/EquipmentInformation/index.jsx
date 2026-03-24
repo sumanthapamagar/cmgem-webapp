@@ -4,6 +4,7 @@ import { EquipmentNotFound } from '../components';
 import CarInterior from './CarInterior';
 import LiftInformation from './LiftInformation';
 import Maintenance from './Maintenance';
+import EscalatorInformation from './EscalatorInformation';
 
 export function EquipmentInformation() {
     const { projectId, equipmentId } = useParams();
@@ -11,6 +12,12 @@ export function EquipmentInformation() {
     
     if (!equipment) {
         return <EquipmentNotFound />;
+    }
+
+    if (equipment.category === 'escaltor') {
+        return (
+            <EscalatorInformation equipment={equipment} />
+        );
     }
 
     return (

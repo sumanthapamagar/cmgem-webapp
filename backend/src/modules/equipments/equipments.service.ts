@@ -134,6 +134,7 @@ export class EquipmentsService {
       checklists: equipment.checklists,
       machine_room: equipment.machine_room,
       car_interior: equipment.car_interior,
+      escalator_information: equipment.escalator_information,
     }
 
     if (existingEquipment) {
@@ -259,6 +260,7 @@ export class EquipmentsService {
       lift_shaft: equipment.lift_shaft,
       checklists: equipment.checklists,
       machine_room: equipment.machine_room,
+      escalator_information: equipment.escalator_information,
       car_interior: equipment.car_interior,
       created_at: equipment.created_at,
       updated_at: equipment.updated_at,

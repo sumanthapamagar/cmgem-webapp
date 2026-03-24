@@ -314,7 +314,7 @@ export class ReportsService {
       { label: 'Original Equipment Manufacturer', value: 'lift.original_equipment_manufacturer' },
       { label: 'Current Maintenance Provider', value: 'maintenance.current_provider' },
       { label: 'Roping Arrangement', value: 'lift.hoist_rope_size' },
-      { label: 'Control/Drive System.Regen?', value: 'lift.drive_system' },
+      { label: 'Control/Drive System', value: 'lift.drive_system' },
     ];
 
     return this.createTable([
@@ -482,7 +482,6 @@ export class ReportsService {
   private async generateDefectiveItemsData(): Promise<Table> {
     const headers = ['Unit No.', 'ELEVATOR / ESCALATOR / MOVING WALK DEFECT', 'Completion Details'];
     const rows: Array<Array<string | TableCell>> = [
-      ['LIFT CAR', '', '']
     ];
     for (const equipment of this.project.equipments) {
       if (!equipment.checklists || !equipment.category) continue;
@@ -647,17 +646,35 @@ export class ReportsService {
 
     const carInterriorRows: Array<{ label: string, typeKeys?: string[] }> = [
       {
-        label: 'Car interior Details (Walls, Floor, Ceiling, Lighting)',
-        typeKeys: ['car_interior.wall_type', 'car_interior.flooring_type', 'car_interior.ceiling_and_lights_type'],
-      }, {
-        label: 'Car mirror',
+        label: 'Walls',
+        typeKeys: ['car_interior.wall_type'],
+      },{
+        label: 'Ceiling and Lights',
+        typeKeys: ['car_interior.ceiling_and_lights_type'],
+      },{
+        label: 'Flooring',
+        typeKeys: ['car_interior.flooring_type'],
+      },{
+        label: 'Mirrors',
         typeKeys: ['car_interior.mirror_location'],
+      },{
+        label: 'Car Buttons',
+        typeKeys: ['car_interior.buttons_type'],
+      },{
+        label: 'Car indication',
+        typeKeys: ['car_interior.indication_type'],
+      },{
+        label: 'Voice Announcement',
+        typeKeys: ['car_interior.voice_announcement'],
       }, {
-        label: 'Car door finishes',
-        typeKeys: ['car_interior.car_door_finishes'],
+        label: 'Car Interior Handrails',
+        typeKeys: ['car_interior.handrails'],
       }, {
-        label: 'Car door type',
+        label: 'Car Door Type',
         typeKeys: ['car_interior.car_door_type'],
+      }, {
+        label: 'Car Door Finishes',
+        typeKeys: ['car_interior.car_door_finishes'],
       }]
 
     const landingRows: Array<{ label: string, typeKeys?: string[] }> = [{
@@ -709,9 +726,7 @@ export class ReportsService {
         ...carInterriorRows,
         ...landingRows
       ]
-      if (equipment.category == "machineRoom") {
         rows.push(...machineRoomRows)
-      }
       siteDetailsChildren.push(
         this.createTable(rows.map(row => {
           return row.typeKeys ? [
@@ -924,6 +939,7 @@ export class ReportsService {
               text: statusText,
               size: `9pt`,
               color: statusColor,
+              bold: true
             })
           ]
         })

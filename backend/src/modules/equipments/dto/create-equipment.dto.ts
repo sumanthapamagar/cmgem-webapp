@@ -20,6 +20,73 @@ export class CreateMaintenanceDto {
   annual_safety_visit_date?: string;
 }
 
+export class CreateEscalatorInformationDto {
+  @IsOptional()
+  @IsString()
+  current_maintenance_provider?: string;
+
+  @IsOptional()
+  @IsString()
+  equipment_type?: string;
+
+  @IsOptional()
+  @IsString()
+  unit_type?: string;
+
+  @IsOptional()
+  @IsString()
+  arrangement?: string;
+
+  @IsOptional()
+  @IsString()
+  unit_number_location?: string;
+
+  @IsOptional()
+  @IsString()
+  installation_modernised_date?: string;
+
+  @IsOptional()
+  @IsString()
+  original_equipment_manufacturer?: string;
+
+  @IsOptional()
+  @IsString()
+  equipment_model?: string;
+
+  @IsOptional()
+  @IsString()
+  control_drive_system?: string;
+
+  @IsOptional()
+  @IsString()
+  speed?: string;
+
+  @IsOptional()
+  @IsString()
+  rise?: string;
+
+  @IsOptional()
+  @IsString()
+  balustrade_type?: string;
+
+  @IsOptional()
+  @IsString()
+  balustrade_lighting?: string;
+
+  @IsOptional()
+  @IsString()
+  balustrade_height?: string;
+
+  @IsOptional()
+  @IsString()
+  skirt_type?: string;
+
+  @IsOptional()
+  @IsString()
+  skirt_lighting?: string;
+
+}
+
 export class CreateLiftInformationDto {
   @IsOptional()
   @IsString()
@@ -245,6 +312,10 @@ export class CreateEquipmentDto {
   @ValidateNested()
   @Type(() => CreateLiftInformationDto)
   lift: CreateLiftInformationDto;
+  
+  @ValidateNested()
+  @Type(() => CreateEscalatorInformationDto)
+  escalator_information: CreateEscalatorInformationDto;
 
   @ValidateNested()
   @Type(() => CreateLiftCarDto)

@@ -1,4 +1,4 @@
-const locations = [
+export const LIFT_LOCATIONS = [
     {
         text: 'Machine Room',
         key: 'machine_room',
@@ -25,4 +25,13 @@ const locations = [
     }
 ];
 
-export default locations
+export const ESCALATOR_LOCATIONS = [
+    {
+        text: 'Passenger Comfort',
+        key: 'passenger_comfort',
+    },
+    {
+        text: 'Truss',
+        key: 'truss',
+    },
+]
