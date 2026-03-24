@@ -1,7 +1,7 @@
 import { useContext, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
-import {LIFT_LOCATIONS} from '../../../../../constants/locations';
+import {LIFT_LOCATIONS, ESCALATOR_LOCATIONS} from '../../../../../constants/locations';
 
 import { Stack } from '../../../../../components';
 import { ProjectContext } from '../../../projectContext';
@@ -16,7 +16,9 @@ const useEquipmentChecklists = (equipment, projectChecklists) => {
     return useMemo(() => {
         if (!equipment?.category || !projectChecklists) return [];
 
-        return LIFT_LOCATIONS.map(({ key, text }) => ({
+        const locations = equipment.category === 'lift' ? LIFT_LOCATIONS : ESCALATOR_LOCATIONS;
+
+        return locations.map(({ key, text }) => ({
             key,
             text,
             checklists: projectChecklists
