@@ -15,8 +15,9 @@ import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 const useEquipmentChecklists = (equipment, projectChecklists) => {
     return useMemo(() => {
         if (!equipment?.category || !projectChecklists) return [];
+        console.log(equipment.category, projectChecklists);
 
-        const locations = equipment.category === 'lift' ? LIFT_LOCATIONS : ESCALATOR_LOCATIONS;
+        const locations = equipment.category === 'escaltor' ? ESCALATOR_LOCATIONS : LIFT_LOCATIONS;
 
         return locations.map(({ key, text }) => ({
             key,
