@@ -697,19 +697,19 @@ export class ReportsService {
       label: 'Lift Shaft / Machine Room',
     }, {
       label: 'Liftwell construction',
-      typeKeys: ['machine_room.liftwell_construiction'],
+      typeKeys: ['lift_shaft.liftwell_construiction'],
     }, {
       label: 'Vents in liftwell',
-      typeKeys: ['machine_room.vents_in_liftwell'],
+      typeKeys: ['lift_shaft.vents_in_liftwell'],
     }, {
       label: 'Smoke detectors at top of liftwell',
-      typeKeys: ['machine_room.smoke_detectors_at_top_of_liftwell'],
+      typeKeys: ['lift_shaft.smoke_detectors_at_top_of_liftwell'],
     }, {
       label: 'Ledges in liftwell',
-      typeKeys: ['machine_room.ledges_in_liftwell'],
+      typeKeys: ['lift_shaft.ledges_in_liftwell'],
     }, {
       label: 'Sprinklers in pit',
-      typeKeys: ['machine_room.sprinklers_in_pit'],
+      typeKeys: ['lift_shaft.sprinklers_in_pit'],
     }, {
       label: 'Machine Room location',
       typeKeys: ['machine_room.machine_room_location'],

@@ -140,7 +140,7 @@ export class ChecklistsService {
     // Get all checklists and filter by equipment type
     const allChecklists = await this.findAll();
     return allChecklists.filter(checklist => 
-      checklist.equipment_type.toLowerCase().includes(equipmentType.toLowerCase())
+      checklist.equipment_type.toLowerCase() === equipmentType.toLowerCase()
     );
   }
 
@@ -148,7 +148,7 @@ export class ChecklistsService {
     // Get all checklists and filter by location
     const allChecklists = await this.findAll();
     return allChecklists.filter(checklist => 
-      checklist.location.toLowerCase().includes(location.toLowerCase())
+      checklist.location.toLowerCase() === location.toLowerCase()
     );
   }
 
@@ -156,8 +156,8 @@ export class ChecklistsService {
     // Get all checklists and filter by equipment type and location
     const allChecklists = await this.findAll();
     return allChecklists.filter(checklist => 
-      checklist.equipment_type.toLowerCase().includes(equipmentType.toLowerCase()) &&
-      checklist.location.toLowerCase().includes(location.toLowerCase())
+      checklist.equipment_type.toLowerCase() === equipmentType.toLowerCase() &&
+      checklist.location.toLowerCase() === location.toLowerCase()
     );
   }
 
