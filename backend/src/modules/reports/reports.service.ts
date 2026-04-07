@@ -181,36 +181,36 @@ export class ReportsService {
       },
       OWNER_BULLET_LIST: {
         type: PatchType.DOCUMENT,
-        children: this.generateChecklistBulletList("owner")
+        children: this.generateChecklistBulletList(["owner", "Owner"])
 
       },
       HOUSEKEEPING_BULLET_LIST: {
         type: PatchType.DOCUMENT,
-        children: this.generateChecklistBulletList("housekeeping")
+        children: this.generateChecklistBulletList(["housekeeping", "Housekeeping"])
       },
       SAFETY_DEVICES_BULLET_LIST: {
         type: PatchType.DOCUMENT,
-        children: this.generateChecklistBulletList("safety-devices")
+        children: this.generateChecklistBulletList(["safety-devices", "Safety Devices"])
       },
       SAFETY_RISKS_BULLET_LIST: {
         type: PatchType.DOCUMENT,
-        children: this.generateChecklistBulletList("safety-risk")
+        children: this.generateChecklistBulletList(["safety-risk", "Safety Risks"])
       },
       RELIABILITY_AND_OUTAGE_RISKS_BULLET_LIST: {
         type: PatchType.DOCUMENT,
-        children: this.generateChecklistBulletList(["reliability", "outage-risk"])
+        children: this.generateChecklistBulletList(["reliability", "outage-risk", "Reliability", "Outage Risk"])
       },
       PASSENGER_COMFORT_BULLET_LIST: {
         type: PatchType.DOCUMENT,
-        children: this.generateChecklistBulletList("passenger-comfort")
+        children: this.generateChecklistBulletList(["passenger-comfort", "Passenger Comfort"])
       },
       COMPLIANCE_BULLET_LIST: {
         type: PatchType.DOCUMENT,
-        children: this.generateChecklistBulletList("compliance")
+        children: this.generateChecklistBulletList(["compliance", "Compliance"])
       },
       SUSTAINABILITY_BULLET_LIST: {
         type: PatchType.DOCUMENT,
-        children: this.generateChecklistBulletList("sustainability")
+        children: this.generateChecklistBulletList(["sustainability", "Sustainability"])
       },
 
     };
@@ -703,7 +703,7 @@ export class ReportsService {
       typeKeys: ['lift_shaft.vents_in_liftwell'],
     }, {
       label: 'Smoke detectors at top of liftwell',
-      typeKeys: ['lift_shaft.smoke_detectors_at_top_of_liftwell'],
+      typeKeys: ['lift_shaft.smoke_detectors_at_top_of_liftwell', 'lift_shaft.sprinklers_smoke_detectors'],
     }, {
       label: 'Ledges in liftwell',
       typeKeys: ['lift_shaft.ledges_in_liftwell'],
