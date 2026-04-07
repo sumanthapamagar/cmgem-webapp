@@ -22,13 +22,14 @@ export default function Checklists() {
     const { data: checklistData, isLoading, refetch } = useQuery({
         queryKey: ['checklists', equipmentType, location],
         queryFn: () =>
-            getChecklists({ equipment_type: equipmentType, location }).then(
-                (res) => {
-                    setChecklists(Array.isArray(res) ? res : []);
-                    return res;
-                }
-            )
+            getChecklists({ equipment_type: equipmentType, location })
     });
+
+    useEffect(() => {
+        if (checklistData) {
+            setChecklists(Array.isArray(checklistData) ? checklistData : []);
+        }
+    }, [checklistData]);
 
     const { mutate: mutatePatchChecklists, isPending: isSaving } = useMutation({
         mutationFn: (data) => {
