@@ -18,7 +18,10 @@ export function Equipmentsnavigation() {
             }
         ];
 
-        project?.equipments?.forEach((equipment) => {
+        project?.equipments
+        ?.slice()
+        .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }))
+        .forEach((equipment) => {
             nav.push({
                 title: equipment.name,
                 iconClass: 'fa-solid fa-fw fa-elevator mr-2',
@@ -76,4 +79,3 @@ export function Equipmentsnavigation() {
         </div>
     );
 };
-
