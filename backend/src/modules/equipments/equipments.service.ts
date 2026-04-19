@@ -52,7 +52,13 @@ export class EquipmentsService {
       project_id: projectId,
       deleted_at: { $exists: false }
     }).exec();
-    return equipments.map(equipment => this.mapToResponseDto(equipment));
+
+    // Sort equipments alphanumerically by name after fetching
+    const sortedEquipments = equipments.sort((a, b) => 
+      a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
+    );
+
+    return sortedEquipments.map(equipment => this.mapToResponseDto(equipment));
   }
 
   async findMultipleByIds(equipmentIds: string[]): Promise<EquipmentResponseDto[]> {
