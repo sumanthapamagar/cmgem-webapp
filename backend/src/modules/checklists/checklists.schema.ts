@@ -16,30 +16,57 @@ export class Checklist {
   // Base fields from checklist class
   @Prop({ required: true })
   @IsString()
-  equipment_type: string;
+  equipment_type!: string;
 
   @Prop({ required: true })
   @IsString()
-  title: string;
+  title!: string;
 
   @Prop({ default: "" })
   @IsOptional()
   @IsString()
-  description: string;
+  description!: string;
 
   @Prop({ default: 1000 })
   @IsOptional()
   @IsNumber()
-  order: number;
+  order!: number;
 
   @Prop({ required: true })
   @IsString()
-  location: string;
+  location!: string;
 
   @Prop({ default: "" })
   @IsOptional()
   @IsString()
-  category: string;
+  category!: string;
+
+  @Prop({ default: "" })
+  @IsOptional()
+  @IsString()
+  priority1Default!: string;
+
+  @Prop({ default: "" })
+  @IsOptional()
+  @IsString()
+  priority2Default!: string;
+
+  @Prop({ default: "" })
+  @IsOptional()
+  @IsString()
+  passDefault!: string;
+
+  @Prop({ default: "" })
+  @IsOptional()
+  @IsString()
+  naDefault!: string;
+
+  @Prop({ default: "" })
+  @IsOptional()
+  @IsString()
+  noteDefault!: string;
+
+  // Audit fields
 
   @Prop({ type: Object })
   created_by?: UserInfo;

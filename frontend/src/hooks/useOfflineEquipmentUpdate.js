@@ -203,67 +203,68 @@ export const useOfflineEquipmentUpdate = () => {
         return success;
     }, [validateOfflineProject, generateMongoId, queryClient]);
 
-    const updateEquipment = useCallback(async ({ projectId, equipmentId, updates, delay = 100 }) => {
-        try {
-            // Clear any existing timeout to prevent race conditions
-            if (updateTimeoutRef.current) {
-                clearTimeout(updateTimeoutRef.current);
-            }
-
-            // Set a new timeout for the update - reduced from 300ms to 100ms
-            updateTimeoutRef.current = setTimeout(async () => {
-                try {
-                    const projectValidation = await validateOfflineProject(projectId);
-                    if (!projectValidation.valid) {
-                        console.error('Project validation failed:', projectValidation.error);
-                        return false;
-                    }
-
-                    const project = projectValidation.project;
-                    const equipmentValidation = validateOfflineProjectEquipment(project, equipmentId);
-
-                    if (!equipmentValidation.valid) {
-                        console.error('Equipment validation failed:', equipmentValidation.error);
-                        return false;
-                    }
-
-                    const equipmentIndex = equipmentValidation.equipmentIndex;
-
-                    const updatedEquipment = {
-                        ...project.equipments[equipmentIndex],
-                        ...updates,
-                    };
-
-                    const updatedEquipments = [...project.equipments];
-                    updatedEquipments[equipmentIndex] = updatedEquipment;
-
-                    const updatedProject = {
-                        ...project,
-                        equipments: updatedEquipments,
-                        last_updated: new Date().toISOString(), // Add timestamp for tracking
-                    };
-
-                    const success = await offlineStorage.saveProject(updatedProject, false, true); // Skip limit enforcement for equipment updates
-
-                    // Invalidate offline project query to trigger UI update
-                    if (success && queryClient) {
-                        queryClient.invalidateQueries({ queryKey: ['offline-project', projectId] });
-                        lastUpdateRef.current = Date.now();
-                    } else {
-                        console.error('Failed to save project to offline storage');
-                    }
-
-                    return success;
-                } catch (error) {
-                    console.error('Error in delayed equipment update:', error);
-                    return false;
+    const updateEquipment = useCallback(({ projectId, equipmentId, updates, delay = 100 }) => {
+        return new Promise((resolve) => {
+            try {
+                // Clear any existing timeout to prevent race conditions
+                if (updateTimeoutRef.current) {
+                    clearTimeout(updateTimeoutRef.current);
                 }
-            }, delay);
 
-        } catch (error) {
-            console.error('Error setting up equipment update:', error);
-            return false;
-        }
+                // Set a new timeout for the update - reduced from 300ms to 100ms
+                updateTimeoutRef.current = setTimeout(async () => {
+                    try {
+                        const projectValidation = await validateOfflineProject(projectId);
+                        if (!projectValidation.valid) {
+                            console.error('Project validation failed:', projectValidation.error);
+                            return resolve(false);
+                        }
+
+                        const project = projectValidation.project;
+                        const equipmentValidation = validateOfflineProjectEquipment(project, equipmentId);
+
+                        if (!equipmentValidation.valid) {
+                            console.error('Equipment validation failed:', equipmentValidation.error);
+                            return resolve(false);
+                        }
+
+                        const equipmentIndex = equipmentValidation.equipmentIndex;
+
+                        const updatedEquipment = {
+                            ...project.equipments[equipmentIndex],
+                            ...updates,
+                        };
+
+                        const updatedEquipments = [...project.equipments];
+                        updatedEquipments[equipmentIndex] = updatedEquipment;
+
+                        const updatedProject = {
+                            ...project,
+                            equipments: updatedEquipments,
+                            last_updated: new Date().toISOString(), // Add timestamp for tracking
+                        };
+
+                        const success = await offlineStorage.saveProject(updatedProject, false, true); // Skip limit enforcement for equipment updates
+
+                        // Invalidate offline project query to trigger UI update
+                        if (success && queryClient) {
+                            queryClient.invalidateQueries({ queryKey: ['offline-project', projectId] });
+                            lastUpdateRef.current = Date.now();
+                        } else if (!success) {
+                            console.error('Failed to save project to offline storage');
+                        }
+
+                        return resolve(success);
+                    } catch (error) {
+                        console.error('Error in delayed equipment update:', error);
+                        return resolve(false);
+                    }
+                }, delay);
+            } catch (error) {
+                console.error('Error setting up equipment update:', error);
+                resolve(false);
+            }
+        });
     }, [validateOfflineProject, validateOfflineProjectEquipment, queryClient]);
 
 

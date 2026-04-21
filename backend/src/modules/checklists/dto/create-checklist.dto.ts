@@ -21,4 +21,25 @@ export class CreateChecklistDto {
   @IsOptional()
   @IsString()
   category?: string;
+
+  @IsOptional()
+  @IsString()
+  priority1Default?: string;
+
+  @IsOptional()
+  @IsString()
+  priority2Default?: string;
+
+  @IsOptional()
+  @IsString()
+  passDefault?: string;
+
+  @IsOptional()
+  @IsString()
+  naDefault?: string;
+
+  @IsOptional()
+  @IsString()
+  noteDefault?: string;
+
 }

@@ -1,12 +1,24 @@
 import { Field, Label } from '../../../../../components';
-import { CustomCheckbox } from '../components/CustomInputs';
+import { CustomCheckbox, useFieldAutosave } from '../components/CustomInputs';
 
 export default function InspectionItemCondition({ inspectionItem, equipment }) {
     const currentStatus = equipment?.checklists?.[inspectionItem._id]?.status || '';
+                const { saveField } = useFieldAutosave();
+    console.log(inspectionItem)
+    const handleStatusChange = (e) => {
 
-    const handleStatusChange = (newStatus) => {
-        // The CustomRadioGroup will handle saving internally
+        const currentComment = equipment.checklists?.[inspectionItem._id]?.comment;
+        //set defualt comment if empty
+        if (e && !currentComment) {
+                const fieldPath = `checklists.${inspectionItem._id}.comment`;
 
+                const defaultComment = inspectionItem[`${e}Default`]
+                console.log('Default comment:', defaultComment)
+                if (defaultComment) {
+                    const success = saveField(fieldPath, defaultComment);
+                }
+
+        }
     };
 
     return (
@@ -20,6 +32,7 @@ export default function InspectionItemCondition({ inspectionItem, equipment }) {
                         value={option.id}
                         fieldPath={`checklists.${inspectionItem._id}.status`}
                         checked={currentStatus === option.id}
+                        onChange={handleStatusChange}
 
                     />
                     <Label

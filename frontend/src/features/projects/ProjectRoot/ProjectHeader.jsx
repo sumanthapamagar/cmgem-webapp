@@ -37,7 +37,7 @@ export function ProjectHeader() {
             const url = window.URL.createObjectURL(blob)
             const link = document.createElement('a')
             link.href = url
-            link.download = `project_report_${projectId}.docx`
+            link.download = `CMG_Inspection_Report_${project.name}.docx`
             
             // Trigger download
             document.body.appendChild(link)

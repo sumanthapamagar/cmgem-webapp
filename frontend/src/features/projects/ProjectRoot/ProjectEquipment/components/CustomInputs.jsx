@@ -246,6 +246,7 @@ export function CustomCheckbox({
     className = '',
     checked,
     value,
+    onChange,
     ...props
 }) {
     // Get the save function directly from the hook
@@ -253,18 +254,12 @@ export function CustomCheckbox({
 
     const handleChange = useCallback(async (e) => {
         const newValue = checked ? "" : value;
-        try {
-            const success = await saveField(fieldPath, newValue);
+        const success = await saveField(fieldPath, newValue);
 
-            if (success) {
-                lastSavedValue.current = newValue;
-            } else {
-                console.error(`❌ Failed to save checkbox ${fieldPath}`);
-            }
-        } catch (error) {
-            console.error(`❌ Error saving checkbox ${fieldPath}:`, error);
+        if (success && onChange) {
+            onChange(newValue);
         }
-    }, [fieldPath, saveField, checked, value]);
+    }, [fieldPath, saveField, checked, value, onChange]);
 
     return (
         <Checkbox
@@ -391,16 +386,25 @@ export function CustomRadioGroup({
  */
 export function useFieldAutosave() {
     const { projectId, equipmentId } = useParams();
-    const { equipment } = useEquipment(equipmentId);
-    const { updateEquipment } = useOfflineEquipmentUpdate();
+    const { updateEquipment, validateOfflineProject } = useOfflineEquipmentUpdate();
 
     const saveField = useCallback(async (fieldPath, value) => {
-        if (!equipmentId || !projectId || !equipment) {
-            console.error('Missing required data for field save:', { equipmentId, projectId, equipment });
+        if (!equipmentId || !projectId) {
+            console.error('Missing equipmentId or projectId for field save.');
             return false;
         }
 
         try {
+            const projectValidation = await validateOfflineProject(projectId);
+            if (!projectValidation.valid) {
+                console.error('Project validation failed on save:', projectValidation.error);
+                return false;
+            }
+            const equipment = projectValidation.project.equipments.find(e => e._id === equipmentId);
+            if (!equipment) {
+                console.error(`Equipment ${equipmentId} not found in project ${projectId} on save.`);
+                return false;
+            }
 
 
             // Special handling for floors array updates
@@ -441,14 +445,9 @@ export function useFieldAutosave() {
                         updates,
                         delay: 100 // Quick save for floor updates
                     });
-
-                    if (success) {
-
-                    } else {
-                        console.error(`❌ Failed to save floor field ${fieldPath}`);
-                    }
-
                     return success;
+
+
                 }
             }
 
@@ -482,12 +481,9 @@ export function useFieldAutosave() {
                         updates,
                         delay: 100 // Quick save for checklist updates
                     });
-                    
-                    if (success) {
 
-                    } else {
-                        console.error(`❌ Failed to save checklist field ${fieldPath}`);
-                    }
+                    console.log(success)
+                    
                     
                     return success;
                 }
@@ -556,7 +552,11 @@ export function useFieldAutosave() {
                 delay: 100 // Quick save for regular field updates
             });
 
+            console.log(success)
+
             if (success) {
+
+                return true;
 
             } else {
                 console.error(`❌ Failed to save equipment field ${fieldPath}`);
@@ -564,10 +564,11 @@ export function useFieldAutosave() {
 
             return success;
         } catch (error) {
+            
             console.error(`❌ Failed to save field ${fieldPath}:`, error);
             return false;
         }
-    }, [equipmentId, projectId, equipment, updateEquipment]);
+    }, [equipmentId, projectId, updateEquipment, validateOfflineProject]);
 
     return { saveField };
 }

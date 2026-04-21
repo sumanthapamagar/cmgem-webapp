@@ -32,7 +32,7 @@ function ChecklistItemForm({ id = null, onCancel, onSaveSuccess }) {
         );
     return (
         <form onSubmit={handleSubmit(handleFormSubmit)}>
-            <Stack className='w-full m-4 gap-4'>
+            <Stack className='w-full p-4 gap-4'>
                 {/* Error Messages */}
                 {(queryError || mutationError) && (
                     <div className="bg-red-50 border border-red-200 rounded-md p-4">
@@ -78,6 +78,78 @@ function ChecklistItemForm({ id = null, onCancel, onSaveSuccess }) {
                         />
                     )}
                 </FormField>
+
+                
+                <FormField
+                    name="priority1Default"
+                    control={control}
+                    label="Priority 1 : Default Value"
+                >
+                    {(field) => (
+                        <Input
+                            {...field}
+                            placeholder="Enter priority 1 default value"
+                            className="w-full"
+                        />
+                    )}
+                </FormField>
+
+                <FormField
+                    name="priority2Default"
+                    control={control}
+                    label="Priority 2 : Default Value"
+                >
+                    {(field) => (
+                        <Input
+                            {...field}
+                            placeholder="Enter priority 2 default value"
+                            className="w-full"
+                        />
+                    )}
+                </FormField>
+
+                <FormField
+                    name="passDefault"
+                    control={control}
+                    label="Pass : Default Value"
+                >
+                    {(field) => (
+                        <Input
+                            {...field}
+                            placeholder="Enter pass default value"
+                            className="w-full"
+                        />
+                    )}
+                </FormField>
+
+                <FormField
+                    name="naDefault"
+                    control={control}
+                    label="N/A : Default Value"
+                >
+                    {(field) => (
+                        <Input
+                            {...field}
+                            placeholder="Enter N/A default value"
+                            className="w-full"
+                        />
+                    )}
+                </FormField>
+
+                <FormField
+                    name="noteDefault"
+                    control={control}
+                    label="Note : Default Value"
+                >
+                    {(field) => (
+                        <Input
+                            {...field}
+                            placeholder="Enter note default value"
+                            className="w-full"
+                        />
+                    )}
+                </FormField>
+
 
                 <FormField
                     name="category"

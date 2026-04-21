@@ -113,6 +113,8 @@ export class ChecklistsService {
       { new: true }
     ).exec();
 
+    console.log(`Updated checklist with ID ${id}:`, updatedChecklist);
+
     if (!updatedChecklist) {
       throw new NotFoundException(`Failed to update checklist with ID ${id}`);
     }
@@ -168,6 +170,11 @@ export class ChecklistsService {
       title: checklist.title,
       description: checklist.description,
       order: checklist.order,
+      priority1Default: checklist.priority1Default,
+      priority2Default: checklist.priority2Default,
+      passDefault: checklist.passDefault,
+      naDefault: checklist.naDefault,
+      noteDefault: checklist.noteDefault,
       location: checklist.location,
       category: checklist.category,
       created_by: checklist.created_by,

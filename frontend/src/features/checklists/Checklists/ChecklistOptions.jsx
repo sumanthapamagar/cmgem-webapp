@@ -62,6 +62,7 @@ export default function ChecklistOptions({ item, setChecklists }) {
                     open={isEditing}
                     hideDialog={() => setIsEditing(false)}
                     title="Edit Inspection Item"
+                    size="xl"
                 >
                     <ChecklistItemForm
                         id={item._id}

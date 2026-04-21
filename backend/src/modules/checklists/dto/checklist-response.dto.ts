@@ -46,4 +46,20 @@ export class ChecklistResponseDto {
   @IsOptional()
   @IsDate()
   deleted_at?: Date;
+
+  
+  @IsOptional()
+  priority1Default?: string;
+
+  @IsOptional()
+  priority2Default?: string;
+
+  @IsOptional()
+  passDefault?: string;
+  
+  @IsOptional()
+  naDefault?: string;
+
+  @IsOptional()
+  noteDefault?: string;
 }

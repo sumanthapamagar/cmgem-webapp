@@ -13,6 +13,11 @@ export const useChecklistForm = (id = null, onSaveSuccess) => {
         defaultValues: {
             title: '',
             description: '',
+            priority1Default: '',
+            priority2Default: '',
+            passDefault: '',
+            naDefault: '',
+            noteDefault: '',
             category: []
         },
         mode: 'onChange'
@@ -36,6 +41,11 @@ export const useChecklistForm = (id = null, onSaveSuccess) => {
             const formData = {
                 title: checklistData.title || '',
                 description: checklistData.description || '',
+                priority1Default: checklistData.priority1Default || '',
+                priority2Default: checklistData.priority2Default || '',
+                passDefault: checklistData.passDefault || '',
+                naDefault: checklistData.naDefault || '',
+                noteDefault: checklistData.noteDefault || '',
                 category: (checklistData.category || '').split('; ').filter(Boolean)
             };
             console.log('Setting form data:', formData);
@@ -47,7 +57,7 @@ export const useChecklistForm = (id = null, onSaveSuccess) => {
         mutationFn: (data) =>
             id ? patchChecklist(id, data) : createChecklist(data),
         onSuccess: (res) => {
-            onSaveSuccess(res.checklist);
+            onSaveSuccess(res);
             reset();
         }
     });
@@ -58,7 +68,12 @@ export const useChecklistForm = (id = null, onSaveSuccess) => {
             location: data.location,
             title: data.title,
             description: data.description || '',
-            category: data.category.join('; ')
+            category: data.category.join('; '),
+            priority1Default: data.priority1Default || '',
+            priority2Default: data.priority2Default || '',
+            passDefault: data.passDefault || '',
+            naDefault: data.naDefault || '',
+            noteDefault: data.noteDefault || ''
         });
     };
 

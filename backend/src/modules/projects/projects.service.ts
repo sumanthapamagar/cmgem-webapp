@@ -327,9 +327,7 @@ export class ProjectsService {
           projectData.address.street_1,
           projectData.address.street_2  ,
           projectData.address.city,
-          projectData.address.post_code,
-          projectData.address.state,
-          projectData.address.country
+          projectData.address.state + ' ' + projectData.address.post_code,
         ].filter(Boolean).join(', ')
       },
       inspection_date: projectData.inspection_date,
@@ -342,7 +340,7 @@ export class ProjectsService {
       deleted_at: projectData.deleted_at,
       equipments: (projectData.equipments || []).map(
         equipment => {
-          equipment.floors_served_front_rear  = `${equipment.lift?.floor_served_front}/${equipment.lift?.floor_served_rear}`
+          equipment.floors_served_front_rear  = `${equipment.lift?.floor_served_front} / ${equipment.lift?.floor_served_rear}`
           return equipment;
         }
       ),

@@ -569,11 +569,13 @@ export class ReportsService {
             },
             children: [
               new Paragraph({
+                alignment: AlignmentType.CENTER,
                 children: [
                   new TextRun({
                     text: equipment.name || `Equipment ${equipment._id}`,
                     bold: true,
                     size: `9pt`,
+                    
                     color: '#141414',
                   })
                 ]
@@ -584,11 +586,42 @@ export class ReportsService {
       )
     ];
 
-    const subHeaders = ['Floor ID', ...this.project.equipments.flatMap(_eq => ['Buttons', 'Indicator', 'Chime'])];
+    const subHeaders = ['Floor ID', ...this.project.equipments.flatMap(_eq => ['Buttons', 'Indicator', 'Chime'])]
+    .map(header => new TableCell({
+          verticalAlign: VerticalAlignTable.CENTER,
+          children: [
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              children: [
+                new TextRun({
+                  text: header,
+                  size: "9pt",
+                  color: '#141414',
+                })
+              ]
+            })
+          ]
+        }));
     const rows: Array<Array<string | TableCell>> = [];
 
     for (const floor of this.allFloorDesignations) {
-      const row: Array<string | TableCell> = [floor];
+      const row: Array<string | TableCell> = [
+        new TableCell({
+          verticalAlign: VerticalAlignTable.CENTER,
+          children: [
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              children: [
+                new TextRun({
+                  text: floor,
+                  size: "9pt",
+                  color: '#141414',
+                })
+              ]
+            })
+          ]
+        })
+      ];
 
       for (const equipment of this.project.equipments) {
         const floorData = equipment.floors.find(f => f.designation === floor);
@@ -615,11 +648,43 @@ export class ReportsService {
   // Helper method to generate floor levelling data
   private generateFloorLevellingData(): Table {
 
-    const headers = ['Floor ID', ...this.project.equipments.map(eq => eq.name || `Equipment ${eq._id}`)];
+    const headers = ['Floor ID', ...this.project.equipments.map(eq => eq.name || `Equipment ${eq._id}`)]
+    .map(header => new TableCell({
+          verticalAlign: VerticalAlignTable.CENTER,
+          children: [
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              children: [
+                new TextRun({
+                  text: header,
+                  size: "9pt",
+                  color: '#141414',
+                })
+              ]
+            })
+          ]
+        }));
+    ;
     const rows: Array<Array<string | TableCell>> = [];
 
     for (const floor of this.allFloorDesignations) {
-      const row: Array<string | TableCell> = [floor];
+      const row: Array<string | TableCell> = [
+        new TableCell({
+          verticalAlign: VerticalAlignTable.CENTER,
+          children: [
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              children: [
+                new TextRun({
+                  text: floor,
+                  size: "9pt",
+                  color: '#141414',
+                })
+              ]
+            })
+          ]
+        })
+      ];
 
       for (const equipment of this.project.equipments) {
         const floorData = equipment.floors.find(f => f.designation === floor);
@@ -801,7 +866,7 @@ export class ReportsService {
       typeKey: 'car_interior.wall_type',
       statusKey: 'walls'
     }, {
-      label: 'Ceiling and Lights',
+      label: 'Ceiling and lights',
       typeKey: 'car_interior.ceiling_and_lights_type',
       statusKey: 'ceiling'
     }, {
@@ -813,27 +878,27 @@ export class ReportsService {
       typeKey: 'car_interior.mirror_location',
       statusKey: 'mirror'
     }, {
-      label: 'Hand Rails',
+      label: 'Hand rails',
       typeKey: 'car_interior.handrails',
       statusKey: 'handrails'
     }, {
-      label: 'Car Buttons',
+      label: 'Car buttons',
       typeKey: 'car_interior.buttons_type',
       statusKey: 'buttons'
     }, {
-      label: 'Car Indication',
+      label: 'Car indication',
       typeKey: 'car_interior.indication_type',
       statusKey: 'indication'
     }, {
-      label: 'Voice Announcement',
+      label: 'Voice announcement',
       typeKey: 'car_interior.voice_announcement',
       statusKey: 'voice_announcement'
     }, {
-      label: 'Car Door Type',
+      label: 'Car door type',
       typeKey: 'car_interior.car_door_type',
       statusKey: 'car_door_type'
     }, {
-      label: 'Car Door Finishes',
+      label: 'Car door finishes',
       typeKey: 'car_interior.car_door_finishes',
       statusKey: 'car_door_finishes'
     }]
@@ -927,8 +992,8 @@ export class ReportsService {
   }
 
   private getStatusCell(status: string): TableCell {
-    const statusText = status === "pass" ? "✓" : ["priority1", "priority2"].includes(status) ? "✗" : ""
-    const statusColor = status === "pass" ? "#588157" : ["priority1", "priority2"].includes(status) ? "#FF0000" : "#000000"
+    const statusText = status === "pass" ? "✓" : ["priority1", "priority2", "needs-attention"].includes(status) ? "✖" : ""
+    const statusColor = status === "pass" ? "#588157" : ["priority1", "priority2", "needs-attention"].includes(status) ? "#FF0000" : "#000000"
 
     return new TableCell({
       children: [

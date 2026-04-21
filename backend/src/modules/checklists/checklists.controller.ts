@@ -64,6 +64,7 @@ export class ChecklistsController {
     @Body() updateChecklistDto: CreateChecklistDto,
     @GetUserInfo() user: UserInfo
   ): Promise<ChecklistResponseDto> {
+    console.log(`Updating checklist with ID ${id} using data:`, updateChecklistDto, 'by user:', user);
     return this.checklistsService.update(id, updateChecklistDto, user);
   }
 
