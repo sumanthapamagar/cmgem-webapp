@@ -23,7 +23,7 @@ export function Equipmentsnavigation() {
         .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }))
         .forEach((equipment) => {
             nav.push({
-                title: equipment.name,
+                title: equipment.lift.lift_number,
                 iconClass: 'fa-solid fa-fw fa-elevator mr-2',
                 key: `${equipment._id}`,
                 href: `/projects/${project._id}/equipments/${equipment._id}/information`,
@@ -58,7 +58,7 @@ export function Equipmentsnavigation() {
     if (!project) return null;
 
     return (
-        <div className="sticky flex flex-col top-[32px] h-[calc(100vh-56px)] bg-neutral-200 overflow-x-clip overflow-y-auto w-64 min-w-64 border-r border-slate-300">
+        <div className="sticky flex flex-col top-8 h-[calc(100vh-56px)] bg-neutral-200 overflow-x-clip overflow-y-auto w-64 min-w-64 border-r border-slate-300">
             <Stack className="sticky top-0 z-10 bg-neutral-200">
                 <Offline>
                     <div className='text-sm font-semibold p-4 lg:p-6 border-b border-harper-blue'>

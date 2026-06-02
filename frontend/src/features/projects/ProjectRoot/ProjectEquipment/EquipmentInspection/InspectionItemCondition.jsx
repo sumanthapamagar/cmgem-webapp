@@ -47,9 +47,9 @@ export default function InspectionItemCondition({ inspectionItem, equipment }) {
 }
 
 const options = [
-    { id: 'priority1', title: 'Priority 1', color: 'text-red-500' },
-    { id: 'priority2', title: 'Priority 2', color: 'text-orange-500' },
-    { id: 'pass', title: 'pass', color: 'text-green-500' },
+    { id: 'priority1', title: 'Recommend / Improve', color: 'text-red-500' },
+    { id: 'priority2', title: 'Requires Attention', color: 'text-orange-500' },
+    { id: 'pass', title: 'Pass', color: 'text-green-500' },
     { id: 'na', title: 'N/A', color: 'text-black/80' },
     { id: 'note', title: 'Note', color: 'text-black/80' }
 ];

@@ -139,7 +139,7 @@ export const useOfflineEquipmentUpdate = () => {
                 "landing_doors_frame_finishes": ""
             },
             lift: {
-                "lift_number": "",
+                "lift_number": name,
                 "installation_date": "",
                 "original_equipment_manufacturer": "",
                 "lift_type": "",

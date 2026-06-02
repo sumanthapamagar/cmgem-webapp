@@ -41,7 +41,7 @@ const ProjectForm = ({
                 city: '',
                 post_code: '',
                 state: '',
-                country: ''
+                country: 'Australia'
             },
             inspection_date: '',
             account_id: '',
@@ -216,7 +216,9 @@ const ProjectForm = ({
                             </div>
                         </div>
                     </Field>
-                    <Field>
+                    {/*
+                        Country field is removed as all projects are in Australia, but can be added back if needed in the future 
+                        <Field>
                         <div className="flex items-center gap-6">
                             <Label className="w-40 shrink-0">Country *</Label>
                             <div className="flex-1">
@@ -231,7 +233,7 @@ const ProjectForm = ({
                                 )}
                             </div>
                         </div>
-                    </Field>
+                    </Field> */}
                 </Fieldset>
 
                 <Fieldset className="flex flex-col gap-2">
