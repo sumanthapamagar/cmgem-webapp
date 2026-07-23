@@ -186,7 +186,7 @@ export class ReportsService {
       },
       HOUSEKEEPING_BULLET_LIST: {
         type: PatchType.DOCUMENT,
-        children: this.generateChecklistBulletList(["housekeeping", "Housekeeping"])
+        children: this.generateChecklistBulletList(["housekeeping", "Housekeeping", "HouseKeeping"])
       },
       SAFETY_DEVICES_BULLET_LIST: {
         type: PatchType.DOCUMENT,
@@ -194,11 +194,11 @@ export class ReportsService {
       },
       SAFETY_RISKS_BULLET_LIST: {
         type: PatchType.DOCUMENT,
-        children: this.generateChecklistBulletList(["safety-risk", "Safety Risks"])
+        children: this.generateChecklistBulletList(["safety-risk", "Safety Risks", "Safety Risk", ])
       },
       RELIABILITY_AND_OUTAGE_RISKS_BULLET_LIST: {
         type: PatchType.DOCUMENT,
-        children: this.generateChecklistBulletList(["reliability", "outage-risk", "Reliability", "Outage Risk"])
+        children: this.generateChecklistBulletList(["reliability", "outage-risk", "Reliability", "Outage Risk", "Reliability", "Outage Risk", "outage-risk"])
       },
       PASSENGER_COMFORT_BULLET_LIST: {
         type: PatchType.DOCUMENT,
