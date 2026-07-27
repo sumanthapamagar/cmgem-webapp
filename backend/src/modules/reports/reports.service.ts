@@ -287,7 +287,7 @@ export class ReportsService {
             level: 0,
           }
         }));
-      });
+      });876543t
 
       if (equipmentItems.length > 0) {
         paragraphs.push(new Paragraph(equipment.name || `Equipment ${equipment._id}`,
