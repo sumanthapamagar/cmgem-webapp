@@ -186,7 +186,7 @@ export class ReportsService {
       },
       HOUSEKEEPING_BULLET_LIST: {
         type: PatchType.DOCUMENT,
-        children: this.generateChecklistBulletList(["housekeeping", "Housekeeping", "HouseKeeping"])
+        children: this.generateChecklistBulletList(["housekeeping", "Housekeeping", "HouseKeeping", "general-maintenance-and-housekeeping"])
       },
       SAFETY_DEVICES_BULLET_LIST: {
         type: PatchType.DOCUMENT,
@@ -194,11 +194,11 @@ export class ReportsService {
       },
       SAFETY_RISKS_BULLET_LIST: {
         type: PatchType.DOCUMENT,
-        children: this.generateChecklistBulletList(["safety-risk", "Safety Risks", "Safety Risk", ])
+        children: this.generateChecklistBulletList(["safety-risk","safety-risks", "Safety Risks", "Safety Risk", ])
       },
       RELIABILITY_AND_OUTAGE_RISKS_BULLET_LIST: {
         type: PatchType.DOCUMENT,
-        children: this.generateChecklistBulletList(["reliability", "outage-risk", "Reliability", "Outage Risk", "Reliability", "Outage Risk", "outage-risk"])
+        children: this.generateChecklistBulletList(["reliability-and-outage-risks","reliability", "outage-risk", "Reliability", "Outage Risk", "Reliability", "Outage Risk", "outage-risk"])
       },
       PASSENGER_COMFORT_BULLET_LIST: {
         type: PatchType.DOCUMENT,
@@ -206,7 +206,7 @@ export class ReportsService {
       },
       COMPLIANCE_BULLET_LIST: {
         type: PatchType.DOCUMENT,
-        children: this.generateChecklistBulletList(["compliance", "Compliance"])
+        children: this.generateChecklistBulletList(["compliance", "Compliance", "compliance-and-regulations"])
       },
       SUSTAINABILITY_BULLET_LIST: {
         type: PatchType.DOCUMENT,
@@ -287,7 +287,7 @@ export class ReportsService {
             level: 0,
           }
         }));
-      });876543t
+      });
 
       if (equipmentItems.length > 0) {
         paragraphs.push(new Paragraph(equipment.name || `Equipment ${equipment._id}`,

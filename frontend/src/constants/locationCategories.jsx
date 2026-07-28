@@ -1,47 +1,43 @@
 const locationCategories = [
     {
-        key: 'comment',
-        text: 'Comment'
-    },
-    {
-        key: 'compliance',
-        text: 'Compliance'
-    },
-    {
-        key: 'housekeeping',
-        text: 'HouseKeeping'
-    },
-    {
-        key: 'note',
-        text: 'Note'
+        key: 'general-maintenance-and-housekeeping',
+        text: 'General Maintenance and Housekeeping'
     },
     {
         key: 'owner',
         text: 'Owner'
     },
     {
+        key: 'safety-risks',
+        text: 'Safety Risks'
+    },
+    {
+        key: 'reliability-and-outage-risks',
+        text: 'Reliability and Outage Risks'
+    },
+    {
         key: 'passenger-comfort',
         text: 'Passenger Comfort'
     },
     {
-        key: 'reliability',
-        text: 'Reliability'
+        key: 'compliance-and-regulations',
+        text: 'Compliance and Regulations'
     },
     {
         key: 'safety-devices',
-        text: 'Safety-Devices'
-    },
-    {
-        key: 'safety-risk',
-        text: 'Safety Risk'
+        text: 'Safety Devices'
     },
     {
         key: 'sustainability',
         text: 'Sustainability'
     },
     {
-        key: 'outage-risk',
-        text: 'Outage Risk'
+        key: 'comment',
+        text: 'Comment'
+    },
+    {
+        key: 'note',
+        text: 'Note'
     },
     {
         key: 'na',
@@ -50,3 +46,8 @@ const locationCategories = [
 ];
 
 export default locationCategories
+
+export const locationCategoryMap = locationCategories.reduce((map, category) => {
+    map[category.key] = category.text;
+    return map;
+}, {});
