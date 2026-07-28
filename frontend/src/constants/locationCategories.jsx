@@ -28,8 +28,8 @@ const locationCategories = [
         text: 'Safety Devices'
     },
     {
-        key: 'sustainability',
-        text: 'Sustainability'
+        key: 'sustainability-and-technology',
+        text: 'Sustainability and Technology'
     },
     {
         key: 'comment',

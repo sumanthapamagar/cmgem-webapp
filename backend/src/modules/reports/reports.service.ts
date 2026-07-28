@@ -210,7 +210,7 @@ export class ReportsService {
       },
       SUSTAINABILITY_BULLET_LIST: {
         type: PatchType.DOCUMENT,
-        children: this.generateChecklistBulletList(["sustainability", "Sustainability"])
+        children: this.generateChecklistBulletList(["sustainability", "Sustainability", "sustainability-and-technology"])
       },
 
     };
