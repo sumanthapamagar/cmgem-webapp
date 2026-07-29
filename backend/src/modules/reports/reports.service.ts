@@ -262,6 +262,11 @@ export class ReportsService {
     const categoryArray = Array.isArray(categories) ? categories : [categories];
     const paragraphs: FileChild[] = [];
 
+    let isEmpty = true;
+
+
+
+
     this.project.equipments.forEach(equipment => {
       if (!equipment.category || !equipment.checklists) return;
       const equipmentItems: FileChild[] = [];
@@ -277,6 +282,7 @@ export class ReportsService {
         if (!comment)
           return
 
+        isEmpty = false;
         equipmentItems.push(new Paragraph({
           text: comment,
           spacing: {
@@ -295,6 +301,27 @@ export class ReportsService {
         paragraphs.push(...equipmentItems);
       }
     });
+    
+    if (isEmpty) {
+      paragraphs.push(new Paragraph({
+        children: [
+                  new TextRun({
+                    text: "Insert Items / No Items identified",
+                    size: `10pt`,
+                    
+                    color: '#FF0000',
+                  })
+                ],
+        spacing: {
+          before: 200,
+          after: 200
+        },
+        bullet: {
+          level: 0,
+        }
+      }));
+    }
+
     return paragraphs;
   }
 
@@ -386,7 +413,7 @@ export class ReportsService {
           }),
         ]
       }),
-      ['Fullly open to fully closed', 'sec', '2.4 - 2.8'],
+      ['Fully open to fully closed', 'sec', '2.4 - 2.8'],
       ['Fully closed to fully open', 'sec', '1.8 - 2.2'],
       ['Levelling time', 'sec', '1.0 - 1.2'],
       ['Closing Force:', 'N', '<=150'],
@@ -425,19 +452,16 @@ export class ReportsService {
 
   // Helper method to generate passenger comfort 1 data
   private generatePassengerComfort1Data(): Table {
-    const headers = ['Parameter:', 'Units', 'Target'];
+    const headers = ['Performance Description', 'Performance Target'];
     const rows = [
-      ['1. Vertical acceleration', 'm/s²', '0.9 - 1.1'],
-      ['2. Vertical deceleration', 'm/s²', '0.9 - 1.1'],
-      ['3. Jerk', 'm/s²', '1 to 3'],
-      ['4. Full speed', 'm/s²', ''],
-      ['    ●Up - maximum', '', '4.75 - 5.25'],
-      ['    ●Down - maximum', '', '4.75 - 5.25'],
-      ['5. Longitudinal vibration:', '', 'Max 0.180'],
-      ['6. Lateral vibration:', '', 'Max 0.180'],
-      ['7. Vertical vibration (Outside Jerk Zones)', '', 'Max 0.200'],
-      ['8. Vertical vibration (Inside Jerk Zones)', '', 'Max 0.350'],
-      ['9. Noise level measured whilst lfit is travelling', 'dBA', '58']
+      ['Acceleration and deceleration rates ', '0.8 to 1.1 m/s²'],
+      ['Jerk ', '0.75 - 1.0 m/s³'],
+      ['Horizontal vibration inside lift car', '0.20 m/s², peak to peak'],
+      ['Vertical vibration inside lift car ', '0.20 m/s², peak to peak'],
+      ['Contract speed (m/s) ', 'Design Speed ±5%'],
+      ['Floor level accuracy', '±5mm under any load conditions '],
+      ['Average peak sound level in moving car (fan off)', '55 dB(A) '],
+      ['Average peak sound level during door operation (fan off) ', '55 dB(A) ']
     ];
 
     return this.createTable([
@@ -714,7 +738,7 @@ export class ReportsService {
         label: 'Walls',
         typeKeys: ['car_interior.wall_type'],
       },{
-        label: 'Ceiling and Lights',
+        label: 'Ceiling and lights',
         typeKeys: ['car_interior.ceiling_and_lights_type'],
       },{
         label: 'Flooring',
@@ -723,22 +747,22 @@ export class ReportsService {
         label: 'Mirrors',
         typeKeys: ['car_interior.mirror_location'],
       },{
-        label: 'Car Buttons',
+        label: 'Car buttons',
         typeKeys: ['car_interior.buttons_type'],
       },{
         label: 'Car indication',
         typeKeys: ['car_interior.indication_type'],
       },{
-        label: 'Voice Announcement',
+        label: 'Voice announcement',
         typeKeys: ['car_interior.voice_announcement'],
       }, {
-        label: 'Car Interior Handrails',
+        label: 'Car interior handrails',
         typeKeys: ['car_interior.handrails'],
       }, {
-        label: 'Car Door Type',
+        label: 'Car door type',
         typeKeys: ['car_interior.car_door_type'],
       }, {
-        label: 'Car Door Finishes',
+        label: 'Car door finishes',
         typeKeys: ['car_interior.car_door_finishes'],
       }]
 
@@ -748,7 +772,7 @@ export class ReportsService {
       label: 'Fire rated landing doors (Label attached)',
       typeKeys: ['landings.fire_rated_landing_doors'],
     }, {
-      label: 'Landing Signalisation type',
+      label: 'Landing signalisation type',
       typeKeys: ['landings.landing_signalisation_type'],
     }, {
       label: 'Nº of landing button risers',
@@ -761,22 +785,22 @@ export class ReportsService {
     const machineRoomRows: Array<{ label: string, typeKeys?: string[] }> = [{
       label: 'Lift Shaft / Machine Room',
     }, {
-      label: 'Liftwell construction',
+      label: 'Lift well construction',
       typeKeys: ['lift_shaft.liftwell_construiction'],
     }, {
       label: 'Vents in liftwell',
-      typeKeys: ['lift_shaft.vents_in_liftwell'],
+      typeKeys: ['lift_shaft.vents_in_lift well'],
     }, {
-      label: 'Smoke detectors at top of liftwell',
+      label: 'Smoke detectors at top of lift well',
       typeKeys: ['lift_shaft.smoke_detectors_at_top_of_liftwell', 'lift_shaft.sprinklers_smoke_detectors'],
     }, {
-      label: 'Ledges in liftwell',
+      label: 'Ledges in lift well',
       typeKeys: ['lift_shaft.ledges_in_liftwell'],
     }, {
       label: 'Sprinklers in pit',
       typeKeys: ['lift_shaft.sprinklers_in_pit'],
     }, {
-      label: 'Machine Room location',
+      label: 'Machine room location',
       typeKeys: ['machine_room.machine_room_location'],
     }, {
       label: 'Lifting beams with rated load (SWL visible)',
@@ -878,7 +902,7 @@ export class ReportsService {
       typeKey: 'car_interior.mirror_location',
       statusKey: 'mirror'
     }, {
-      label: 'Hand rails',
+      label: 'Handrails',
       typeKey: 'car_interior.handrails',
       statusKey: 'handrails'
     }, {
