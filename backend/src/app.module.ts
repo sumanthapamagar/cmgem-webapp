@@ -22,7 +22,7 @@ import { AuthModule } from './modules/auth/auth.module';
       connectionName: 'default',
       dbName: process.env.MONGODB_DATABASE || 'cmgem',
     }),
-    // AuthModule,
+    AuthModule,
     CommonModule,
     AccountsModule,
     ProjectsModule,
