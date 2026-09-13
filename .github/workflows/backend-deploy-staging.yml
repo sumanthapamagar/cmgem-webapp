@@ -7,14 +7,14 @@ on:
       - dev
     paths:
       - "backend/**"
-      - ".github/workflows/backend-deploy.yml"
+      - ".github/workflows/backend-deploy-staging.yml"
   pull_request:
     branches-ignore:
       - main
       - dev
     paths:
       - "backend/**"
-      - ".github/workflows/backend-deploy.yml"
+      - ".github/workflows/backend-deploy-staging.yml"
 
 jobs:
   build_and_deploy:
