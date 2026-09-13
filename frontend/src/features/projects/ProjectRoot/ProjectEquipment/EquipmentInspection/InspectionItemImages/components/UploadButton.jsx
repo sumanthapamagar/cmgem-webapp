@@ -15,7 +15,7 @@ export const UploadButton = ({ onSelectImages }) => {
                 }}
             >
                 <i className="fa-solid fa-cloud-arrow-up fa-fw mr-4"></i>
-                Add pictures
+                Upload Images
             </Button>
             <input
                 hidden

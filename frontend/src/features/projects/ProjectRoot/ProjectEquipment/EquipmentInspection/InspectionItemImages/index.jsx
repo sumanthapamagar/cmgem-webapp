@@ -1,7 +1,7 @@
 import { useContext, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Stack } from "../../../../../../components";
+import { Online, Stack } from "../../../../../../components";
 import {
     ImageGallery,
     ImageUploadModal,
@@ -16,6 +16,9 @@ import { useEquipmentAttachments } from "../../../../../../hooks/useEquipmentAtt
 import { processImageUrls } from "./utils/imageUtils";
 import { useImageUpload } from "../../../../../../hooks/useImageUpload";
 import { deleteAttachment, patchEquipment } from "../../../../../../lib/api";
+import InAppCamera from "./components/InAppCamera";
+import { OfflineImageGallary } from "./components/OfflineImageGallary";
+import { useOfflineImageKeys } from "../../../../../../hooks/useOfflineImageKeys";
 
 export function InspectionImages({ inspectionItem }) {
     const { equipmentId } = useParams();
@@ -25,6 +28,9 @@ export function InspectionImages({ inspectionItem }) {
     const sasTokenQuery = useSasToken(equipmentId);
     const equipmentAttachmentsQuery = useEquipmentAttachments(equipmentId);
     
+
+    const {offlineImageKeys, refetchOfflineImages} = useOfflineImageKeys(project._id, equipmentId, inspectionItem._id);
+
     const equipment = useMemo(() =>
         project?.equipments?.find((eq) => eq._id == equipmentId),
         [project?.equipments, equipmentId]
@@ -94,45 +100,58 @@ export function InspectionImages({ inspectionItem }) {
 
     return (
         <Stack className="gap-2 h-full place-content-end">
-            <ImageGallery
-                images={uploadedImages}
-                onImageClick={setVisibleImage}
-                onDeleteClick={setImageToDelete}
-                imageLoadErrors={imageLoadErrors}
-                onImageError={handleImageError}
-                onImageLoad={handleImageLoad}
-                sasTokenQuery={sasTokenQuery}
-                token={token}
-                equipment={equipment}
-            />
-
-            <DebugInfo uploadedImages={uploadedImages} token={token} />
-
-            <UploadButton onSelectImages={onSelectImages} />
-
-            {/* Image Viewer Modal */}
-            <ImageViewerModal
-                visibleImage={visibleImage}
-                onClose={handleCloseImageModal}
-            />
-
-            {/* Delete Confirmation Modal */}
-            <DeleteConfirmationModal
-                imageToDelete={imageToDelete}
-                onClose={handleCloseDeleteModal}
-                onConfirm={handleConfirmDelete}
-            />
-
-            {/* Image Upload Modal */}
-            {images.length > 0 && (
-                <ImageUploadModal
-                    images={images}
-                    onClose={handleCloseUploadModal}
-                    onUpload={handleUploadAllImages}
-                    onRemoveImage={removeImage}
-                    isUploading={isUploading}
+            <Online>
+                <ImageGallery
+                    images={uploadedImages}
+                    onImageClick={setVisibleImage}
+                    onDeleteClick={setImageToDelete}
+                    imageLoadErrors={imageLoadErrors}
+                    onImageError={handleImageError}
+                    onImageLoad={handleImageLoad}
+                    sasTokenQuery={sasTokenQuery}
+                    token={token}
+                    equipment={equipment}
                 />
-            )}
+            </Online>
+
+                <OfflineImageGallary
+                    inspectionItem={inspectionItem} 
+                    onImageClick={setVisibleImage}
+                    offlineImageKeys={offlineImageKeys}
+                />
+                {/* <DebugInfo uploadedImages={uploadedImages} token={token} /> */}
+                <Stack horizontal className="gap-4">
+                    <InAppCamera 
+                        refetchOfflineImages={refetchOfflineImages}
+                        inspectionItem={inspectionItem} />
+                        <Online>
+                            <UploadButton onSelectImages={onSelectImages} />
+                        </Online>
+                </Stack>
+
+                {/* Image Viewer Modal */}
+                <ImageViewerModal
+                    visibleImage={visibleImage}
+                    onClose={handleCloseImageModal}
+                />
+
+                {/* Delete Confirmation Modal */}
+                <DeleteConfirmationModal
+                    imageToDelete={imageToDelete}
+                    onClose={handleCloseDeleteModal}
+                    onConfirm={handleConfirmDelete}
+                />
+
+                {/* Image Upload Modal */}
+                {images.length > 0 && (
+                    <ImageUploadModal
+                        images={images}
+                        onClose={handleCloseUploadModal}
+                        onUpload={handleUploadAllImages}
+                        onRemoveImage={removeImage}
+                        isUploading={isUploading}
+                    />
+                )}
         </Stack>
     );
 }

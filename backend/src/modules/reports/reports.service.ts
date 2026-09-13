@@ -35,7 +35,6 @@ export class ReportsService {
       });
       return buffer;
     } catch (error) {
-      console.log("error", error);
       throw new Error(`Failed to generate Word document: ${error.message}`);
     }
   }
@@ -541,11 +540,6 @@ export class ReportsService {
           const successfulImages = imageResults.filter(img => img instanceof ImageRun).length;
           const failedImages = totalImages - successfulImages;
 
-          if (failedImages > 0) {
-            console.warn(`Image processing summary for equipment ${equipment.name || equipment._id}: ${successfulImages}/${totalImages} images loaded successfully, ${failedImages} failed (using fallbacks)`);
-          } else if (totalImages > 0) {
-            console.log(`Image processing summary for equipment ${equipment.name || equipment._id}: ${successfulImages}/${totalImages} images loaded successfully`);
-          }
 
           rows.push([
             equipment.name || `Equipment ${equipment._id}`,

@@ -37,7 +37,6 @@ export const useChecklistForm = (id = null, onSaveSuccess) => {
     // Reset form when data is loaded
     useEffect(() => {
         if (checklistData) {
-            console.log('Loading checklist data for editing:', checklistData);
             const formData = {
                 title: checklistData.title || '',
                 description: checklistData.description || '',
@@ -48,7 +47,6 @@ export const useChecklistForm = (id = null, onSaveSuccess) => {
                 noteDefault: checklistData.noteDefault || '',
                 category: (checklistData.category || '').split('; ').filter(Boolean)
             };
-            console.log('Setting form data:', formData);
             reset(formData);
         }
     }, [checklistData, reset]);

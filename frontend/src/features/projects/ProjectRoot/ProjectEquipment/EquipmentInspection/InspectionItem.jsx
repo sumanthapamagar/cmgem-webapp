@@ -24,9 +24,7 @@ export default function InspectionItem({ inspectionItem, equipment }) {
                     />
                 </Stack>
             </Stack>
-            <Online>
                 <InspectionImages inspectionItem={inspectionItem} />
-            </Online>
         </Stack>
     );
 }

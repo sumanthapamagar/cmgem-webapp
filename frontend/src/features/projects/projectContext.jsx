@@ -1,4 +1,4 @@
-import { createContext, useState, } from 'react';
+import { createContext, useEffect, useState, } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
@@ -7,16 +7,20 @@ import {
     saveProjectEquipments,
 } from '../../lib/api';
 import { offlineStorage, updateLastVisitedTimestamp } from '../../lib/offline-api';
-import { Button, Dialog, DialogBody, DialogActions, DialogTitle, ProjectLoadingState } from '../../components';
+import { Button, Dialog, DialogBody, DialogActions, DialogTitle, ProjectLoadingState, LoadingBar, Text } from '../../components';
 import { projectKeys } from './projects';
 import { useNetworkStatus } from '../../contexts/NetworkStatusContext';
 import { useChecklists } from '../../hooks/useChecklists';
+import { ProgressBar } from '../../components/common/ProgressBar';
 
 const ProjectContext = createContext();
 
 const ProjectProvder = ({ children, projectId }) => {
     const queryClient = useQueryClient();
     const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' });
+
+    const [totalOfflineImages, setTotalOfflineImages] = useState(0);
+    const [uploadedOfflineImages, setUploadedOfflineImages] = useState(0);
 
     const { isOnline } = useNetworkStatus();
 
@@ -71,8 +75,6 @@ const ProjectProvder = ({ children, projectId }) => {
     });
 
 
-
-
     if (projectQuery.isLoading || offlineProjectQuery.isLoading && !projectQuery.data) {
         return <ProjectLoadingState />;
     }
@@ -96,22 +98,42 @@ const ProjectProvder = ({ children, projectId }) => {
                 submitStatus,
                 setSubmitStatus,
                 saveAllChanges: projectEquipmentsMutation.mutate,
+                setTotalOfflineImages,
+                setUploadedOfflineImages,
             }}
         >
-            {(projectEquipmentsMutation.isPending || projectEquipmentsMutation.isSuccess) && (
+            {( projectEquipmentsMutation.isPending || projectEquipmentsMutation.isSuccess) && (
                 <Dialog open={true} onClose={() => { }}>
                     <DialogTitle>
                         {projectEquipmentsMutation.isPending
                             ? 'Saving Offline Changes to server...'
-                            : 'All changes saved to server'
+                            : 'All changes saved to server.'
                         }
                     </DialogTitle>
                     <DialogBody>
-                        {projectEquipmentsMutation.isPending ? (
-                            <p>Please wait while we save your changes to the server.</p>
-                        ) : (
-                            <p>All changes have been saved to the server.</p>
+                        {projectEquipmentsMutation.isPending ?? (
+                            <p>Saving Project equipments updates</p>
                         )}
+                        {projectEquipmentsMutation.isSuccess ?? (
+                            <p>Project Equipments updated successfully!</p>
+                        )}
+
+                        {
+                             totalOfflineImages > 0 && (
+                                <div>
+                                    <p>Uploading offline images...</p>
+                                    <ProgressBar completed={(uploadedOfflineImages / totalOfflineImages)}>
+                                        <Text>Uploaded {uploadedOfflineImages} of {totalOfflineImages} images</Text>
+                                    </ProgressBar>
+                                </div>
+                            )
+                        }
+                        
+                        { projectEquipmentsMutation.isSuccess && (
+                            <p>Project Equipments updated successfully!</p>
+                        )}
+
+
                     </DialogBody>
                     {projectEquipmentsMutation.isSuccess && (
                         <DialogActions>

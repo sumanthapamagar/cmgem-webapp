@@ -1,20 +1,34 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { ProjectContext } from '../../features/projects/projectContext';
-import { useNetworkStatus } from '../../contexts/NetworkStatusContext';
 import { Online } from './Online';
 import { Offline } from './Offline';
 import { Button } from '../ui/button';
-import { Dialog, DialogActions, DialogBody, DialogTitle } from '../ui';
-
+import { Dialog, DialogActions, DialogBody, DialogTitle, Text } from '../ui';
+import localforage from 'localforage';
+import { useOfflineImageUpload } from '../../hooks/useOfflineImageUpload';
+import { useOfflineImageKeys } from '../../hooks/useOfflineImageKeys';
+export const getProjectImageKeys = async (projectId) => {
+    try {
+        const keys = await localforage.keys();
+        return keys.filter(key => key.startsWith(`photo_${projectId}`));
+    } catch (error) {
+        console.error("Failed to load keys from localforage:", error);
+        return []; // Return an empty array on error to prevent UI crashes
+    }
+};
 export const ProjectSyncIndicator = () => {
-    const { offlineProject: project, saveAllChanges } = useContext(ProjectContext);
-
+    const { offlineProject: project, saveAllChanges, off } = useContext(ProjectContext);
+    const offlineImageUpload = useOfflineImageUpload(project._id);
     const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
     
+    const {offlineImageKeys} = useOfflineImageKeys(project._id);
+
+
     // Add null check to prevent TypeError
-    if (!project || !project.has_local_changes) {
+    if ((!project || !project.has_local_changes) && offlineImageKeys.length === 0) {
         return null;
     }
+
 
     const openDialog = () => {
         setIsConfirmationOpen(true);
@@ -24,8 +38,9 @@ export const ProjectSyncIndicator = () => {
         setIsConfirmationOpen(false);
     }
 
-    const handleConfrim = () => {
-        saveAllChanges();
+    const handleConfrim = async() => {
+        await saveAllChanges();
+        await offlineImageUpload.uploadAllImages(offlineImageKeys);
         closeDialog();
     }
 
@@ -42,6 +57,7 @@ export const ProjectSyncIndicator = () => {
         return date.toLocaleDateString();
     };
 
+    
     return (
         <div className="bg-yellow-50 border border-yellow-200 rounded-md p-2 m-2">
             <div className="flex flex-col gap-2 items-center justify-between">
@@ -79,7 +95,11 @@ export const ProjectSyncIndicator = () => {
                     <Dialog open={isConfirmationOpen} onClose={closeDialog}>
                         <DialogTitle>Save all changes to server?</DialogTitle>
                         <DialogBody>
-                            This will overwrite all previous equuipments in the server.
+                            <Text>This will overwrite all previous equuipments in the server.</Text>
+                            <Text className="text-sm text-gray-500 bg-amber-200 px-2">
+                                {offlineImageKeys.length} offline image(s) will be uploaded to the server.
+                            </Text>
+                            <Text>Are you sure you want to proceed?</Text>
                         </DialogBody>
                         <DialogActions>
                             <Button plain onClick={closeDialog}> 

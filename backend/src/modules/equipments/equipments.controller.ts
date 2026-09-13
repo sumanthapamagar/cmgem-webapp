@@ -81,8 +81,6 @@ export class EquipmentsController {
     @UploadedFiles() files: MulterFile[],
     @GetUserInfo() user: UserInfo
   ): Promise<any> {
-    console.log('Files received:', files);
-    console.log('Uploading multiple images for equipment:', id, 'Data:', uploadData, 'User:', user);
     return this.equipmentsService.uploadMultipleImages(id, files, uploadData, user);
   }
 

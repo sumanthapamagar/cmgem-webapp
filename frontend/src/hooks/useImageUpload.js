@@ -45,6 +45,7 @@ export const useImageUpload = (projectId, equipmentId) => {
                         equipmentId: inspectionItem.equipmentId,
                         data: {
                             group_id: inspectionItem.location,
+                            equipmentId: inspectionItem.equipmentId,
                             inspection_item: inspectionItem._id
                         }
                     });

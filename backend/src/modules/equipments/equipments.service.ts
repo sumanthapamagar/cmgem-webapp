@@ -90,7 +90,6 @@ export class EquipmentsService {
   }
 
   async delete(id: string, user: UserInfo): Promise<void> {
-    console.log('deleting equipment', id);
     const equipment = await this.equipmentModel.findOne({
       _id: new Types.ObjectId(id),
       deleted_at: { $exists: false }
@@ -100,7 +99,6 @@ export class EquipmentsService {
       throw new NotFoundException(`Equipment with ID ${id} not found`);
     }
 
-    console.log('Equipment found, performing soft delete:', equipment._id);
     const result = await this.equipmentModel.findOneAndUpdate(
       { _id: new Types.ObjectId(id) },
       {
@@ -110,7 +108,6 @@ export class EquipmentsService {
       { new: true }
     ).exec();
 
-    console.log('Soft delete result:', result);
     
     if (!result) {
       throw new NotFoundException(`Failed to delete equipment with ID ${id}`);
@@ -120,7 +117,6 @@ export class EquipmentsService {
     async createOrUpdate(equipment: CreateEquipmentWithFloorsDto, user: UserInfo): Promise<Equipment> {
 
     const equipmentId = new Types.ObjectId(equipment._id);
-    console.log('equipmentId', equipmentId);
     const existingEquipment = await this.equipmentModel.findOne({
       _id: equipmentId,
     }).exec();
@@ -144,7 +140,6 @@ export class EquipmentsService {
     }
 
     if (existingEquipment) {
-      console.log('updating equipment', equipmentId);
       // For updates, include the _id
       const updateData = {
         ...baseEquipmentData,
@@ -161,11 +156,8 @@ export class EquipmentsService {
         throw new NotFoundException(`Equipment with ID ${equipment._id} not found`);
       }
 
-      console.log('updatedEquipment', equipmentId);
       return newEquipment;
     }
-    console.log('creating equipment', equipmentId);
-
 
     // For creation, include the _id since auto: false in schema
     const newEquipment = await new this.equipmentModel({
@@ -177,7 +169,6 @@ export class EquipmentsService {
     if (!newEquipment) {
       throw new NotFoundException(`Failed to create equipment with ID ${equipment._id}`);
     }
-    console.log('createdEquipment', equipmentId);
     return newEquipment;
   }
 
@@ -236,7 +227,6 @@ export class EquipmentsService {
     uploadData: UploadImageDto, 
     user: UserInfo
   ): Promise<any> {
-    console.log('uploading multiple images', id, files.length, uploadData, user);
     
     const uploadPromises = files.map(file => 
       this.attachmentsService.uploadImage(id, file, uploadData, user)

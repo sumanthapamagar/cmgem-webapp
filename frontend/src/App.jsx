@@ -1,6 +1,6 @@
 // Import necessary dependencies
 import { Outlet, Route, Routes } from 'react-router-dom';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import Root from './features/projects/Root';
 import ProjectRoot from './features/projects/ProjectRoot';
 import OfflineProjects from './features/projects/OfflineProjects';
@@ -15,7 +15,11 @@ import { loginRequest } from './lib/authConfig';
 import ChecklistHome from './features/checklists/Checklists';
 import { NetworkStatusProvider, useNetworkStatus } from './contexts/NetworkStatusContext';
 import { useInitializeChecklists } from './hooks/useChecklists';
+import localforage from 'localforage';
+import ErrorConsole from './components/common/error-console';
 
+const APP_ENVIRONMENT = import.meta.env.VITE_NODE_ENV // Default to DEVELOPMENT if not set
+console.log(`App is running in ${APP_ENVIRONMENT} mode.`);
 // Create a new instance of QueryClient
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -47,7 +51,7 @@ function AppContent({ msalInstance }) {
 
     return (
         <div key={`app-${isOffline ? 'offline' : 'online'}`}>
-            {isOffline ? (
+            {isOffline && (
                 // Offline mode - show offline projects and limited functionality
                 <>
                     <Header />
@@ -60,7 +64,8 @@ function AppContent({ msalInstance }) {
                         <Route path="offline-projects" element={<OfflineProjects />} />
                     </Routes>
                 </>
-            ) : (
+            ) }
+            { !isOffline && (
                 // Online mode - show full functionality with authentication
                 <MsalProvider instance={msalInstance}>
                     <MsalAuthenticationTemplate
@@ -102,12 +107,24 @@ function AppContent({ msalInstance }) {
                     </MsalAuthenticationTemplate>
                 </MsalProvider>
             )}
+            
+            {
+                ["DEVELOPMENT", "staging"].includes(APP_ENVIRONMENT) && <ErrorConsole />
+            }
         </div>
     );
 }
 
 // Define the main App component
 function App({ msalInstance }) {
+
+    // useEffect(() => {
+    //     // Configure localForage on app load
+    //     localforage.config({
+    //         name: 'MyOfflineApp',
+    //         storeName: 'offline_photos' // The name of the datastore
+    //     })
+    // }, [])
     return (
         <QueryClientProvider client={queryClient}>
             <NetworkStatusProvider>

@@ -9,8 +9,6 @@ import * as bodyParser from 'body-parser';
 declare const module: any
 
 async function bootstrap() {
-    console.log('Starting NestJS application...')
-
     const app = await NestFactory.create(AppModule, { cors: true })
 
     // Add compression middleware
@@ -37,12 +35,8 @@ async function bootstrap() {
     app.use(bodyParser.json({ limit: '8mb' }));  // increase limit
     app.use(bodyParser.urlencoded({ limit: '8mb', extended: true }));
     
-    console.log(`Environment PORT: ${process.env.PORT}`)
-    console.log(`Config APP_PORT: ${configService.get<number>("APP_PORT")}`)
-    console.log(`Final port: ${port}`)
 
     await app.listen(port, '0.0.0.0')
-    console.log(`Application is running on: http://0.0.0.0:${port}`)
 
     if (module.hot) {
         module.hot.accept()

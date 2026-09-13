@@ -1,19 +1,18 @@
+import { useState } from 'react';
 import { Field, Label } from '../../../../../components';
 import { CustomCheckbox, useFieldAutosave } from '../components/CustomInputs';
 
 export default function InspectionItemCondition({ inspectionItem, equipment }) {
-    const currentStatus = equipment?.checklists?.[inspectionItem._id]?.status || '';
-                const { saveField } = useFieldAutosave();
-    console.log(inspectionItem)
+    const [currentStatus, setCurrentStatus] = useState(equipment?.checklists?.[inspectionItem._id]?.status || '');
+    const { saveField } = useFieldAutosave();
     const handleStatusChange = (e) => {
-
+        setCurrentStatus(e);
         const currentComment = equipment.checklists?.[inspectionItem._id]?.comment;
         //set defualt comment if empty
         if (e && !currentComment) {
                 const fieldPath = `checklists.${inspectionItem._id}.comment`;
 
                 const defaultComment = inspectionItem[`${e}Default`]
-                console.log('Default comment:', defaultComment)
                 if (defaultComment) {
                     const success = saveField(fieldPath, defaultComment);
                 }
@@ -33,7 +32,6 @@ export default function InspectionItemCondition({ inspectionItem, equipment }) {
                         fieldPath={`checklists.${inspectionItem._id}.status`}
                         checked={currentStatus === option.id}
                         onChange={handleStatusChange}
-
                     />
                     <Label
                         className={ "cursor-pointer " + (currentStatus === option.id ? option.color : 'text-black/40')}

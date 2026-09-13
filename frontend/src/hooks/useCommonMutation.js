@@ -106,6 +106,7 @@ export const useFloorMutation = ({ projectId, equipmentId, floorId }) => {
     });
 };
 
+
 export const useImageMutation = ({ projectId, equipmentId }) => {
     return useCommonMutation({
         mutationFn: ({file, data}) => {
@@ -115,11 +116,11 @@ export const useImageMutation = ({ projectId, equipmentId }) => {
             formData.append('group_id', data.group_id);
             formData.append('inspection_item', data.inspection_item);
             
-            return postImage(projectId, equipmentId, formData);
+            return postImage(projectId, data.equipmentId, formData);
         },
         invalidateQueries: [
             ['equipments', projectId],
-            ['equipment-attachments', equipmentId]
+            ['equipment-attachments']
         ],
         showSuccessMessage: true
     });

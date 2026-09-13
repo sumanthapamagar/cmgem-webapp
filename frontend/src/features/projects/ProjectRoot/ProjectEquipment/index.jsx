@@ -1,9 +1,9 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useContext, useEffect, useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
+import { useContext, useState } from 'react'
 import { Outlet, useNavigate, useParams } from 'react-router-dom'
 
-import { deleteEquipment, patchEquipment } from '../../../../lib/api'
-import { Stack, Button, Modal, ProjectSyncIndicator, Online } from '../../../../components'
+import { deleteEquipment } from '../../../../lib/api'
+import { Stack, Button, Modal, Online } from '../../../../components'
 import { ProjectContext } from '../../projectContext'
 import { useEquipment } from '../../../../hooks'
 

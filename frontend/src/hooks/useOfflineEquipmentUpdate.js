@@ -206,6 +206,7 @@ export const useOfflineEquipmentUpdate = () => {
     const updateEquipment = useCallback(({ projectId, equipmentId, updates, delay = 100 }) => {
         return new Promise((resolve) => {
             try {
+                console.error('updateEquipment called with:', { projectId, equipmentId, updates, delay });
                 // Clear any existing timeout to prevent race conditions
                 if (updateTimeoutRef.current) {
                     clearTimeout(updateTimeoutRef.current);

@@ -11,17 +11,17 @@ class OfflineStorage {
     async initialize() {
         if (this.isInitialized) return this.db;
         
-        try {
-            // Try IndexedDB first
-            if (window.indexedDB) {
-                this.db = await this.initIndexedDB();
-                this.isInitialized = true;
+        // try {
+        //     // Try IndexedDB first
+        //     if (window.indexedDB) {
+        //         this.db = await this.initIndexedDB();
+        //         this.isInitialized = true;
 
-                return this.db;
-            }
-        } catch (error) {
-            console.warn('IndexedDB failed, falling back to localStorage:', error);
-        }
+        //         return this.db;
+        //     }
+        // } catch (error) {
+        //     console.warn('IndexedDB failed, falling back to localStorage:', error);
+        // }
 
         // Fallback to localStorage
         this.db = 'localStorage';
