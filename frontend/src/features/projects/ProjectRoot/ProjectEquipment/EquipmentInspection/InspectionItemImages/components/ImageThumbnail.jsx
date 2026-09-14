@@ -9,11 +9,17 @@ export const ImageThumbnail = ({
     onImageError, 
     onImageLoad 
 }) => {
+
+
+    const fileUrl = image.file ? URL.createObjectURL(image.file) : image.large_url;
+    const thumbnailSrc = image.thumbnail_url || fileUrl;
+
+
     if (hasError) {
         return (
             <ImageErrorFallback 
                 image={image} 
-                onClick={() => onImageClick(image.file || image.large_url)} 
+                onClick={() => onImageClick( image.large_url)} 
             />
         );
     }
@@ -21,12 +27,12 @@ export const ImageThumbnail = ({
     return (
         <div className="relative rounded-sm overflow-hidden">
             <img
-                src={image.file ||image.thumb_url || image.low_size_url || image.large_url}
+                src={thumbnailSrc}
                 className="h-12 cursor-pointer"
                 alt="image"
                 onError={onImageError}
                 onLoad={onImageLoad}
-                onClick={() => onImageClick(image.file || image.large_url)}
+                onClick={() => onImageClick(fileUrl)}
             />
             <DeleteButton onClick={() => onDeleteClick(image)} iconColor="text-red-400" />
         </div>

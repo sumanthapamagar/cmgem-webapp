@@ -1,78 +1,64 @@
-import { useState } from 'react';
-import { useImageMutation } from './index';
+import localforage from 'localforage';
+import { useQueryClient } from '@tanstack/react-query';
 
-export const useImageUpload = (projectId, equipmentId) => {
-    const [images, setImages] = useState([]);
-    const [isUploading, setIsUploading] = useState(false);
-    
-    const uploadImage = useImageMutation({
-        projectId,
-        equipmentId
-    });
+export const useImageUpload = (projectId, equipmentId, inspectionItem) => {
+    const queryClient = useQueryClient();
 
     const onSelectImages = async (ev) => {
         const selectedFiles = ev.target?.files;
-        if (selectedFiles?.length > 0) {
-            const newImages = Array.from(selectedFiles).map((file) => ({
-                url: URL.createObjectURL(file),
-                file,
-                isUploading: false,
-                isUploaded: false,
-                isUploadError: false
-            }));
-            setImages((prevImages) => [...prevImages, ...newImages]);
-        }
-    };
 
-    const removeImage = (idx) => {
-        setImages(images.filter((img, idx2) => idx2 != idx));
-    };
-
-    const uploadAllImages = async (inspectionItem) => {
-        setIsUploading(true);
-        
-        const uploadPromises = images
-            .filter((file) => !file.isUploaded && !file.isUploading)
+        const uploadPromises = Array.from(selectedFiles)
             .map(async (file, idx) => {
-                // Mark as uploading
-                setImages(prev => prev.map((img, i) => 
-                    i === idx ? { ...img, isUploading: true, isUploadError: false } : img
-                ));
+                const img_key = `photo_${projectId}_${equipmentId}_${inspectionItem._id}_${Date.now()}_${idx}`;
+                
+                await localforage.setItem(img_key, {
+                    id: img_key,
+                    file: file, 
+                    equipmentId: equipmentId,
+                    data: {
+                        group_id: inspectionItem.location,
+                        equipmentId: equipmentId,
+                        inspection_item: inspectionItem._id
+                    }
+                });
 
-                try {
-                    await uploadImage.mutateAsync({
-                        file: file.file,
-                        equipmentId: inspectionItem.equipmentId,
-                        data: {
-                            group_id: inspectionItem.location,
-                            equipmentId: inspectionItem.equipmentId,
-                            inspection_item: inspectionItem._id
-                        }
-                    });
+                // // Mark as uploading
+                // setImages(prev => prev.map((img, i) => 
+                //     i === idx ? { ...img, isUploading: true, isUploadError: false } : img
+                // ));
+
+                // try {
+                //     await uploadImage.mutateAsync({
+                //         file: file.file,
+                //         equipmentId: inspectionItem.equipmentId,
+                //         data: {
+                //             group_id: inspectionItem.location,
+                //             equipmentId: inspectionItem.equipmentId,
+                //             inspection_item: inspectionItem._id
+                //         }
+                //     });
                     
-                    // Mark as uploaded
-                    setImages(prev => prev.map((img, i) => 
-                        i === idx ? { ...img, isUploading: false, isUploaded: true } : img
-                    ));
-                } catch (error) {
-                    // Mark as error
-                    setImages(prev => prev.map((img, i) => 
-                        i === idx ? { ...img, isUploading: false, isUploadError: true } : img
-                    ));
-                    console.error('Upload failed for image:', error);
-                }
+                //     // Mark as uploaded
+                //     setImages(prev => prev.map((img, i) => 
+                //         i === idx ? { ...img, isUploading: false, isUploaded: true } : img
+                //     ));
+                // } catch (error) {
+                //     // Mark as error
+                //     setImages(prev => prev.map((img, i) => 
+                //         i === idx ? { ...img, isUploading: false, isUploadError: true } : img
+                //     ));
+                //     console.error('Upload failed for image:', error);
+                // }
             });
 
         await Promise.all(uploadPromises);
-        setIsUploading(false);
+        queryClient.invalidateQueries({
+            queryKey: ["offlineImageKeys", projectId],
+        });
     };
 
+
     return { 
-        images, 
-        setImages, 
-        isUploading, 
-        uploadAllImages, 
-        removeImage, 
         onSelectImages 
     };
 };

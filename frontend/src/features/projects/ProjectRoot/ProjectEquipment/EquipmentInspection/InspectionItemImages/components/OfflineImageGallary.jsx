@@ -19,6 +19,7 @@ export const OfflineImageGallary = ({
         const offlineImages = await Promise.all(
             offlineImageKeys.map(async (key) => {
                 const item = await localforage.getItem(key);
+
                 return item;
             })
         );

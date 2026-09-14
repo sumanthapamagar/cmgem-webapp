@@ -4,19 +4,16 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Online, Stack } from "../../../../../../components";
 import {
     ImageGallery,
-    ImageUploadModal,
     DeleteConfirmationModal,
     ImageViewerModal,
     UploadButton,
-    DebugInfo
 } from "./components";
 import { ProjectContext } from "../../../../projectContext";
 import { useSasToken } from "../../../../../../hooks/useSASToken";
 import { useEquipmentAttachments } from "../../../../../../hooks/useEquipmentAttachments";
 import { processImageUrls } from "./utils/imageUtils";
 import { useImageUpload } from "../../../../../../hooks/useImageUpload";
-import { deleteAttachment, patchEquipment } from "../../../../../../lib/api";
-import InAppCamera from "./components/InAppCamera";
+import { deleteAttachment } from "../../../../../../lib/api";
 import { OfflineImageGallary } from "./components/OfflineImageGallary";
 import { useOfflineImageKeys } from "../../../../../../hooks/useOfflineImageKeys";
 
@@ -29,7 +26,7 @@ export function InspectionImages({ inspectionItem }) {
     const equipmentAttachmentsQuery = useEquipmentAttachments(equipmentId);
     
 
-    const {offlineImageKeys, refetchOfflineImages} = useOfflineImageKeys(project._id, equipmentId, inspectionItem._id);
+    const {offlineImageKeys} = useOfflineImageKeys(project._id, equipmentId, inspectionItem._id);
 
     const equipment = useMemo(() =>
         project?.equipments?.find((eq) => eq._id == equipmentId),
@@ -37,13 +34,14 @@ export function InspectionImages({ inspectionItem }) {
     );
 
     const token = sasTokenQuery.data?.sas_token;
+
     const uploadedImages = useMemo(() =>
         processImageUrls(equipmentAttachmentsQuery.data?.attachments || [], token, inspectionItem._id),
         [equipmentAttachmentsQuery.data?.attachments, token, inspectionItem._id]
     );
 
-    const { images, setImages, isUploading, uploadAllImages, removeImage, onSelectImages } =
-        useImageUpload(project._id, equipmentId);
+    const { onSelectImages } =
+        useImageUpload(project._id, equipmentId, inspectionItem);
 
     const [visibleImage, setVisibleImage] = useState(false);
     const [imageToDelete, setImageToDelete] = useState(false);
@@ -72,17 +70,6 @@ export function InspectionImages({ inspectionItem }) {
             return res;
         }
     });
-
-    const handleUploadAllImages = () => {
-        uploadAllImages({
-            ...inspectionItem,
-            equipmentId
-        });
-    };
-
-    const handleCloseUploadModal = () => {
-        setImages([]);
-    };
 
     const handleCloseImageModal = () => {
         setVisibleImage(false);
@@ -120,14 +107,14 @@ export function InspectionImages({ inspectionItem }) {
                     offlineImageKeys={offlineImageKeys}
                 />
                 {/* <DebugInfo uploadedImages={uploadedImages} token={token} /> */}
-                <Stack horizontal className="gap-4">
+                {/* <Stack horizontal className="gap-4">
                     <InAppCamera 
                         refetchOfflineImages={refetchOfflineImages}
                         inspectionItem={inspectionItem} />
-                        <Online>
+                        <Online> */}
                             <UploadButton onSelectImages={onSelectImages} />
-                        </Online>
-                </Stack>
+                        {/* </Online>
+                </Stack> */}
 
                 {/* Image Viewer Modal */}
                 <ImageViewerModal
@@ -142,16 +129,6 @@ export function InspectionImages({ inspectionItem }) {
                     onConfirm={handleConfirmDelete}
                 />
 
-                {/* Image Upload Modal */}
-                {images.length > 0 && (
-                    <ImageUploadModal
-                        images={images}
-                        onClose={handleCloseUploadModal}
-                        onUpload={handleUploadAllImages}
-                        onRemoveImage={removeImage}
-                        isUploading={isUploading}
-                    />
-                )}
         </Stack>
     );
 }

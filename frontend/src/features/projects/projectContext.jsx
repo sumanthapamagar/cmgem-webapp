@@ -21,6 +21,8 @@ const ProjectProvder = ({ children, projectId }) => {
 
     const [totalOfflineImages, setTotalOfflineImages] = useState(0);
     const [uploadedOfflineImages, setUploadedOfflineImages] = useState(0);
+    const [isUploading, setIsUploading] = useState(false);
+    const [isUploadingCompleted, setIsUploadingCompleted] = useState(false);
 
     const { isOnline } = useNetworkStatus();
 
@@ -74,10 +76,18 @@ const ProjectProvder = ({ children, projectId }) => {
 
     });
 
+    const onCloseDialog = () => {
+        setIsUploading(false);
+        setIsUploadingCompleted(false);
+        projectEquipmentsMutation.reset();
+        setUploadedOfflineImages(0);
+    }
+
 
     if (projectQuery.isLoading || offlineProjectQuery.isLoading && !projectQuery.data) {
         return <ProjectLoadingState />;
     }
+
     if (!offlineProject && !projectQuery.data) return <div>Project not found</div>;
 
     if (!offlineProject && projectQuery.isError) return <div>Error loading project</div>;
@@ -85,6 +95,8 @@ const ProjectProvder = ({ children, projectId }) => {
     // Get checklists from the new service
     const checklists = checklistsData?.checklists || [];
 
+    const isDialogOpen = projectEquipmentsMutation.isPending || projectEquipmentsMutation.isSuccess || isUploading || isUploadingCompleted;
+    const isSyncComplete = (!hasLocalChanges || projectEquipmentsMutation.isSuccess) && (totalOfflineImages == uploadedOfflineImages)
     return (
         <ProjectContext.Provider
             value={{
@@ -96,14 +108,15 @@ const ProjectProvder = ({ children, projectId }) => {
                 onlineProject: projectQuery.data,
                 projectMutation,
                 submitStatus,
+                setIsUploading,
+                setIsUploadingCompleted,
                 setSubmitStatus,
                 saveAllChanges: projectEquipmentsMutation.mutate,
                 setTotalOfflineImages,
                 setUploadedOfflineImages,
             }}
         >
-            {( projectEquipmentsMutation.isPending || projectEquipmentsMutation.isSuccess) && (
-                <Dialog open={true} onClose={() => { }}>
+                <Dialog open={isDialogOpen} onClose={() => { }}>
                     <DialogTitle>
                         {projectEquipmentsMutation.isPending
                             ? 'Saving Offline Changes to server...'
@@ -121,9 +134,9 @@ const ProjectProvder = ({ children, projectId }) => {
                         {
                              totalOfflineImages > 0 && (
                                 <div>
-                                    <p>Uploading offline images...</p>
+                                    <p>{uploadedOfflineImages != totalOfflineImages ? "Uploading offline images..." : "All pictures saved to server"}</p>
                                     <ProgressBar completed={(uploadedOfflineImages / totalOfflineImages)}>
-                                        <Text>Uploaded {uploadedOfflineImages} of {totalOfflineImages} images</Text>
+                                        <Text>Uploaded {uploadedOfflineImages} of {totalOfflineImages} pictures</Text>
                                     </ProgressBar>
                                 </div>
                             )
@@ -135,15 +148,14 @@ const ProjectProvder = ({ children, projectId }) => {
 
 
                     </DialogBody>
-                    {projectEquipmentsMutation.isSuccess && (
+                    {(isSyncComplete) && (
                         <DialogActions>
-                            <Button onClick={() => projectEquipmentsMutation.reset()}>
+                            <Button onClick={onCloseDialog}>
                                 Close
                             </Button>
                         </DialogActions>
                     )}
                 </Dialog>
-            )}
             {children}
 
         </ProjectContext.Provider>
