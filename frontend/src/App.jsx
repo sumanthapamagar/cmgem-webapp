@@ -1,6 +1,6 @@
 // Import necessary dependencies
 import { Outlet, Route, Routes } from 'react-router-dom';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import Root from './features/projects/Root';
 import ProjectRoot from './features/projects/ProjectRoot';
 import OfflineProjects from './features/projects/OfflineProjects';
@@ -15,12 +15,7 @@ import { loginRequest } from './lib/authConfig';
 import ChecklistHome from './features/checklists/Checklists';
 import { NetworkStatusProvider, useNetworkStatus } from './contexts/NetworkStatusContext';
 import { useInitializeChecklists } from './hooks/useChecklists';
-import localforage from 'localforage';
-import ErrorConsole from './components/common/error-console';
 
-const APP_ENVIRONMENT = import.meta.env.VITE_ENVIRONMENT // Default to DEVELOPMENT if not set
-console.log(`App is running in ${APP_ENVIRONMENT} mode.`);
-// Create a new instance of QueryClient
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {

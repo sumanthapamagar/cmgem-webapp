@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState, } from 'react';
+import { createContext, useState, } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
@@ -18,26 +18,13 @@ const ProjectContext = createContext();
 
 const ProjectProvder = ({ children, projectId }) => {
     const queryClient = useQueryClient();
-    const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' });
-    const {
-        resetCount,
-        failedUploads,
-        totalOfflineImages,
-        uploadedOfflineImages,
-        isUploading,
-        isUploadingCompleted,
-        uploadAllImages,
-        setIsUploading,
-        setIsUploadingCompleted,
-        setUploadedOfflineImages
-    } = useOfflineImageUpload(projectId)
-
-    console.log("failed uploads",failedUploads)
+    const offlineImageUpload = useOfflineImageUpload(projectId)
 
     const { isOnline } = useNetworkStatus();
-
-    // Get checklists using the new offline-first approach
     const { data: checklistsData, isLoading: isLoadingChecklists } = useChecklists();
+
+    const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' });
+
 
     const { data: offlineProject, ...offlineProjectQuery } = useQuery({
         queryKey: ['offline-project', projectId],
@@ -48,6 +35,7 @@ const ProjectProvder = ({ children, projectId }) => {
     const hasLocalChanges = offlineProject?.has_local_changes || false;
 
     const canFetchOnlineProject = isOnline && !isLoadingOfflineProject && (!offlineProject || !hasLocalChanges);
+    
     // Online project query (fallback and sync) - only when online and no local changes
     const projectQuery = useQuery({
         queryKey: projectKeys.detail(projectId),
@@ -87,7 +75,7 @@ const ProjectProvder = ({ children, projectId }) => {
     });
 
     const onCloseDialog = () => {
-        resetCount();
+        offlineImageUpload.resetCount();
         projectEquipmentsMutation.reset();
     }
 
@@ -103,8 +91,9 @@ const ProjectProvder = ({ children, projectId }) => {
     // Get checklists from the new service
     const checklists = checklistsData?.checklists || [];
 
-    const isDialogOpen = projectEquipmentsMutation.isPending || projectEquipmentsMutation.isSuccess || isUploading || isUploadingCompleted;
-    const isSyncComplete = (!hasLocalChanges || projectEquipmentsMutation.isSuccess) && (totalOfflineImages == 0 || isUploadingCompleted)
+    const isDialogOpen = projectEquipmentsMutation.isPending || projectEquipmentsMutation.isSuccess || offlineImageUpload.isUploading || offlineImageUpload.isUploadingCompleted;
+    const isSyncComplete = (!hasLocalChanges || projectEquipmentsMutation.isSuccess) && (offlineImageUpload.totalOfflineImages == 0 || offlineImageUpload.isUploadingCompleted)
+    
     return (
         <ProjectContext.Provider
             value={{
@@ -116,7 +105,7 @@ const ProjectProvder = ({ children, projectId }) => {
                 onlineProject: projectQuery.data,
                 projectMutation,
                 submitStatus,
-                uploadAllImages,
+                offlineImageUpload,
                 setSubmitStatus,
                 saveAllChanges: projectEquipmentsMutation.mutate,
             }}
@@ -139,20 +128,20 @@ const ProjectProvder = ({ children, projectId }) => {
                             )}
 
                             {
-                                totalOfflineImages > 0 && (
+                                offlineImageUpload.totalOfflineImages > 0 && (
                                     <div>
-                                        {isUploading &&  <p>Uploading offline images...</p>}
-                                        {uploadedOfflineImages == totalOfflineImages && <p>All pictures saved to server</p>}
+                                        {offlineImageUpload.isUploading &&  <p>Uploading offline images...</p>}
+                                        {offlineImageUpload.uploadedOfflineImages == offlineImageUpload.totalOfflineImages && <p>All pictures saved to server</p>}
                                         
-                                        <ProgressBar completed={(uploadedOfflineImages / totalOfflineImages)}>
-                                            <Text>Uploaded {uploadedOfflineImages} of {totalOfflineImages} pictures</Text>
+                                        <ProgressBar completed={(offlineImageUpload.uploadedOfflineImages / offlineImageUpload.totalOfflineImages)}>
+                                            <Text>Uploaded {offlineImageUpload.uploadedOfflineImages} of {offlineImageUpload.totalOfflineImages} pictures</Text>
                                         </ProgressBar>
                                     </div>
                                 )
                             }
                             {
-                                failedUploads > 0 && (
-                                    <Text className="bg-yellow-300">Failed to upload {failedUploads} pictures.</Text>
+                                offlineImageUpload.failedUploads > 0 && (
+                                    <Text className="bg-yellow-300">Failed to upload {offlineImageUpload.failedUploads} pictures.</Text>
                                 )
                             } 
                         </Stack>
@@ -162,8 +151,8 @@ const ProjectProvder = ({ children, projectId }) => {
                             <Button plain onClick={onCloseDialog}>
                                 Close
                             </Button>
-                            {failedUploads > 0 && (
-                                <Button onClick={uploadAllImages}>
+                            {offlineImageUpload.failedUploads > 0 && (
+                                <Button onClick={offlineImageUpload.uploadAllImages}>
                                     Retry upload
                                 </Button>
                             )}

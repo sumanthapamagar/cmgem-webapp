@@ -1,31 +1,27 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useState } from 'react';
 import { ProjectContext } from '../../features/projects/projectContext';
 import { Online } from './Online';
 import { Offline } from './Offline';
 import { Button } from '../ui/button';
 import { Dialog, DialogActions, DialogBody, DialogTitle, Text } from '../ui';
-import localforage from 'localforage';
 import { useOfflineImageKeys } from '../../hooks/useOfflineImageKeys';
-export const getProjectImageKeys = async (projectId) => {
-    try {
-        const keys = await localforage.keys();
-        return keys.filter(key => key.startsWith(`photo_${projectId}`));
-    } catch (error) {
-        console.error("Failed to load keys from localforage:", error);
-        return []; // Return an empty array on error to prevent UI crashes
-    }
-};
+
 export const ProjectSyncIndicator = () => {
-    const { offlineProject: project, saveAllChanges, uploadAllImages } = useContext(ProjectContext);
+    const {
+        offlineProject: project,
+        saveAllChanges,
+        offlineImageUpload: {
+            offlineImageKeys,
+            uploadAllImages
+        }
+    } = useContext(ProjectContext);
     const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
     
-    const {offlineImageKeys} = useOfflineImageKeys(project._id);
 
     // Add null check to prevent TypeError
     if ((!project || !project.has_local_changes) && offlineImageKeys.length === 0) {
         return null;
     }
-
 
     const openDialog = () => {
         setIsConfirmationOpen(true);
@@ -59,7 +55,7 @@ export const ProjectSyncIndicator = () => {
         <div className="bg-yellow-50 border border-yellow-200 rounded-md p-2 m-2">
             <div className="flex flex-col gap-2 items-center justify-between">
                 <div className="flex items-center space-x-2">
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                         <svg className="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                         </svg>

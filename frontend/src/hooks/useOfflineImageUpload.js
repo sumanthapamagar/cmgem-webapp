@@ -25,6 +25,7 @@ export const useOfflineImageUpload = (projectId) => {
         setFailedUploads(0)
         setTotalOfflineImages(offlineImageKeys.length);
         setUploadedOfflineImages(0);
+        setIsUploadingCompleted(false)
 
     }
 
@@ -70,6 +71,7 @@ export const useOfflineImageUpload = (projectId) => {
 
     return {
         uploadAllImages,
+        offlineImageKeys,
         currentlyUploadingImageIndex,
         failedUploads,
         totalOfflineImages,
