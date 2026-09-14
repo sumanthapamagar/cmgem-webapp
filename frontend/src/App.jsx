@@ -107,10 +107,6 @@ function AppContent({ msalInstance }) {
                     </MsalAuthenticationTemplate>
                 </MsalProvider>
             )}
-            
-            {
-                ["DEVELOPMENT", "staging"].includes(APP_ENVIRONMENT) && <ErrorConsole />
-            }
         </div>
     );
 }
