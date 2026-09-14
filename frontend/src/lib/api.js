@@ -498,10 +498,6 @@ const postImage = async ( projectId, equipmentId, data) => {
 
 	validateRequiredString(projectId, 'Project ID');
 	validateRequiredString(equipmentId, 'Equipment ID');
-	// if (!(data instanceof FormData)) {
-	// 	throw new Error('Image data must be FormData');
-	// }
-	
 	const response = await server.post(`equipments/${equipmentId}/images`, data);
 	return response.data;
 }

@@ -112,7 +112,10 @@ export const useImageMutation = ({ projectId, equipmentId }) => {
         mutationFn: ({file, data}) => {
             // Create FormData from the data object
             const formData = new FormData();
-            formData.append('file', file);
+            const safeFile = new File([file], file.name || 'upload.jpg', {
+                type: file.type || 'image/jpeg',
+            });
+            formData.append('file', safeFile);
             formData.append('group_id', data.group_id);
             formData.append('inspection_item', data.inspection_item);
             
