@@ -115,7 +115,6 @@ export const useImageMutation = ({ projectId, equipmentId }) => {
             const safeFile = new File([file], file.name || 'upload.jpg', {
                 type: file.type || 'image/jpeg',
             });
-            console.log(file.size)
             formData.append('file', safeFile);
             formData.append('group_id', data.group_id);
             formData.append('inspection_item', data.inspection_item);

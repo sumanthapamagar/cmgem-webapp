@@ -5,7 +5,6 @@ import { Offline } from './Offline';
 import { Button } from '../ui/button';
 import { Dialog, DialogActions, DialogBody, DialogTitle, Text } from '../ui';
 import localforage from 'localforage';
-import { useOfflineImageUpload } from '../../hooks/useOfflineImageUpload';
 import { useOfflineImageKeys } from '../../hooks/useOfflineImageKeys';
 export const getProjectImageKeys = async (projectId) => {
     try {
@@ -17,12 +16,10 @@ export const getProjectImageKeys = async (projectId) => {
     }
 };
 export const ProjectSyncIndicator = () => {
-    const { offlineProject: project, saveAllChanges } = useContext(ProjectContext);
-    const offlineImageUpload = useOfflineImageUpload(project._id);
+    const { offlineProject: project, saveAllChanges, uploadAllImages } = useContext(ProjectContext);
     const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
     
     const {offlineImageKeys} = useOfflineImageKeys(project._id);
-
 
     // Add null check to prevent TypeError
     if ((!project || !project.has_local_changes) && offlineImageKeys.length === 0) {
@@ -39,9 +36,9 @@ export const ProjectSyncIndicator = () => {
     }
 
     const handleConfrim = async() => {
-        await saveAllChanges();
-        await offlineImageUpload.uploadAllImages(offlineImageKeys);
         closeDialog();
+        await saveAllChanges();
+        await uploadAllImages();
     }
 
     const formatTime = (timestamp) => {

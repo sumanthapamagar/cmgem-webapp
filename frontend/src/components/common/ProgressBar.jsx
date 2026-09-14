@@ -2,7 +2,6 @@ import clsx from "clsx";
 import { Stack } from "../layout/Stack";
 
 export const ProgressBar = ({children, completed = 1}) => {
-    console.log(completed)
     return (
         <Stack>
             <div className="loader bg-gray-200 relative rounded-full h-2">

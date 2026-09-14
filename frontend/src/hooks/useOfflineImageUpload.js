@@ -1,26 +1,37 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { useImageMutation } from "./useCommonMutation";
 import localforage from "localforage";
 import { useQueryClient } from "@tanstack/react-query";
-import { ProjectContext } from "../features/projects/projectContext";
+import { useOfflineImageKeys } from './useOfflineImageKeys';
 
 export const useOfflineImageUpload = (projectId) => {
-    const {setTotalOfflineImages, setUploadedOfflineImages, setIsUploading, setIsUploadingCompleted, setFailedUploads} = useContext(ProjectContext);
     const queryClient = useQueryClient();
+    const {offlineImageKeys} = useOfflineImageKeys(projectId);
 
     const [currentlyUploadingImageIndex, setCurrentlyUploadingImageIndex] = useState(-1);
+    const [failedUploads, setFailedUploads] = useState(0)
+    const [totalOfflineImages, setTotalOfflineImages] = useState(0);    
+    const [uploadedOfflineImages, setUploadedOfflineImages] = useState(0);
+    const [isUploading, setIsUploading] = useState(false);
+    const [isUploadingCompleted, setIsUploadingCompleted] = useState(false);
 
     const uploadImage = useImageMutation({
         projectId,
         equipmentId: null 
     });
 
-    const uploadAllImages = async (imagesKeys) => {
+    const resetCount=()=>{
+        setCurrentlyUploadingImageIndex(-1)
         setFailedUploads(0)
-        setTotalOfflineImages(imagesKeys.length);
-        setIsUploading(true);
+        setTotalOfflineImages(offlineImageKeys.length);
+        setUploadedOfflineImages(0);
 
-        for (const [idx, key] of imagesKeys.entries()) {
+    }
+
+    const uploadAllImages = async () => {
+        setIsUploading(true);
+        resetCount()
+        for (const [idx, key] of offlineImageKeys.entries()) {
             setCurrentlyUploadingImageIndex(idx + 1);
 
             try {
@@ -45,6 +56,7 @@ export const useOfflineImageUpload = (projectId) => {
                 setUploadedOfflineImages(prev => prev + 1);
             } catch (error) {
                 console.error('Upload failed for image:', error);
+                setFailedUploads(prev=>prev+1)
                 // Decide whether to 'continue' to the next image or 'break' the loop on error
             }
         }
@@ -58,7 +70,16 @@ export const useOfflineImageUpload = (projectId) => {
 
     return {
         uploadAllImages,
-        currentlyUploadingImageIndex
+        currentlyUploadingImageIndex,
+        failedUploads,
+        totalOfflineImages,
+        uploadedOfflineImages,
+        isUploading,
+        isUploadingCompleted,
+        setIsUploading,
+        setIsUploadingCompleted,
+        setUploadedOfflineImages,
+        resetCount
     }
 }
 

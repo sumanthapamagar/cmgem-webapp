@@ -179,7 +179,6 @@ class OfflineStorage {
             }
             return null;
         } catch (error) {
-            console.error('Error getting project from localStorage:', error);
             return null;
         }
     }

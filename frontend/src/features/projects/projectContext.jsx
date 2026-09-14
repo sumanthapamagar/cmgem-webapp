@@ -7,23 +7,32 @@ import {
     saveProjectEquipments,
 } from '../../lib/api';
 import { offlineStorage, updateLastVisitedTimestamp } from '../../lib/offline-api';
-import { Button, Dialog, DialogBody, DialogActions, DialogTitle, ProjectLoadingState, LoadingBar, Text } from '../../components';
+import { Button, Dialog, DialogBody, DialogActions, DialogTitle, ProjectLoadingState, LoadingBar, Text, Stack } from '../../components';
 import { projectKeys } from './projects';
 import { useNetworkStatus } from '../../contexts/NetworkStatusContext';
 import { useChecklists } from '../../hooks/useChecklists';
 import { ProgressBar } from '../../components/common/ProgressBar';
+import { useOfflineImageUpload } from '../../hooks/useOfflineImageUpload';
 
 const ProjectContext = createContext();
 
 const ProjectProvder = ({ children, projectId }) => {
     const queryClient = useQueryClient();
     const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' });
+    const {
+        resetCount,
+        failedUploads,
+        totalOfflineImages,
+        uploadedOfflineImages,
+        isUploading,
+        isUploadingCompleted,
+        uploadAllImages,
+        setIsUploading,
+        setIsUploadingCompleted,
+        setUploadedOfflineImages
+    } = useOfflineImageUpload(projectId)
 
-    const [failedUploads, setFailedUploads] = useState(0)
-    const [totalOfflineImages, setTotalOfflineImages] = useState(0);    
-    const [uploadedOfflineImages, setUploadedOfflineImages] = useState(0);
-    const [isUploading, setIsUploading] = useState(false);
-    const [isUploadingCompleted, setIsUploadingCompleted] = useState(false);
+    console.log("failed uploads",failedUploads)
 
     const { isOnline } = useNetworkStatus();
 
@@ -78,10 +87,8 @@ const ProjectProvder = ({ children, projectId }) => {
     });
 
     const onCloseDialog = () => {
-        setIsUploading(false);
-        setIsUploadingCompleted(false);
+        resetCount();
         projectEquipmentsMutation.reset();
-        setUploadedOfflineImages(0);
     }
 
 
@@ -107,14 +114,11 @@ const ProjectProvder = ({ children, projectId }) => {
                 projectQuery,
                 offlineProject: hasLocalChanges ? offlineProject : (projectQuery.data || offlineProject),
                 onlineProject: projectQuery.data,
-                projectMutation,setFailedUploads,
+                projectMutation,
                 submitStatus,
-                setIsUploading,
-                setIsUploadingCompleted,
+                uploadAllImages,
                 setSubmitStatus,
                 saveAllChanges: projectEquipmentsMutation.mutate,
-                setTotalOfflineImages,
-                setUploadedOfflineImages,
             }}
         >
                 <Dialog open={isDialogOpen} onClose={() => { }}>
@@ -125,41 +129,41 @@ const ProjectProvder = ({ children, projectId }) => {
                         }
                     </DialogTitle>
                     <DialogBody>
-                        {projectEquipmentsMutation.isPending ?? (
-                            <p>Saving Project equipments updates</p>
-                        )}
+                        <Stack className="gap-4">
+                            {projectEquipmentsMutation.isPending ?? (
+                                <p>Saving Project equipments updates</p>
+                            )}
 
-                        { projectEquipmentsMutation.isSuccess && (
-                            <p>Project Equipments synced successfully!</p>
-                        )}
+                            { projectEquipmentsMutation.isSuccess && (
+                                <p>Equipment data synced successfully!</p>
+                            )}
 
-                        {
-                             totalOfflineImages > 0 && (
-                                <div>
-                                    {isUploading &&  <p>Uploading offline images...</p>}
-                                    {uploadedOfflineImages == totalOfflineImages && <p>All pictures saved to server</p>}
-                                    
-                                    <ProgressBar completed={(uploadedOfflineImages / totalOfflineImages)}>
-                                        <Text>Uploaded {uploadedOfflineImages} of {totalOfflineImages} pictures</Text>
-                                    </ProgressBar>
-                                </div>
-                            )
-                        }
-                        {
-                            failedUploads > 0 && (
-                                <Text className="bg-yellow-300">Faile to upload {failedUploads} pictures.</Text>
-                            )
-                        } 
-
-
+                            {
+                                totalOfflineImages > 0 && (
+                                    <div>
+                                        {isUploading &&  <p>Uploading offline images...</p>}
+                                        {uploadedOfflineImages == totalOfflineImages && <p>All pictures saved to server</p>}
+                                        
+                                        <ProgressBar completed={(uploadedOfflineImages / totalOfflineImages)}>
+                                            <Text>Uploaded {uploadedOfflineImages} of {totalOfflineImages} pictures</Text>
+                                        </ProgressBar>
+                                    </div>
+                                )
+                            }
+                            {
+                                failedUploads > 0 && (
+                                    <Text className="bg-yellow-300">Failed to upload {failedUploads} pictures.</Text>
+                                )
+                            } 
+                        </Stack>
                     </DialogBody>
                     {(isSyncComplete) && (
                         <DialogActions>
-                            <Button onClick={onCloseDialog}>
+                            <Button plain onClick={onCloseDialog}>
                                 Close
                             </Button>
                             {failedUploads > 0 && (
-                                <Button onClick={onCloseDialog}>
+                                <Button onClick={uploadAllImages}>
                                     Retry upload
                                 </Button>
                             )}
