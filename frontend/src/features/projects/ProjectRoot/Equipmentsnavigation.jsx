@@ -69,7 +69,6 @@ export function Equipmentsnavigation() {
                 <Online>
                     <ProjectSyncIndicator className="place-self-end" />
                 </Online>
-                    <OfflineProjectRefresh />
             </Stack>
             <div
                 id="sidebar"
