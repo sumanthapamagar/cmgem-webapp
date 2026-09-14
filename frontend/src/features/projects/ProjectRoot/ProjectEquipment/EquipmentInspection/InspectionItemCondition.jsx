@@ -30,11 +30,11 @@ export default function InspectionItemCondition({ inspectionItem, equipment }) {
                     <CustomCheckbox
                         value={option.id}
                         fieldPath={`checklists.${inspectionItem._id}.status`}
-                        checked={currentStatus === option.id}
+                        checked={equipment?.checklists?.[inspectionItem._id]?.status === option.id}
                         onChange={handleStatusChange}
                     />
                     <Label
-                        className={ "cursor-pointer " + (currentStatus === option.id ? option.color : 'text-black/40')}
+                        className={ "cursor-pointer " + (equipment?.checklists?.[inspectionItem._id]?.status === option.id ? option.color : 'text-black/40')}
                     >
                         {option.title}
                     </Label>

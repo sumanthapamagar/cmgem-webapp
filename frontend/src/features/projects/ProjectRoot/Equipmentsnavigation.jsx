@@ -3,6 +3,7 @@ import { Navigation, Offline, Online, ProjectSyncIndicator, Stack } from '../../
 import { ProjectContext } from '../projectContext';
 import { useParams } from 'react-router-dom';
 import { NewEquipment } from './ProjectEquipment/NewEquipment';
+import { OfflineProjectRefresh } from '../../../components/common/OfflineProjectRefresh';
 
 export function Equipmentsnavigation() {
     const { projectId } = useParams();
@@ -68,6 +69,7 @@ export function Equipmentsnavigation() {
                 <Online>
                     <ProjectSyncIndicator className="place-self-end" />
                 </Online>
+                    <OfflineProjectRefresh />
             </Stack>
             <div
                 id="sidebar"

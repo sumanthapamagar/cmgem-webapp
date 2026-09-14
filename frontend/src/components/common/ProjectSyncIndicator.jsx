@@ -4,7 +4,6 @@ import { Online } from './Online';
 import { Offline } from './Offline';
 import { Button } from '../ui/button';
 import { Dialog, DialogActions, DialogBody, DialogTitle, Text } from '../ui';
-import { useOfflineImageKeys } from '../../hooks/useOfflineImageKeys';
 
 export const ProjectSyncIndicator = () => {
     const {
@@ -15,13 +14,10 @@ export const ProjectSyncIndicator = () => {
             uploadAllImages
         }
     } = useContext(ProjectContext);
+    
     const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
     
 
-    // Add null check to prevent TypeError
-    if ((!project || !project.has_local_changes) && offlineImageKeys.length === 0) {
-        return null;
-    }
 
     const openDialog = () => {
         setIsConfirmationOpen(true);
@@ -50,6 +46,11 @@ export const ProjectSyncIndicator = () => {
         return date.toLocaleDateString();
     };
 
+    
+    // Add null check to prevent TypeError
+    if ((!project || !project.has_local_changes) && offlineImageKeys.length === 0) {
+        return null;
+    }
     
     return (
         <div className="bg-yellow-50 border border-yellow-200 rounded-md p-2 m-2">
