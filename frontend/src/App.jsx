@@ -18,7 +18,7 @@ import { useInitializeChecklists } from './hooks/useChecklists';
 import localforage from 'localforage';
 import ErrorConsole from './components/common/error-console';
 
-const APP_ENVIRONMENT = import.meta.env.VITE_NODE_ENV // Default to DEVELOPMENT if not set
+const APP_ENVIRONMENT = import.meta.env.VITE_ENVIRONMENT // Default to DEVELOPMENT if not set
 console.log(`App is running in ${APP_ENVIRONMENT} mode.`);
 // Create a new instance of QueryClient
 const queryClient = new QueryClient({
