@@ -9,7 +9,7 @@ import {  EventType } from "@azure/msal-browser";
 // if ('serviceWorker' in navigator) {
 //   registerSW();
 // }
-if (import.meta.env.DEV) {
+if (import.meta.env.VITE_ENABLE_ERUDA) {
   import('eruda').then((eruda) => eruda.default.init());
 }
 
