@@ -19,7 +19,8 @@ const ProjectProvder = ({ children, projectId }) => {
     const queryClient = useQueryClient();
     const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' });
 
-    const [totalOfflineImages, setTotalOfflineImages] = useState(0);
+    const [failedUploads, setFailedUploads] = useState(0)
+    const [totalOfflineImages, setTotalOfflineImages] = useState(0);    
     const [uploadedOfflineImages, setUploadedOfflineImages] = useState(0);
     const [isUploading, setIsUploading] = useState(false);
     const [isUploadingCompleted, setIsUploadingCompleted] = useState(false);
@@ -96,7 +97,7 @@ const ProjectProvder = ({ children, projectId }) => {
     const checklists = checklistsData?.checklists || [];
 
     const isDialogOpen = projectEquipmentsMutation.isPending || projectEquipmentsMutation.isSuccess || isUploading || isUploadingCompleted;
-    const isSyncComplete = (!hasLocalChanges || projectEquipmentsMutation.isSuccess) && (totalOfflineImages == uploadedOfflineImages)
+    const isSyncComplete = (!hasLocalChanges || projectEquipmentsMutation.isSuccess) && (totalOfflineImages == 0 || isUploadingCompleted)
     return (
         <ProjectContext.Provider
             value={{
@@ -106,7 +107,7 @@ const ProjectProvder = ({ children, projectId }) => {
                 projectQuery,
                 offlineProject: hasLocalChanges ? offlineProject : (projectQuery.data || offlineProject),
                 onlineProject: projectQuery.data,
-                projectMutation,
+                projectMutation,setFailedUploads,
                 submitStatus,
                 setIsUploading,
                 setIsUploadingCompleted,
@@ -127,24 +128,28 @@ const ProjectProvder = ({ children, projectId }) => {
                         {projectEquipmentsMutation.isPending ?? (
                             <p>Saving Project equipments updates</p>
                         )}
-                        {projectEquipmentsMutation.isSuccess ?? (
-                            <p>Project Equipments updated successfully!</p>
+
+                        { projectEquipmentsMutation.isSuccess && (
+                            <p>Project Equipments synced successfully!</p>
                         )}
 
                         {
                              totalOfflineImages > 0 && (
                                 <div>
-                                    <p>{uploadedOfflineImages != totalOfflineImages ? "Uploading offline images..." : "All pictures saved to server"}</p>
+                                    {isUploading &&  <p>Uploading offline images...</p>}
+                                    {uploadedOfflineImages == totalOfflineImages && <p>All pictures saved to server</p>}
+                                    
                                     <ProgressBar completed={(uploadedOfflineImages / totalOfflineImages)}>
                                         <Text>Uploaded {uploadedOfflineImages} of {totalOfflineImages} pictures</Text>
                                     </ProgressBar>
                                 </div>
                             )
                         }
-                        
-                        { projectEquipmentsMutation.isSuccess && (
-                            <p>Project Equipments updated successfully!</p>
-                        )}
+                        {
+                            failedUploads > 0 && (
+                                <Text className="bg-yellow-300">Faile to upload {failedUploads} pictures.</Text>
+                            )
+                        } 
 
 
                     </DialogBody>
@@ -153,6 +158,11 @@ const ProjectProvder = ({ children, projectId }) => {
                             <Button onClick={onCloseDialog}>
                                 Close
                             </Button>
+                            {failedUploads > 0 && (
+                                <Button onClick={onCloseDialog}>
+                                    Retry upload
+                                </Button>
+                            )}
                         </DialogActions>
                     )}
                 </Dialog>

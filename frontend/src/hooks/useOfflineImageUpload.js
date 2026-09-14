@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ProjectContext } from "../features/projects/projectContext";
 
 export const useOfflineImageUpload = (projectId) => {
-    const {setTotalOfflineImages, setUploadedOfflineImages, setIsUploading, setIsUploadingCompleted} = useContext(ProjectContext);
+    const {setTotalOfflineImages, setUploadedOfflineImages, setIsUploading, setIsUploadingCompleted, setFailedUploads} = useContext(ProjectContext);
     const queryClient = useQueryClient();
 
     const [currentlyUploadingImageIndex, setCurrentlyUploadingImageIndex] = useState(-1);
@@ -16,41 +16,41 @@ export const useOfflineImageUpload = (projectId) => {
     });
 
     const uploadAllImages = async (imagesKeys) => {
+        setFailedUploads(0)
         setTotalOfflineImages(imagesKeys.length);
         setIsUploading(true);
-        if(!imagesKeys || imagesKeys.length === 0) {
-            console.warn("No images to upload.");
-            return;
-        }
-        const uploadPromises = imagesKeys.map(async (key, idx) => {
-            setCurrentlyUploadingImageIndex(idx+1);
 
-            localforage.getItem(key).then(async (file) => {
+        for (const [idx, key] of imagesKeys.entries()) {
+            setCurrentlyUploadingImageIndex(idx + 1);
+
+            try {
+                const file = await localforage.getItem(key);
                 if (!file) {
                     console.error(`File not found for key: ${key}`);
-                    return;
+                    continue;
                 }
-                setIsUploading(true);
 
                 await uploadImage.mutateAsync({
                     file: file.file,
                     equipmentId: file.equipmentId,
                     data: file.data
                 });
+
                 await localforage.removeItem(key);
+                
                 queryClient.invalidateQueries({
                     queryKey: ["offlineImageKeys", projectId],
                 });
-                setUploadedOfflineImages(prev => prev + 1);
-            }).catch((error) => {
-                console.error('Upload failed for image:', error);
-            }) 
-        });
 
-        await Promise.all(uploadPromises).finally(() => {
-            setIsUploadingCompleted(true)   ;
-            setIsUploading(false);
-        })
+                setUploadedOfflineImages(prev => prev + 1);
+            } catch (error) {
+                console.error('Upload failed for image:', error);
+                // Decide whether to 'continue' to the next image or 'break' the loop on error
+            }
+        }
+
+        setIsUploading(false);
+        setIsUploadingCompleted(true);
         queryClient.invalidateQueries({
             queryKey: ["offlineImageKeys", projectId],
         });

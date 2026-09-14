@@ -17,7 +17,7 @@ export const getProjectImageKeys = async (projectId) => {
     }
 };
 export const ProjectSyncIndicator = () => {
-    const { offlineProject: project, saveAllChanges, off } = useContext(ProjectContext);
+    const { offlineProject: project, saveAllChanges } = useContext(ProjectContext);
     const offlineImageUpload = useOfflineImageUpload(project._id);
     const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
     
