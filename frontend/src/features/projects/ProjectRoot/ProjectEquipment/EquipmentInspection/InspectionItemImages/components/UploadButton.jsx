@@ -1,18 +1,14 @@
 import { useRef } from 'react';
 import { Button } from '../../../../../../../components';
+import { useParams } from 'react-router-dom';
+import { useImageUpload } from '../../../../../../../hooks/useImageUpload';
 
-export const UploadButton = ({ onSelectImages, updateImageKeys }) => {
-
-    const handleImageSelect = async (ev) => {
-        const newKeys = await onSelectImages(ev)
-
-        updateImageKeys(prevKeys=> [
-            ...prevKeys,
-            newKeys
-        ])
-    }
-
+export const UploadButton = ({  inspectionItem }) => {
+    const {projectId, equipmentId} = useParams()
     const ref = useRef();
+    const { onSelectImages } = useImageUpload(projectId, equipmentId, inspectionItem);
+
+
     return (
         <div className='flex'>
             <Button
@@ -24,13 +20,13 @@ export const UploadButton = ({ onSelectImages, updateImageKeys }) => {
                 }}
             >
                 <i className="fa-solid fa-cloud-arrow-up fa-fw mr-4"></i>
-                Upload Images
+                Add Images
             </Button>
             <input
                 hidden
                 type="file"
                 ref={ref}
-                onChange={handleImageSelect}
+                onChange={onSelectImages}
                 multiple
             />
         </div>

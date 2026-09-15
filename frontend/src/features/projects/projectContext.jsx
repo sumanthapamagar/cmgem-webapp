@@ -1,4 +1,4 @@
-import { createContext, useState, } from 'react';
+import { createContext, useEffect, useState, } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
@@ -13,11 +13,13 @@ import { useNetworkStatus } from '../../contexts/NetworkStatusContext';
 import { useChecklists } from '../../hooks/useChecklists';
 import { ProgressBar } from '../../components/common/ProgressBar';
 import { useOfflineImageUpload } from '../../hooks/useOfflineImageUpload';
+import { useOfflineImageKeys } from '../../hooks/useOfflineImageKeys';
 
 const ProjectContext = createContext();
 
 const ProjectProvder = ({ children, projectId }) => {
     const queryClient = useQueryClient();
+
     const offlineImageUpload = useOfflineImageUpload(projectId)
 
     const { isOnline } = useNetworkStatus();

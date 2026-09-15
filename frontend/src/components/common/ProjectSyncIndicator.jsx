@@ -4,16 +4,19 @@ import { Online } from './Online';
 import { Offline } from './Offline';
 import { Button } from '../ui/button';
 import { Dialog, DialogActions, DialogBody, DialogTitle, Text } from '../ui';
+import { useOfflineImageKeys } from '../../hooks/useOfflineImageKeys';
 
 export const ProjectSyncIndicator = () => {
     const {
         offlineProject: project,
         saveAllChanges,
         offlineImageUpload: {
-            offlineImageKeys,
             uploadAllImages
         }
     } = useContext(ProjectContext);
+
+        
+    const {offlineProjectImages} = useOfflineImageKeys(project._id)
     
     const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
     
@@ -48,7 +51,7 @@ export const ProjectSyncIndicator = () => {
 
     
     // Add null check to prevent TypeError
-    if ((!project || !project.has_local_changes) && offlineImageKeys.length === 0) {
+    if ((!project || !project.has_local_changes) && offlineProjectImages.length === 0) {
         return null;
     }
     
@@ -91,7 +94,7 @@ export const ProjectSyncIndicator = () => {
                         <DialogBody>
                             <Text>This will overwrite all previous equuipments in the server.</Text>
                             <Text className="text-sm text-gray-500 bg-amber-200 px-2">
-                                {offlineImageKeys.length} offline image(s) will be uploaded to the server.
+                                {offlineProjectImages.length} offline image(s) will be uploaded to the server.
                             </Text>
                             <Text>Are you sure you want to proceed?</Text>
                         </DialogBody>

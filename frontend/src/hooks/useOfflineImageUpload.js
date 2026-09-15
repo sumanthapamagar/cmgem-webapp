@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useImageMutation } from "./useCommonMutation";
 import localforage from "localforage";
-import { useQueryClient } from "@tanstack/react-query";
 import { useOfflineImageKeys } from './useOfflineImageKeys';
+import { useQueryClient } from "@tanstack/react-query";
 
 export const useOfflineImageUpload = (projectId) => {
-    const queryClient = useQueryClient();
-    const {offlineImageKeys} = useOfflineImageKeys(projectId);
+    const queryClient = useQueryClient() 
+    const {offlineProjectImages} = useOfflineImageKeys(projectId)
 
     const [currentlyUploadingImageIndex, setCurrentlyUploadingImageIndex] = useState(-1);
     const [failedUploads, setFailedUploads] = useState(0)
@@ -23,7 +23,7 @@ export const useOfflineImageUpload = (projectId) => {
     const resetCount=()=>{
         setCurrentlyUploadingImageIndex(-1)
         setFailedUploads(0)
-        setTotalOfflineImages(offlineImageKeys.length);
+        setTotalOfflineImages(offlineProjectImages.length);
         setUploadedOfflineImages(0);
         setIsUploadingCompleted(false)
 
@@ -32,16 +32,18 @@ export const useOfflineImageUpload = (projectId) => {
     const uploadAllImages = async () => {
         setIsUploading(true);
         resetCount()
-        for (const [idx, key] of offlineImageKeys.entries()) {
+        for (const [idx, key] of offlineProjectImages.entries()) {
             setCurrentlyUploadingImageIndex(idx + 1);
 
             try {
+                //fetch file form IndexDB
                 const file = await localforage.getItem(key);
                 if (!file) {
                     console.error(`File not found for key: ${key}`);
                     continue;
                 }
 
+                //upload to server
                 await uploadImage.mutateAsync({
                     file: file.file,
                     equipmentId: file.equipmentId,
@@ -49,11 +51,14 @@ export const useOfflineImageUpload = (projectId) => {
                 });
 
                 await localforage.removeItem(key);
-                
-                queryClient.invalidateQueries({
-                    queryKey: ["offlineImageKeys", projectId],
-                });
 
+                //remove key from query data records
+                queryClient.setQueryData(
+                    ["offlineImageKeys", projectId],
+                    offlineImageKeys  =>  offlineImageKeys.filter(offlineKey => offlineKey != key)
+                )
+                
+                
                 setUploadedOfflineImages(prev => prev + 1);
             } catch (error) {
                 console.error('Upload failed for image:', error);
@@ -64,14 +69,11 @@ export const useOfflineImageUpload = (projectId) => {
 
         setIsUploading(false);
         setIsUploadingCompleted(true);
-        queryClient.invalidateQueries({
-            queryKey: ["offlineImageKeys", projectId],
-        });
     };
 
     return {
         uploadAllImages,
-        offlineImageKeys,
+        offlineProjectImages,
         currentlyUploadingImageIndex,
         failedUploads,
         totalOfflineImages,
@@ -83,17 +85,4 @@ export const useOfflineImageUpload = (projectId) => {
         setUploadedOfflineImages,
         resetCount
     }
-}
-
-
-function getBlob(dataURL) {
-    const arr = dataURL.split(',');
-    const mime = arr[0].match(/:(.*?);/)[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new Blob([u8arr], { type: mime });
 }

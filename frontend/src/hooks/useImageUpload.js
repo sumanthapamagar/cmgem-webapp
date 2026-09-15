@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 export const useImageUpload = (projectId, equipmentId, inspectionItem) => {
     const queryClient = useQueryClient();
+    const offlineQuerykey = ["offlineImageKeys", projectId]
 
     const onSelectImages = async (ev) => {
 
@@ -27,11 +28,12 @@ export const useImageUpload = (projectId, equipmentId, inspectionItem) => {
 
         await Promise.all(uploadPromises);
 
-        queryClient.invalidateQueries({
-            queryKey: ["offlineImageKeys", projectId],
-        });
-
-        return new_keys
+        queryClient.setQueryData(offlineQuerykey,
+            keys=> [
+                ...(keys ?? []),
+                ...new_keys
+            ]
+        )
     };
 
 

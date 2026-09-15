@@ -1,56 +1,61 @@
-import { useParams } from "react-router-dom";
-import { Stack, LoadingState, Text } from "../../../../../../../components";
+import { Stack, Text } from "../../../../../../../components";
 import { ImageThumbnail } from "./ImageThumbnail";
-import { ProjectContext } from "../../../../../projectContext";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import localforage from "localforage";
+import { useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { useOfflineImageKeys } from "../../../../../../../hooks/useOfflineImageKeys";
 
 export const OfflineImageGallary = ({
-    imageKeys,
-    updateImageKeys,
-    onImageClick
+    inspectionItem
 }) => {
-    const queryClient = useQueryClient();
-
-    const { offlineProject: project } = useContext(ProjectContext);
-
+    const { projectId, equipmentId } = useParams();
     const [images, setImages] = useState([]);
+    const { offlineProjectImages } = useOfflineImageKeys(projectId)
 
-    const getOfflineImages = async () => {
-        setImages([])
-        for( const key of imageKeys ){
-            if(!key) continue;
-            const image = await localforage.getItem(key);
-            if(image){
-                setImages(images => [...images, image])
+    useEffect(() => {
+        let isMounted = true;
+
+        const loadOfflineImages = async () => {
+            // 1. Guard against missing ID or empty image sets
+            if (!inspectionItem?._id || !offlineProjectImages?.length) {
+                setImages([]);
+                return;
             }
-        }
-    }
-    
-    useEffect(() =>{
-        getOfflineImages()
-    }, [imageKeys] );
 
-    const onDeleteClick = async (image) => {
-        try {
-            await localforage.removeItem(image.id);
-            updateImageKeys(
-                prev=> prev.filter(img => img.id == image.id )
-            )
-            queryClient.invalidateQueries({
-                queryKey: ["offlineImageKeys", project._id],
-            });
-        }
-        catch (error) {
-            console.error("Error deleting image from localForage:", error);
-        }   
-    }
+            // 2. Filter keys relevant to this specific inspection item
+            const prefix = `photo_${projectId}_${equipmentId}_${inspectionItem._id}_`;
+            const relevantKeys = offlineProjectImages.filter(key => key.includes(prefix));
+
+            if (relevantKeys.length === 0) {
+                setImages([]);
+                return;
+            }
+
+            try {
+                // 3. Concurrently fetch all matches from localforage
+                const imagePromises = relevantKeys.map(key => localforage.getItem(key));
+                const resolvedImages = await Promise.all(imagePromises);
+
+                if (isMounted) {
+                    setImages(resolvedImages.filter(Boolean));
+                }
+            } catch (error) {
+                console.error("Failed to load offline images", error);
+            }
+        };
+
+        loadOfflineImages();
+
+        // 4. Genuine useEffect cleanup to prevent race conditions on unmount
+        return () => {
+            isMounted = false;
+        };
+    }, [offlineProjectImages]);
 
     if(!images || images.length === 0) {
         return null;
     }
-    console.log(images)
 
     return (
         <Stack className=" border border-gray-200 p-2 rounded bg-gray-200">
@@ -59,9 +64,8 @@ export const OfflineImageGallary = ({
                 {images?.map((image) => (
                     <ImageThumbnail 
                         key={image.id}
+                        isOnlineImage={false}
                         image={image}
-                        onImageClick={onImageClick}
-                        onDeleteClick={onDeleteClick}
                     />
                 ))}
             </Stack>
