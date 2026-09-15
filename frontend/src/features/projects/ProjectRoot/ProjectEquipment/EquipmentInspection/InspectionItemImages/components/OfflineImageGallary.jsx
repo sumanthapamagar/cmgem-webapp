@@ -7,41 +7,37 @@ import localforage from "localforage";
 import { useQueryClient } from "@tanstack/react-query";
 
 export const OfflineImageGallary = ({
-    inspectionItem,
     imageKeys,
     updateImageKeys,
     onImageClick
 }) => {
     const queryClient = useQueryClient();
 
-    const { equipmentId } = useParams();
-
     const { offlineProject: project } = useContext(ProjectContext);
 
     const [images, setImages] = useState([]);
 
     const getOfflineImages = async () => {
-        const offlineImages = await Promise.all(
-            imageKeys.map(async (key) => {
-                const item = await localforage.getItem(key);
-
-                return item;
-            })
-        );
-        setImages(offlineImages);
+        setImages([])
+        for( const key of imageKeys ){
+            if(!key) continue;
+            const image = await localforage.getItem(key);
+            if(image){
+                setImages(images => [...images, image])
+            }
+        }
     }
     
     useEffect(() =>{
         getOfflineImages()
-    }, [project.id, equipmentId, inspectionItem._id, imageKeys] );
+    }, [imageKeys] );
 
     const onDeleteClick = async (image) => {
         try {
             await localforage.removeItem(image.id);
             updateImageKeys(
-                prev=> prev.filter(image.id)
+                prev=> prev.filter(img => img.id == image.id )
             )
-            setImages(prev => prev.filter(img => img.id !== image.id));
             queryClient.invalidateQueries({
                 queryKey: ["offlineImageKeys", project._id],
             });
@@ -54,6 +50,7 @@ export const OfflineImageGallary = ({
     if(!images || images.length === 0) {
         return null;
     }
+    console.log(images)
 
     return (
         <Stack className=" border border-gray-200 p-2 rounded bg-gray-200">

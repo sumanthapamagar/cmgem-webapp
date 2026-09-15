@@ -59,12 +59,10 @@ export function InspectionImages({ inspectionItem }) {
     };
 
     const { mutate: deleteImage } = useMutation({
-        mutationFn: async (id) => {
-            const res = await deleteAttachment(id);
-            // Invalidate and refetch equipment attachments
-            await queryClient.invalidateQueries(['equipment-attachments', equipmentId]);
+        mutationFn:  id => deleteAttachment(id),
+        onSuccess : () => {
+            queryClient.invalidateQueries(['equipment-attachments', equipmentId]);
             setImageToDelete(null);
-            return res;
         }
     });
 
@@ -76,10 +74,9 @@ export function InspectionImages({ inspectionItem }) {
         setImageToDelete(null);
     };
 
-    const handleConfirmDelete = () => {
-        if (imageToDelete) {
-            deleteImage(imageToDelete._id);
-        }
+    const handleConfirmDelete = async () => {
+            await deleteImage(imageToDelete._id);
+            setImageToDelete(null)
     };
 
     return (
