@@ -8,16 +8,21 @@ import { useQueryClient } from "@tanstack/react-query";
 
 export const OfflineImageGallary = ({
     inspectionItem,
-    offlineImageKeys,
+    imageKeys,
+    updateImageKeys,
     onImageClick
 }) => {
     const queryClient = useQueryClient();
-  const { equipmentId } = useParams();
-  const { offlineProject: project } = useContext(ProjectContext);
+
+    const { equipmentId } = useParams();
+
+    const { offlineProject: project } = useContext(ProjectContext);
+
     const [images, setImages] = useState([]);
+
     const getOfflineImages = async () => {
         const offlineImages = await Promise.all(
-            offlineImageKeys.map(async (key) => {
+            imageKeys.map(async (key) => {
                 const item = await localforage.getItem(key);
 
                 return item;
@@ -26,11 +31,16 @@ export const OfflineImageGallary = ({
         setImages(offlineImages);
     }
     
-    useEffect(() =>{ getOfflineImages()}, [project.id, equipmentId, inspectionItem._id, offlineImageKeys] );
+    useEffect(() =>{
+        getOfflineImages()
+    }, [project.id, equipmentId, inspectionItem._id, imageKeys] );
 
     const onDeleteClick = async (image) => {
         try {
             await localforage.removeItem(image.id);
+            updateImageKeys(
+                prev=> prev.filter(image.id)
+            )
             setImages(prev => prev.filter(img => img.id !== image.id));
             queryClient.invalidateQueries({
                 queryKey: ["offlineImageKeys", project._id],

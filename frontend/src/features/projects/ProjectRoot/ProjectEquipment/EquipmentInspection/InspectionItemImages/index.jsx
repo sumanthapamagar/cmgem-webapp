@@ -1,4 +1,4 @@
-import { useContext, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Online, Stack } from "../../../../../../components";
@@ -18,15 +18,13 @@ import { OfflineImageGallary } from "./components/OfflineImageGallary";
 import { useOfflineImageKeys } from "../../../../../../hooks/useOfflineImageKeys";
 
 export function InspectionImages({ inspectionItem }) {
-    const { equipmentId } = useParams();
-    const { offlineProject: project } = useContext(ProjectContext);
     const queryClient = useQueryClient();
-
+    const { offlineProject: project } = useContext(ProjectContext);
+    const { equipmentId } = useParams();
     const sasTokenQuery = useSasToken(equipmentId);
     const equipmentAttachmentsQuery = useEquipmentAttachments(equipmentId);
-    
 
-    const {offlineImageKeys} = useOfflineImageKeys(project._id, equipmentId, inspectionItem._id);
+    const {offlineImageKeys, setOfflineImageKeys} = useOfflineImageKeys(project._id, equipmentId, inspectionItem._id);
 
     const equipment = useMemo(() =>
         project?.equipments?.find((eq) => eq._id == equipmentId),
@@ -40,8 +38,7 @@ export function InspectionImages({ inspectionItem }) {
         [equipmentAttachmentsQuery.data?.attachments, token, inspectionItem._id]
     );
 
-    const { onSelectImages } =
-        useImageUpload(project._id, equipmentId, inspectionItem);
+    const { onSelectImages } = useImageUpload(project._id, equipmentId, inspectionItem);
 
     const [visibleImage, setVisibleImage] = useState(false);
     const [imageToDelete, setImageToDelete] = useState(false);
@@ -104,17 +101,13 @@ export function InspectionImages({ inspectionItem }) {
                 <OfflineImageGallary
                     inspectionItem={inspectionItem} 
                     onImageClick={setVisibleImage}
-                    offlineImageKeys={offlineImageKeys}
+                    imageKeys={offlineImageKeys}
+                    updateImageKeys={setOfflineImageKeys}
                 />
-                {/* <DebugInfo uploadedImages={uploadedImages} token={token} /> */}
-                {/* <Stack horizontal className="gap-4">
-                    <InAppCamera 
-                        refetchOfflineImages={refetchOfflineImages}
-                        inspectionItem={inspectionItem} />
-                        <Online> */}
-                            <UploadButton onSelectImages={onSelectImages} />
-                        {/* </Online>
-                </Stack> */}
+                <UploadButton
+                    onSelectImages={onSelectImages}
+                    updateImageKeys={setOfflineImageKeys}
+                />
 
                 {/* Image Viewer Modal */}
                 <ImageViewerModal

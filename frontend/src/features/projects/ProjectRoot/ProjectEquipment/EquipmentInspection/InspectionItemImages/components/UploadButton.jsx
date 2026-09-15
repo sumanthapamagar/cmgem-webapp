@@ -1,9 +1,18 @@
 import { useRef } from 'react';
 import { Button } from '../../../../../../../components';
 
-export const UploadButton = ({ onSelectImages }) => {
-    const ref = useRef();
+export const UploadButton = ({ onSelectImages, updateImageKeys }) => {
 
+    const handleImageSelect = async (ev) => {
+        const newKeys = await onSelectImages(ev)
+
+        updateImageKeys(prevKeys=> [
+            ...prevKeys,
+            newKeys
+        ])
+    }
+
+    const ref = useRef();
     return (
         <div className='flex'>
             <Button
@@ -21,7 +30,7 @@ export const UploadButton = ({ onSelectImages }) => {
                 hidden
                 type="file"
                 ref={ref}
-                onChange={onSelectImages}
+                onChange={handleImageSelect}
                 multiple
             />
         </div>

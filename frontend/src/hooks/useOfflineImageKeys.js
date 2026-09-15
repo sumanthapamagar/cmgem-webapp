@@ -28,6 +28,12 @@ export const useOfflineImageKeys = (projectId, equipmentId=null, inspectionItemI
     refetchOnWindowFocus: false,
   });
 
+  const setOfflineImageKeys = keys => {
+    queryClient.setQueryData(queryKey, 
+      keys
+    )
+  }
+
   // Current reactive state for JSX
   const keys = offlineImageKeysQuery.data ?? [];
 
@@ -87,6 +93,7 @@ export const useOfflineImageKeys = (projectId, equipmentId=null, inspectionItemI
     // Sync (Render/JSX)
     getEquipmentKeys,
     getInspectionItemKeys,
+    setOfflineImageKeys,
     // Async (Handlers, side-effects, after refetch)
     getEquipmentKeysAsync,
     getInspectionItemKeysAsync,
