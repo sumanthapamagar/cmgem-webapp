@@ -57,6 +57,7 @@ export class StorageService {
 
       return sasToken;
     } catch (error) {
+      console.error(error)
       throw new InternalServerErrorException(`Failed to generate container SAS token: ${error.message}`);
     }
   }

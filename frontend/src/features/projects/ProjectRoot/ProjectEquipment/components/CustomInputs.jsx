@@ -482,9 +482,6 @@ export function useFieldAutosave() {
                         delay: 100 // Quick save for checklist updates
                     });
 
-                    console.log(success)
-                    
-                    
                     return success;
                 }
             }
@@ -552,7 +549,6 @@ export function useFieldAutosave() {
                 delay: 100 // Quick save for regular field updates
             });
 
-            console.log(success)
 
             if (success) {
 

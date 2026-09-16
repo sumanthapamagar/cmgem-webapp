@@ -16,7 +16,6 @@ import ChecklistHome from './features/checklists/Checklists';
 import { NetworkStatusProvider, useNetworkStatus } from './contexts/NetworkStatusContext';
 import { useInitializeChecklists } from './hooks/useChecklists';
 
-// Create a new instance of QueryClient
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
@@ -47,7 +46,7 @@ function AppContent({ msalInstance }) {
 
     return (
         <div key={`app-${isOffline ? 'offline' : 'online'}`}>
-            {isOffline ? (
+            {isOffline && (
                 // Offline mode - show offline projects and limited functionality
                 <>
                     <Header />
@@ -60,7 +59,8 @@ function AppContent({ msalInstance }) {
                         <Route path="offline-projects" element={<OfflineProjects />} />
                     </Routes>
                 </>
-            ) : (
+            ) }
+            { !isOffline && (
                 // Online mode - show full functionality with authentication
                 <MsalProvider instance={msalInstance}>
                     <MsalAuthenticationTemplate
@@ -108,6 +108,14 @@ function AppContent({ msalInstance }) {
 
 // Define the main App component
 function App({ msalInstance }) {
+
+    // useEffect(() => {
+    //     // Configure localForage on app load
+    //     localforage.config({
+    //         name: 'MyOfflineApp',
+    //         storeName: 'offline_photos' // The name of the datastore
+    //     })
+    // }, [])
     return (
         <QueryClientProvider client={queryClient}>
             <NetworkStatusProvider>

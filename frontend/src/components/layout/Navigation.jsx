@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 export function Navigation({ navigation, className }) {
     let location = useLocation();
     return (
-        <div className={clsx('text-lg', className)}>
+        <div className={clsx('text-base xl:text-large', className)}>
             <ul role="list" className="space-y-4">
                 {navigation.map((section) => (
                     <li key={section.key}>
@@ -32,7 +32,7 @@ export function Navigation({ navigation, className }) {
                                         <Link
                                             to={link.href}
                                             className={clsx(
-                                                'block rounded-sm w-full ml-6 leading-4 px-3 py-2 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full hover:bg-neutral-200 hover:text-gray-800 ',
+                                                'block rounded-sm w-full ml-2 xl:ml-6 leading-4 px-3 py-2 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full hover:bg-neutral-200 hover:text-gray-800 ',
                                                 link.href == location.pathname
                                                     ? 'bg-sky-200 text-gray-800 before:bg-sky-500'
                                                     : 'text-slate-800 before:hidden before:bg-slate-600 hover:text-slate-600 hover:before:block'

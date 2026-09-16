@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Reorder, useDragControls } from 'framer-motion';
-import locationCategories from '../../../constants/locationCategories';
+import locationCategories, {locationCategoryMap} from '../../../constants/locationCategories';
 import ChecklistOptions from './ChecklistOptions';
 
 export default function ChecklistItem({ item, isEditing, idx, setChecklists }) {
@@ -15,7 +15,7 @@ export default function ChecklistItem({ item, isEditing, idx, setChecklists }) {
                     (cat) => cat.text === category
                 );
                 return locationCat?.text || category;
-            })
+            }).map((category) => locationCategoryMap[category] || category)
             .join(', ');
     }, [item.category]);
 

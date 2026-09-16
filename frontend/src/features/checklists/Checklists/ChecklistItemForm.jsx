@@ -182,7 +182,7 @@ function ChecklistItemForm({ id = null, onCancel, onSaveSuccess }) {
                                 size={4}
                             >
                                 {locationCategories.map((category) => (
-                                    <option key={category.key} value={category.text}>
+                                    <option key={category.key} value={category.key}>
                                         {category.text}
                                     </option>
                                 ))}

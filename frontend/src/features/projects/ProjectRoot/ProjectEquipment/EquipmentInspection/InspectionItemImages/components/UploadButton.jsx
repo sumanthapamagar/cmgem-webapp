@@ -1,8 +1,13 @@
 import { useRef } from 'react';
 import { Button } from '../../../../../../../components';
+import { useParams } from 'react-router-dom';
+import { useImageUpload } from '../../../../../../../hooks/useImageUpload';
 
-export const UploadButton = ({ onSelectImages }) => {
+export const UploadButton = ({  inspectionItem }) => {
+    const {projectId, equipmentId} = useParams()
     const ref = useRef();
+    const { onSelectImages } = useImageUpload(projectId, equipmentId, inspectionItem);
+
 
     return (
         <div className='flex'>
@@ -15,7 +20,7 @@ export const UploadButton = ({ onSelectImages }) => {
                 }}
             >
                 <i className="fa-solid fa-cloud-arrow-up fa-fw mr-4"></i>
-                Add pictures
+                Add Images
             </Button>
             <input
                 hidden

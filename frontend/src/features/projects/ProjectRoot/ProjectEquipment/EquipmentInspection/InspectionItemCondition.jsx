@@ -1,19 +1,18 @@
+import { useState } from 'react';
 import { Field, Label } from '../../../../../components';
 import { CustomCheckbox, useFieldAutosave } from '../components/CustomInputs';
 
 export default function InspectionItemCondition({ inspectionItem, equipment }) {
-    const currentStatus = equipment?.checklists?.[inspectionItem._id]?.status || '';
-                const { saveField } = useFieldAutosave();
-    console.log(inspectionItem)
-    const handleStatusChange = (e) => {
+    const [currentStatus, setCurrentStatus] = useState(equipment?.checklists?.[inspectionItem._id]?.status || '');
+    const { saveField } = useFieldAutosave();
 
+    const handleStatusChange = (status) => {
+        setCurrentStatus(status)
         const currentComment = equipment.checklists?.[inspectionItem._id]?.comment;
-        //set defualt comment if empty
-        if (e && !currentComment) {
+        if (status && !currentComment) {
                 const fieldPath = `checklists.${inspectionItem._id}.comment`;
 
-                const defaultComment = inspectionItem[`${e}Default`]
-                console.log('Default comment:', defaultComment)
+                const defaultComment = inspectionItem[`${status}Default`]
                 if (defaultComment) {
                     const success = saveField(fieldPath, defaultComment);
                 }

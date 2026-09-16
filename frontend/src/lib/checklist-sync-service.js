@@ -22,7 +22,6 @@ class ChecklistSyncService {
         try {
             // Check if we have offline checklists
             const offlineData = await getChecklistsFromOfflineStorage();
-            
             if (offlineData.checklists.length === 0) {
                 // No offline data, try to fetch from server if online
                 await this.syncChecklists();
