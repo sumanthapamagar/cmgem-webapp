@@ -519,12 +519,12 @@ export class ReportsService {
             try {
               return await this.getImage(attachment);
             } catch (error) {
+              console.error(error)
               const errorCategory = this.categorizeImageError(error, attachment);
               console.error(`Failed to load image for attachment ${attachment._id}:`, {
                 attachmentId: attachment._id,
                 fileName: attachment.low_size_name,
                 errorCategory,
-                error: error.message
               });
               // Return a fallback text element instead of null
               return this.createImageFallback(attachment);
