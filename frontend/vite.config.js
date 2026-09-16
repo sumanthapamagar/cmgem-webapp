@@ -9,6 +9,7 @@ export default ({ mode }) => {
     const isDev = mode === 'development';
     
     return defineConfig({
+        host: true,
         root: 'public',
         jsx: 'react',
         build: {
@@ -70,9 +71,19 @@ export default ({ mode }) => {
             jsxInject: `import React from 'react';`
         },
         server: {
-          port: 5173,
+            allowedHosts: true,
+            port: 5173,
             watch: {
                 usePolling: true,
+            },
+            proxy: {
+                // Whenever your React app requests anything starting with /api...
+                '/api': {
+                    target: 'http://localhost:7080', // ...forward it to your backend
+                    changeOrigin: true,              // Needed for virtual hosted sites
+                    secure: false,                   // Set to false if backend is HTTP, not HTTPS
+                    rewrite: (path) => path.replace(/^\/api/, ''), // Remove /api prefix when forwarding
+                }
             }
         },
         preview: {

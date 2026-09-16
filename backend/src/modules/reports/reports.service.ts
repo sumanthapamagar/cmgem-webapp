@@ -35,7 +35,6 @@ export class ReportsService {
       });
       return buffer;
     } catch (error) {
-      console.log("error", error);
       throw new Error(`Failed to generate Word document: ${error.message}`);
     }
   }
@@ -520,12 +519,12 @@ export class ReportsService {
             try {
               return await this.getImage(attachment);
             } catch (error) {
+              console.error(error)
               const errorCategory = this.categorizeImageError(error, attachment);
               console.error(`Failed to load image for attachment ${attachment._id}:`, {
                 attachmentId: attachment._id,
                 fileName: attachment.low_size_name,
                 errorCategory,
-                error: error.message
               });
               // Return a fallback text element instead of null
               return this.createImageFallback(attachment);
@@ -541,11 +540,6 @@ export class ReportsService {
           const successfulImages = imageResults.filter(img => img instanceof ImageRun).length;
           const failedImages = totalImages - successfulImages;
 
-          if (failedImages > 0) {
-            console.warn(`Image processing summary for equipment ${equipment.name || equipment._id}: ${successfulImages}/${totalImages} images loaded successfully, ${failedImages} failed (using fallbacks)`);
-          } else if (totalImages > 0) {
-            console.log(`Image processing summary for equipment ${equipment.name || equipment._id}: ${successfulImages}/${totalImages} images loaded successfully`);
-          }
 
           rows.push([
             equipment.name || `Equipment ${equipment._id}`,

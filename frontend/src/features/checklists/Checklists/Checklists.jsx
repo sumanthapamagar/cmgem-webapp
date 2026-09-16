@@ -33,11 +33,9 @@ export default function Checklists() {
 
     const { mutate: mutatePatchChecklists, isPending: isSaving } = useMutation({
         mutationFn: (data) => {
-            console.log('Saving checklist order:', data);
             return patchChecklists(data);
         },
         onSuccess: (res) => {
-            console.log('Checklist order saved successfully:', res);
             setIsEdting(false);
             refetch();
         },

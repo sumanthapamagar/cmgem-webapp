@@ -9,6 +9,9 @@ import {  EventType } from "@azure/msal-browser";
 // if ('serviceWorker' in navigator) {
 //   registerSW();
 // }
+// if (import.meta.env.VITE_ENABLE_ERUDA) {
+//   import('eruda').then((eruda) => eruda.default.init());
+// }
 
 msalInstance.initialize().then(() => {
   // Default to using the first account if no account is active on page load

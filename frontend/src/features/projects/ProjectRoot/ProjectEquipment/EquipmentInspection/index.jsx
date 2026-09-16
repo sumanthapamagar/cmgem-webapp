@@ -15,7 +15,6 @@ import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 const useEquipmentChecklists = (equipment, projectChecklists) => {
     return useMemo(() => {
         if (!equipment?.category || !projectChecklists) return [];
-        console.log(equipment.category, projectChecklists);
 
         const locations = equipment.category === 'escaltor' ? ESCALATOR_LOCATIONS : LIFT_LOCATIONS;
 
@@ -70,7 +69,7 @@ export function EquipmentInspection() {
                         aria-label={`${text} inspection items (${checklists.length} items)`}
                     >
                         {text}
-                        <span className="ml-2 bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full">
+                        <span className="ml-2 bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full hidden xl:inline-flex">
                             {checklists.length}
                         </span>
                     </Tab>

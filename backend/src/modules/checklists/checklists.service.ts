@@ -113,8 +113,6 @@ export class ChecklistsService {
       { new: true }
     ).exec();
 
-    console.log(`Updated checklist with ID ${id}:`, updatedChecklist);
-
     if (!updatedChecklist) {
       throw new NotFoundException(`Failed to update checklist with ID ${id}`);
     }
