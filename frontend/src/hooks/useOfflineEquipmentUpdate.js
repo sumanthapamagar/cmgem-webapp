@@ -249,7 +249,8 @@ export const useOfflineEquipmentUpdate = () => {
 
                         // Invalidate offline project query to trigger UI update
                         if (success && queryClient) {
-                            queryClient.invalidateQueries({ queryKey: ['offline-project', projectId] });
+                            queryClient.setQueriesData({ queryKey: ['offline-project', projectId] }, updatedProject);
+                            // queryClient.invalidateQueries({ queryKey: ['offline-project', projectId] });
                             lastUpdateRef.current = Date.now();
                         } else if (!success) {
                             console.error('Failed to save project to offline storage');
