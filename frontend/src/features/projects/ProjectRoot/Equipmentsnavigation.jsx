@@ -59,7 +59,7 @@ export function Equipmentsnavigation() {
     if (!project) return null;
 
     return (
-        <div className="sticky flex flex-col top-8 h-[calc(100vh-56px)] bg-neutral-200 overflow-x-clip overflow-y-auto  xl:min-w-64 border-r border-slate-300">
+        <div className="sticky  min-w-40 flex flex-col top-8 h-[calc(100vh-56px)] bg-neutral-200 overflow-x-clip overflow-y-auto  xl:min-w-64 border-r border-slate-300">
             <Stack className="sticky top-0 z-10 bg-neutral-200">
                 <Offline>
                     <div className='text-sm font-semibold p-4 lg:p-6 border-b border-harper-blue'>

@@ -10,9 +10,7 @@ export default function ChecklistNav() {
             equipmentTypes.map((equipment) => ({
                 title: equipment.text,
                 key: equipment.key,
-                links: (
-                        equipment.key === 'escaltor' ? ESCALATOR_LOCATIONS : LIFT_LOCATIONS
-                ).map((location) => ({
+                links: equipment.links.map((location) => ({
                     title: location.text,
                     key: `${equipment.key}-${location.key}`,
                     href: `/checklists/${equipment.key}/${location.key}`
