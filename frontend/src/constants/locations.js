@@ -35,3 +35,15 @@ export const ESCALATOR_LOCATIONS = [
         key: 'truss',
     },
 ]
+
+export const HOIST_DUMB_WAITER_LOCATIONS = [
+    {
+        text: 'Machine Room',
+        key: 'machine_room',
+    },
+    {
+        text: 'Lift Shaft',
+        key: 'lift_shaft',
+    },
+
+]

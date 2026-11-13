@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Checkbox, CheckboxField, Field, Label, Select, Input, Textarea } from '../../../../../components';
 
 const doorOpeningOptions = [
@@ -5,6 +6,33 @@ const doorOpeningOptions = [
     { key: 'rear', text: 'Rear' },
     { key: 'front&Rear', text: 'Front and Rear' }
 ];
+
+const floorStatusOptions = [
+    { key: 'pass', text: 'Pass' },
+    { key: 'needs-attention', text: 'Needs Attention' }
+];
+
+const FloorStatusCheckbox = ({ floorId, fieldName, label, register, watch, handleCheckboxChange }) => {
+    const fieldPath = `floors.${floorId}.${fieldName}`;
+    const [isChecked, setIsChecked] = useState(watch(fieldPath) === 'pass' || watch(fieldPath) === 'needs-attention');
+
+    const onChange = () => {
+        const newValue = isChecked ? '' : 'pass';
+        setIsChecked(!isChecked);
+        handleCheckboxChange(floorId, fieldName, newValue);
+    };
+
+    return (
+        <CheckboxField>
+            <Checkbox
+                checked={isChecked}
+                onChange={onChange}
+            />
+            <Label>{label}</Label>
+        </CheckboxField>
+    );
+}
+
 
 export default function FloorForm({ 
     equipment, 
@@ -17,7 +45,7 @@ export default function FloorForm({
     return (
         <>
             <div className="overflow-x-scroll inline-block w-full">
-                <table className="table-fixed w-full min-w-[1600px] divide-y divide-gray-300 bg-white">
+                <table className="table-fixed w-full min-w-400 divide-y divide-gray-300 bg-white">
                     <thead>
                         <tr>
                             <th
@@ -110,68 +138,77 @@ export default function FloorForm({
                                     </Field>
                                 </td>
                                 <td className="whitespace-nowrap px-3 text-gray-500">
-                                    <CheckboxField>
-                                        <Checkbox
-                                            checked={watch(`floors.${floor._id}.floor_levelling`) === 'pass'}
-                                            onChange={() => handleCheckboxChange(floor._id, 'floor_levelling', 'pass')}
-                                        />
-                                        <Label>Pass</Label>
-                                    </CheckboxField>
-                                    <CheckboxField>
-                                        <Checkbox
-                                            checked={watch(`floors.${floor._id}.floor_levelling`) === 'needs-attention'}
-                                            onChange={() => handleCheckboxChange(floor._id, 'floor_levelling', 'needs-attention')}
-                                        />
-                                        <Label>Needs Attention</Label>
-                                    </CheckboxField>
+                                    <FloorStatusCheckbox
+                                        floorId={floor._id}
+                                        fieldName="floor_levelling"
+                                        label="Pass"
+                                        register={register}
+                                        watch={watch}
+                                        handleCheckboxChange={handleCheckboxChange}
+                                    />
+                                    <FloorStatusCheckbox
+                                        floorId={floor._id}
+                                        fieldName="floor_levelling"
+                                        label="Needs Attention"
+                                        register={register}
+                                        watch={watch}
+                                        handleCheckboxChange={handleCheckboxChange}
+                                    />
                                 </td>
                                 <td className="whitespace-nowrap px-3 text-gray-500">
-                                    <CheckboxField>
-                                        <Checkbox
-                                            checked={watch(`floors.${floor._id}.landing_call_button`) === 'pass'}
-                                            onChange={() => handleCheckboxChange(floor._id, 'landing_call_button', 'pass')}
-                                        />
-                                        <Label>Pass</Label>
-                                    </CheckboxField>
-                                    <CheckboxField>
-                                        <Checkbox
-                                            checked={watch(`floors.${floor._id}.landing_call_button`) === 'needs-attention'}
-                                            onChange={() => handleCheckboxChange(floor._id, 'landing_call_button', 'needs-attention')}
-                                        />
-                                        <Label>Needs Attention</Label>
-                                    </CheckboxField>
+                                    <FloorStatusCheckbox
+                                        floorId={floor._id}
+                                        fieldName="landing_call_button"
+                                        label="Pass"
+                                        register={register}
+                                        watch={watch}
+                                        handleCheckboxChange={handleCheckboxChange}
+                                    />
+                                    <FloorStatusCheckbox
+                                        floorId={floor._id}
+                                        fieldName="landing_call_button"
+                                        label="Needs Attention"
+                                        register={register}
+                                        watch={watch}
+                                        handleCheckboxChange={handleCheckboxChange}
+                                    />
+                                      
                                 </td>
                                 <td className="whitespace-nowrap px-3 text-gray-500">
-                                    <CheckboxField>
-                                        <Checkbox
-                                            checked={watch(`floors.${floor._id}.landing_indication`) === 'pass'}
-                                            onChange={() => handleCheckboxChange(floor._id, 'landing_indication', 'pass')}
-                                        />
-                                        <Label>Pass</Label>
-                                    </CheckboxField>
-                                    <CheckboxField>
-                                        <Checkbox
-                                            checked={watch(`floors.${floor._id}.landing_indication`) === 'needs-attention'}
-                                            onChange={() => handleCheckboxChange(floor._id, 'landing_indication', 'needs-attention')}
-                                        />
-                                        <Label>Needs Attention</Label>
-                                    </CheckboxField>
+                                    <FloorStatusCheckbox
+                                        floorId={floor._id}
+                                        fieldName="landing_indication"
+                                        label="Pass"
+                                        register={register}
+                                        watch={watch}
+                                        handleCheckboxChange={handleCheckboxChange}
+                                    />
+                                    <FloorStatusCheckbox
+                                        floorId={floor._id}
+                                        fieldName="landing_indication"
+                                        label="Needs Attention"
+                                        register={register}
+                                        watch={watch}
+                                        handleCheckboxChange={handleCheckboxChange}
+                                    />
                                 </td>
                                 <td className="whitespace-nowrap px-3 text-gray-500">
-                                    <CheckboxField>
-                                        <Checkbox
-                                            checked={watch(`floors.${floor._id}.landing_chime`) === 'pass'}
-                                            onChange={() => handleCheckboxChange(floor._id, 'landing_chime', 'pass')}
-                                        />
-                                        <Label>Pass</Label>
-                                    </CheckboxField>
-                                    <CheckboxField>
-                                        <Checkbox
-                                            checked={watch(`floors.${floor._id}.landing_chime`) === 'needs-attention'}
-                                            onChange={() => handleCheckboxChange(floor._id, 'landing_chime', 'needs-attention')}
-                                        />
-                                        <Label>Needs Attention</Label>
-                                    </CheckboxField>
+                                    <FloorStatusCheckbox
+                                        floorId={floor._id}
+                                        fieldName="landing_chime"
+                                        label="Pass"
+                                        register={register}
+                                        watch={watch}
+                                        handleCheckboxChange={handleCheckboxChange}
+                                    />
+                                    <FloorStatusCheckbox
+                                        floorId={floor._id}
+                                        fieldName="landing_chime"
+                                        label="Needs Attention"
+                                        register={register}
+                                        watch={watch}
+                                        handleCheckboxChange={handleCheckboxChange}
+                                    />
                                 </td>
                                 <td className="whitespace-nowrap px-3 text-gray-500">
                                     <Field>

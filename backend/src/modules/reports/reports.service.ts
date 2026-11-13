@@ -1010,6 +1010,7 @@ export class ReportsService {
   }
 
   private getStatusCell(status: string): TableCell {
+    //use a checkmark for pass, a cross for priority1, priority2, needs-attention, and empty for others
     const statusText = status === "pass" ? "✓" : ["priority1", "priority2", "needs-attention"].includes(status) ? "✖" : ""
     const statusColor = status === "pass" ? "#588157" : ["priority1", "priority2", "needs-attention"].includes(status) ? "#FF0000" : "#000000"
 
