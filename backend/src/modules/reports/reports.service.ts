@@ -1,5 +1,5 @@
 import { Injectable, Scope } from '@nestjs/common';
-import { Document, Packer, Paragraph, TextRun, AlignmentType, patchDocument, PatchType, PatchDocumentOptions, IPatch, Table, TableRow, TableCell, VerticalAlignTable, TextDirection, HeadingLevel, WidthType, ShadingType, ParagraphChild, FileChild, ImageRun, LevelFormat, Numbering, TableOfContents } from 'docx';
+import { Document, Packer, Paragraph, TextRun, AlignmentType, patchDocument, PatchType, PatchDocumentOptions, IPatch, Table, TableRow, TableCell, VerticalAlignTable, TextDirection, HeadingLevel, WidthType, ShadingType, ParagraphChild, FileChild, ImageRun, LevelFormat, Numbering, TableOfContents, VerticalAlign } from 'docx';
 import type { EquipmentWithFloors, ProjectDetailResponseDto } from '../projects/dto';
 import type { UserInfo } from 'src/types/user.types';
 import * as fs from 'fs';
@@ -1011,17 +1011,21 @@ export class ReportsService {
 
   private getStatusCell(status: string): TableCell {
     //use a checkmark for pass, a cross for priority1, priority2, needs-attention, and empty for others
-    const statusText = status === "pass" ? "✓" : ["priority1", "priority2", "needs-attention"].includes(status) ? "✖" : ""
+    const statusText = status === "pass" ? String.fromCharCode(0xF0FC) : ["priority1", "priority2", "needs-attention"].includes(status) ? String.fromCharCode(0xF0FB) : ""
     const statusColor = status === "pass" ? "#588157" : ["priority1", "priority2", "needs-attention"].includes(status) ? "#FF0000" : "#000000"
 
     return new TableCell({
+      verticalAlign: VerticalAlign.CENTER,
       children: [
         new Paragraph({
-          alignment: AlignmentType.CENTER,
+          alignment: AlignmentType.CENTER, 
           children: [
             new TextRun({
               text: statusText,
-              size: `9pt`,
+              font: {
+                name: "Wingdings",
+              },
+              size: `12pt`,
               color: statusColor,
               bold: true
             })
